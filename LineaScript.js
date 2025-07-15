@@ -1764,13 +1764,16 @@ id('graphic').addEventListener('pointerdown',function(e) {
             else hint('drag to SIZE');
             // console.log('size using node '+node);
             dx=dy=0;
-            switch(type(element)) {
+            switch(graph.type) {
             	case 'curve':
                 case 'line':
                 case 'shape':
                 	// console.log('drag sizer for '+type(element))
                     mode='movePoint'+node;
-                    var points=element.getAttribute('points');
+                    var points='';
+                    for(var i in graph.points) {
+                    	points+=graph.points[i].x+','+graph.points[i].y+' ';
+                    }
                     id('bluePolyline').setAttribute('points',points);
                     id('blueBox').setAttribute('width',0);
                     id('blueBox').setAttribute('height',0);
@@ -1892,11 +1895,11 @@ id('graphic').addEventListener('pointerdown',function(e) {
             selectionBox.w=selectionBox.h=0;
     }
     event.stopPropagation();
-    console.log('exit pointer down code - graphs: '+graphs.length);
     if(mode!='set') id('graphic').addEventListener('pointermove',drag);
+    console.log('exit pointer down code - graphs: '+graphs.length);
 });
 function drag(event) {
-	// console.log('dragging - mode: '+mode);
+	console.log('dragging - mode: '+mode+' - '+graphs.length+' graphs');
     event.preventDefault();
     id('datumSet').style.display='block'; // show datum lines while dragging
     scr.x=Math.round(event.clientX);
@@ -2169,6 +2172,7 @@ function drag(event) {
     event.stopPropagation();
 };
 id('graphic').addEventListener('pointerup',function(e) {
+	console.log('pointer up - '+graphs.length+' graphs');
 	scr.x=Math.round(event.clientX);
     scr.y=Math.round(event.clientY);
     console.log('pointer up at '+scr.x+','+scr.y+' ('+x+','+y+') mode: '+mode);
@@ -2178,48 +2182,28 @@ id('graphic').addEventListener('pointerup',function(e) {
     console.log('snap - x:'+snap.x+' y:'+snap.y+' n:'+snap.n);
     if(mode.startsWith('movePoint')) { // move polyline/polygon point
         id('handles').innerHTML='';
-        // console.log('move point '+node+' on '+type(element));
-        if(type(element)=='curve') {
-        	// /* IS THIS ALL DONE BY draw()?
-            var graphs=db.transaction('graphs','readwrite').objectStore('graphs');
-	        var request=graphs.get(Number(element.id));
-	        request.onsuccess=function(event) {
-	            var graph=request.result;
-	            // console.log('got graph '+graph.id);
-	            var points=id('bluePolyline').points;
-				graph.points='';
-	            for(var i=0;i<points.length;i++) {
-	        		graph.points+=(points[i].x+','+points[i].y+' ');
-	        	}
-	            request=graphs.put(graph);
-	            request.onsuccess=function(event) {
-			        // console.log('graph '+graph.id+' updated');
-			        id(graph.id).setAttribute('points',graph.points);
-			        var d=curvePath(pointsArray(graph.points));
-			        id(graph.id).setAttribute('d',d); // redraw curve element path
-			        cancel();
-			        id('bluePolyline').setAttribute('points','0,0');
-		        };
-	            request.onerror=function(event) {
-		            console.log("PUT ERROR updating graph "+graph.id);
-		        }
-	        }
-	    }
-        else {
-        	// console.log('move point '+node);
-        	element.points[node].x=x;
-        	element.points[node].y=y;
-        	if((Math.abs(x-x0)<snapD)&&(Math.abs(y-y0)<snapD)) { // no drag - swop to mover
+        graph=graphs[index];
+        element=id(index);
+        console.log('move point '+node+' on '+graph.type); // type(element));
+        var points=id('bluePolyline').points;
+    	// console.log('curve has '+points.length+' points');
+    	graph.points=[];
+    	for(var i=0;i<points.length;i++) {
+    		graph.points.push({'x':points[i].x,'y':points[i].y});
+    		// console.log('point '+i+': '+points[i].x+','+points[i].y);
+    	}
+    	console.log('graph has '+graph.points.length+' points');
+    	if((Math.abs(x-x0)<snapD)&&(Math.abs(y-y0)<snapD)) { // no drag - swop to mover
             // console.log('TAP - add mover at node '+node); // node becomes new element 'anchor'
-            var html="<use id='mover"+node+"' href='#mover' x='"+x+"' y='"+y+"'/>";
-            id('handles').innerHTML=html;
-            mode='edit';
-            return;
-        }
-        	// updateGraph(index,['points',element.getAttribute('points')]);
-        	// refreshNodes(element);
-        	cancel();
-        }
+        	var html="<use id='mover"+node+"' href='#mover' x='"+x+"' y='"+y+"'/>";
+        	id('handles').innerHTML=html;
+        	mode='edit';
+        	return;
+    	}
+    	graphs[index]=graph;
+    	console.log('graph updated');
+    	cancel();
+    	draw();
     }
     else switch(mode) {
         case 'move':
@@ -2478,7 +2462,6 @@ id('graphic').addEventListener('pointerup',function(e) {
             var graph={}; // create polygon element
             graph.type='shape';
             graph.points=[];
-            // graph.points='';
             var len=0;
 	        for(var i=0;i<points.length-1;i++) {
 	        	graph.points.push({'x':points[i].x,'y':points[i].y});
@@ -2834,10 +2817,6 @@ id('graphic').addEventListener('pointerup',function(e) {
                     	if(selection.length<2) { // only item selected
                     		// SINGLE ELEMENT SELECTED - IS IT A NODE?
                         	var snap=snapCheck();
-                        	// if(snap) console.log('SNAP! element '+element.id+'; snap: element '+Math.floor(snap.n/10)+' node '+snap.n%10+' at '+snap.x+','+snap.y);
-                        	// select(element,false,snap);
-                        	console.log(graphs.length+' graphs');
-                        	console.log('graph['+hit+'] is '+graphs[hit].type);
                         	index=hit;
                         	graph=graphs[hit];
                         	element=id(hit);
@@ -3898,7 +3877,7 @@ function save() {
 	var json=JSON.stringify(data);
 	// console.log('saving...'+json);
 	window.localStorage.setItem('lineaData',json);
-	console.log('data saved');
+	console.log(graphs.length+' graphs and '+sets.length+' sets saved');
 }
 function select(n,multiple,s) {
 	if(!multiple) { // single element selected
