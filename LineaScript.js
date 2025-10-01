@@ -66,6 +66,30 @@ var currentDialog=null;
 var sizes=['A4','A5','21cm square','15x10cm','18x13cm','20x15cm','25x20cm'];
 var widths=[297,210,210,150,180,200,250.210,148,210,100,130,150,200];
 var heights=[210,148,210,100,130,150,200,297,210,210,150,180,200,250];
+var pattern=[];
+var tile=[];
+pattern[0]={'width':4, 'height':2, 'spin':0, 'tile':0};
+pattern[1]={'width':4, 'height':2, 'spin':90, 'tile':0};
+pattern[2]={'width':4, 'height':2, 'spin':0, 'tile':1};
+pattern[3]={'width':4, 'height':2, 'spin':90, 'tile':1};
+pattern[4]={'width':2, 'height':2, 'spin':0, 'tile':2};
+pattern[5]={'width':4, 'height':2, 'spin':-45, 'tile':0};
+pattern[6]={'width':4, 'height':2, 'spin':45, 'tile':0};
+pattern[7]={'width':4, 'height':2, 'spin':-45, 'tile':1};
+pattern[8]={'width':4, 'height':2, 'spin':45, 'tile':1};
+pattern[9]={'width':2, 'height':2, 'spin':45, 'tile':2};
+pattern[10]={'width':1, 'height':1, 'spin':0, 'tile':3};
+pattern[11]={'width':4, 'height':4, 'spin':0, 'tile':4};
+pattern[12]={'width':1, 'height':1, 'spin':0, 'tile':5};
+pattern[13]={'width':2, 'height':2, 'spin':0, 'tile':6};
+pattern[14]={'width':1, 'height':1, 'spin':45, 'tile':6};
+tile[0]='<rect x="0" y="1" width="4" height="0.5" stroke="none"/>';
+tile[1]='<rect x="0" y="1" width="4" height="1" stroke="none"/>';
+tile[2]='<rect x="0" y="1" width="2" height="0.5" stroke="none"/><rect x="1" y="0" width="0.5" height="2" stroke="none"/>';
+tile[3]='<rect x="0" y="0" width="0.5" height="0.5" stroke="none"/><rect x="0.5" y="0.5" width="0.5" height="0.5" stroke="none"/>'
+tile[4]='<rect x="0" y="0" width="2" height="2" stroke="none"/><rect x="2" y="2" width="2" height="2" stroke="none"/>';
+tile[5]='<circle cx="0.5" cy="0.5" r="0.25" stroke="none"/>';
+tile[6]='<circle cx="1" cy="1" r="0.5" stroke="none"/>';
 class Point {
     constructor(x,y) {
         this.x=x;
@@ -222,74 +246,31 @@ id('confirmLoad').addEventListener('click',async function(){
 	// console.log('load file '+file+' name: '+file.name+' type '+file.type+' '+file.size+' bytes');
     var loader=new FileReader();
     loader.addEventListener('load',function(evt) {
-        	var data=evt.target.result;
-        	// console.log('data: '+data.length+' bytes');
-      		var json=JSON.parse(data);
-      		layers=json.layers;
-			var transaction=db.transaction(['graphs','sets'],'readwrite');
-			var graphStore=transaction.objectStore('graphs');
-			var setStore=transaction.objectStore('sets');
-			if(method=='set') { // load selected set(s)
-				var sets=json.sets;
-				for(var i=0;i<sets.length;i++) {
-					var name=sets[i].name;
-		    		// console.log("add set "+name);
-					var request=setStore.add(sets[i]);
-					request.onsuccess=function(e) {
-						console.log("set added");
-					};
-					request.onerror=function(e) {console.log("error adding sets");};
-				}
-			}
-			else { // load drawing
-				if(method=='drawing') {
-		    	name=file.name;
-		   		var n=name.indexOf('.json');
-		   		name=name.substr(0,n);
-		   		window.localStorage.setItem('name',name);
-		   		id('dwg').innerHTML=''; // clear drawing
-           		id('handles').innerHTML=''; // clear any edit handles
-	    		graphStore.clear();
-		    	setStore.clear();
-		   		nodes=[];
-		   		dims=[];
-		   		size=json.size;
-				window.localStorage.setItem('size',size);
-	    		aspect=json.aspect;
-	    		window.localStorage.setItem('aspect',aspect);
-		    	scale=json.scale;
-		   		window.localStorage.setItem('scale',scale);
-		   		// console.log('load drawing - aspect:'+aspect+' scale:'+scale);
-		   		initialise();
-			}
-				// reset();
-	  			for(var i=0;i<json.graphs.length;i++) {
-		    		// console.log('add graph '+json.graphs[i].type);
-	        		var request=graphStore.add(json.graphs[i]);
-	        		request.onsuccess=function(e){
-	        		// console.log('saved graph');
-	        	}
-	  			}
-	        	for(i=0;i<json.sets.length;i++) {
-		       	// console.log('add set '+json.sets[i].name);
-		       	request=setStore.add(json.sets[i]);
-		   	}
-			}
-			transaction.oncomplete=function() {
-            	if(method=='drawing') load();
-            	else if(method=='set') listSets();
-            	else listImages();
-			}
-        });
+    	var data=evt.target.result;
+    	// console.log('data: '+data.length+' bytes');
+    	var json=JSON.parse(data);
+    	layers=json.layers;
+    	if(method=='set') sets=json.sets;
+    	else { // load drawing
+    		name=file.name;
+			var n=name.indexOf('.json');
+			name=name.substr(0,n);
+			window.localStorage.setItem('name',name);
+			id('dwg').innerHTML=''; // clear drawing
+    		id('handles').innerHTML=''; // clear any edit handles
+      		graphs=json.graphs;
+      		save();
+    		load();
+    	}
+    });
 	loader.addEventListener('error',function(event) {
-        	console.log('load failed - '+event);
-    	});
+    	console.log('load failed - '+event);
+	});
     loader.readAsText(file);
-    // }
     showDialog('loadDialog',false);
 });
 id('save').addEventListener('click',function() {
-    // name=window.localStorage.getItem('name');
+    name=window.localStorage.getItem('name');
     // if(name) id('saveName').value=name;
     showDialog('saveDialog',true);
 });
@@ -302,40 +283,11 @@ id('confirmSave').addEventListener('click',async function() {
     	data.size=size;
     	data.aspect=aspect;
     	data.scale=scale;
-    	data.graphs=[];
-    	data.sets=[];
-    	var transaction=db.transaction(['graphs','sets']);
-    	var request=transaction.objectStore('graphs').openCursor();
-    	request.onsuccess=function(event) {
-    		var cursor=event.target.result;
-        	if(cursor) {
-            	delete cursor.value.id;
-            	data.graphs.push(cursor.value);
-            	// data.graphs[index]=cursor.value;
-            	cursor.continue();
-        	}
-        	else {
-            	// console.log('save '+data.graphs.length+' graphs');
-        		request=transaction.objectStore('sets').openCursor();
-        		request.onsuccess=function(event) {
-                	cursor=event.target.result;
-                	if(cursor) {
-                    	// console.log('set: '+cursor.value.name);
-                    	delete cursor.value.id; // SHOULDN'T NEED THIS
-                    	data.sets.push(cursor.value);
-                    	cursor.continue();
-                	}
-                	else {
-                    	// console.log('save '+data.sets.length+' sets');
-                	}
-            	}
-        	}
-    	}
-    	transaction.oncomplete=function() {
-    		// console.log('ready to save drawing data to file');
-    		var json=JSON.stringify(data);
-    		write(name,json,'json');
-    	}
+    	data.graphs=graphs;
+    	data.sets=sets;
+    	// console.log('ready to save drawing data to file');
+    	var json=JSON.stringify(data);
+    	write(name,json,'json');
     }
     else if(id('print').checked) {
     	// console.log('save drawing as SVG');
@@ -1528,7 +1480,6 @@ id('colorPicker').addEventListener('click',function(e) {
 	var val=e.target.id;
 	showColorPicker(false);
 	if(id('colorPicker').mode=='line') { // line colour
-        // if(val=='white') val='blue';
         if(selection.length>0) { // change line shade of selected elements
         	for(var i=0;i<selection.length;i++) {
         		var n=selection[i];
@@ -1558,7 +1509,6 @@ id('colorPicker').addEventListener('click',function(e) {
         			id('pattern'+n).firstChild.setAttribute('fill',val);
         			id('pattern'+n).lastChild.setAttribute('fill',val);
         		}
-        		// val='"'+val+'"'; // colours are strings
         		graphs[n].fill=val;
     		}
     		draw();
@@ -2417,17 +2367,6 @@ id('graphic').addEventListener('pointerup',function(e) {
                 	for(var i=0;i<points.length-1;i++) {
                 		graph.points.push({'x':points[i].x,'y':points[i].y});
                 	}
-                    /*
-                    graph.x=blueline.points[0].x;
-                    graph.y=blueline.points[0].y;
-                    // console.log('line.x/.y: '+graph.x+','+graph.y);
-                    graph.points=''; // ***** JUST DO GRAPH.POINTS=BLUELINE.POINTS??? ******
-                    var len=0;
-	                for(var i=0;i<points.length-1;i++) {
-	                    graph.points+=(points[i].x+','+points[i].y+' ');
-	                    if(i>0) len+=Math.abs(points[i].x-points[i-1].x)+Math.abs(points[i].y-points[i-1].y);
-	                }
-	                */
 	                graph.spin=0;
 	                graph.stroke=lineColor;
 	                graph.lineW=(pen*scale);
@@ -2607,7 +2546,6 @@ id('graphic').addEventListener('pointerup',function(e) {
                 // console.log('SNAP - end dimension at '+x+','+y+'; node '+snap.n);
                 dim.x2=x;
                 dim.y2=y;
-                // dim.el2=snap.el;
                 dim.n2=snap.n;
                 if(dim.x1==dim.x2) dim.dir='v'; // vertical
                 else if(dim.y1==dim.y2) dim.dir='h'; // horizontal
@@ -2673,22 +2611,8 @@ id('graphic').addEventListener('pointerup',function(e) {
             id('blueLine').setAttribute('y2',0);
             id('blueLine').setAttribute('transform','rotate(0)');
             dy=y1-y0;
-            var request=db.transaction('graphs').objectStore('graphs').get(Number(index));
-            request.onsuccess=function(event) {
-                dim=request.result;
-                // console.log('dimension start node: '+dim.x1+','+dim.y1);
-                dim.offset+=dy; // dimension moved up/down before rotation
-                request=db.transaction('graphs','readwrite').objectStore('graphs').put(dim);
-                request.onsuccess=function(event) {
-                    // console.log('dimension graph updated - offset is '+dim.offset );
-                }
-                request.onerror=function(event) {
-                    // console.log('error updating dimension');
-                }
-            }
-            request.onerror=function(event) {
-                // console.log('get error');
-            }
+            graph.offset+=dy;
+            graphs[index]=graph;
             cancel();
             break;
         case 'anchor':
@@ -2851,7 +2775,6 @@ id('first').addEventListener('change',function() { // CHANGE OTHERS TO MATCH BOX
     var val=parseInt(id('first').value);
     re('member');
     console.log('graph '+index);
-    // switch(type(element)) {
     switch(graph.type) {
         case 'line':
         case 'shape':
@@ -2887,7 +2810,6 @@ id('first').addEventListener('change',function() { // CHANGE OTHERS TO MATCH BOX
 	                pts.push(points[i].y);
 	            }
                 updateGraph(index,['points',pts]);
-                // refreshNodes(element);
             }
             break;
         case 'box':
@@ -2917,10 +2839,6 @@ id('first').addEventListener('change',function() { // CHANGE OTHERS TO MATCH BOX
             break;
         case 'oval':
         	graph.rx=val/2;
-            // element.setAttribute('rx',val/2);
-            // updateGraph(index,['rx',val/2]);
-            // var elX=parseInt(element.getAttribute('cx'));
-            // refreshNodes(element);
             break;
         case 'arc':
             // console.log('adjust arc radius to '+val);
@@ -2989,10 +2907,6 @@ id('second').addEventListener('change',function() { // CHANGE OTHERS TO MATCH BO
 	                pts.push(points[i].y);
 	            }
 	            graph.points=pts;
-                // updateGraph(index,['points',pts]);
-                // refreshNodes(element);
-                // id('handles').innerHTML='';
-                // mode='select';
             }
             break;
         case 'box':
@@ -3021,12 +2935,6 @@ id('second').addEventListener('change',function() { // CHANGE OTHERS TO MATCH BO
             break;
         case 'oval':
         	graph.ry=val/2;
-            // element.setAttribute('ry',val/2);
-            // updateGraph(index,['ry',val/2]);
-            // var elY=parseInt(element.getAttribute('cy'));
-            // refreshNodes(element);
-            // id('handles').innerHTML='';
-            // mode='select';
             break;
         case 'arc':
             // console.log('change arc angle to '+val);
@@ -3067,26 +2975,9 @@ id('undoButton').addEventListener('click',function() {
 // FUNCTIONS
 function addGraph(graph) {
     // console.log('add '+graph.type+' element - spin: '+graph.spin+' to layer '+graph.layer);
-    // console.log('fill: '+graph.fillType+', '+graph.fill);
     graphs.push(graph);
     draw();
 }
-/*
-function addSet(content) {
-	// console.log('save set '+content);
-	json=JSON.parse(content);
-	sets.push(json)
-	var name=json.name; // one set per file
-	// console.log("add "+name);
-	var request=db.transaction('sets','readwrite').objectStore('sets').add(json);
-	request.onsuccess=function(e) {
-		var n=request.result;
-		// console.log("set added to database: "+n);
-		listSets();
-	};
-	request.onerror=function(e) {console.log("error adding sets");};
-}
-*/
 function cancel() { // cancel current operation and return to select mode
     mode='select';
     id('tools').style.display='block';
@@ -3208,6 +3099,7 @@ function copy(x,y) {
             g.text=graph.text; // el.getAttribute('text');
             g.textSize=graph.textSize; // Number(el.getAttribute('font-size'));
             g.textStyle=graph.textStyle;
+            g.textFont=graph.textFont;
             break;
     }
     addGraph(g);
@@ -3509,15 +3401,18 @@ function draw() {
 			if(dash) el.setAttribute('stroke-dasharray',dash);
 			if(g.fillType.startsWith('pattern')) {
 				var n=Number(g.fillType.substr(7));
-				// console.log('fillType is '+g.fillType);
-				var html="<pattern id='pattern"+g.id+"' index='"+n+"' width='"+pattern[n].width+"' height='"+pattern[n].height+"' patternUnits='userSpaceOnUse'";
+				console.log('fillType is '+g.fillType+' n: '+n);
+				console.log(tile.length+' tiles');
+				console.log('pattern width is '+pattern[n].width);
+				var html="<pattern id='pattern"+index+"' width='"+pattern[n].width+"' height='"+pattern[n].height+"' patternUnits='userSpaceOnUse'";
+				// var html="<pattern id='pattern"+index+"' index='"+n+"' width='"+pattern[n].width+"' height='"+pattern[n].height+"' patternUnits='userSpaceOnUse'";
 				if(pattern[n].spin>0) html+=" patternTransform='rotate("+pattern[n].spin+")'";
 				html+='>'+tile[pattern[n].tile]+'</pattern>';
 				// console.log('pattern HTML: '+html);
 				id('defs').innerHTML+=html;
-				id('pattern'+g.id).firstChild.setAttribute('fill',g.fill);
-				id('pattern'+g.id).lastChild.setAttribute('fill',g.fill);
-				el.setAttribute('fill','url(#pattern'+g.id+')');
+				id('pattern'+index).firstChild.setAttribute('fill',g.fill);
+				id('pattern'+index).lastChild.setAttribute('fill',g.fill);
+				el.setAttribute('fill','url(#pattern'+index+')');
 			}
 			else el.setAttribute('fill',(g.fillType=='none')?'none':g.fill);
 			if(g.opacity<1) {
@@ -3622,7 +3517,6 @@ function load() {
 		var json=JSON.parse(data);
 		graphs=json.graphs;
 		sets=json.sets;
-		// images=json.images;
 		console.log(graphs.length+' graphs and '+sets.length+' sets loaded');
 	}
 	draw();
@@ -3634,7 +3528,7 @@ function move(dx,dy) { // CHANGE OTHER TO MATCH BOX, ETC
 		index=selection[i];
 		graph=graphs[index];
 		element=id(index);
-		console.log('move graph '+index+' by '+dx+','+dy);
+		console.log('move graph '+index+' ('+graph.type+') by '+dx+','+dy);
 		switch(graph.type) {
     		case 'curve':
         	case 'line':
@@ -3648,6 +3542,9 @@ function move(dx,dy) { // CHANGE OTHER TO MATCH BOX, ETC
         	case 'box':
         	case 'text':
         	case 'set':
+        		graph.x+=dx;
+        		graph.y+=dy;
+        		break
         	case 'oval':
             	console.log('move oval by '+dx+','+dy);
             	graph.cx+=dx;
@@ -3673,7 +3570,7 @@ function pointsArray(points) {
 		pt=new StringPoint(points.substring(i,points.indexOf(' ',i)));
 		// console.log('point: '+pt.x+','+pt.y);
 		pts.push(pt);
-		i=points.indexOf(' ',i)+1
+		i=points.indexOf(' ',i)+1;
 	}
 	// console.log(pts.length+' points');
 	return pts;
@@ -3681,7 +3578,6 @@ function pointsArray(points) {
 function re(op) {
 	// op is 're-member' (memorise and show undo), 're-call' (reinstate and hide undo) or 're-wind' (hide undo)
     // console.log('re'+op+'; '+selection.length+' selected items; '+memory.length+' memory items');
-    // console.log('item 1: '+selection[0]);
     if(op=='member') {
         memory=[];
         // console.log('REMEMBER');
@@ -3771,6 +3667,9 @@ function re(op) {
     id('line').style.display='block';
 }
 function redrawDim(d) {
+	console.log('redraw dimension');
+	// REDO DIRECT TO graphs[]
+	/*
     var request=db.transaction('graphs','readwrite').objectStore('graphs').put(d);
     request.onsuccess=function(event) {
         // console.log('dimension '+dim.id+' updated - redraw from '+d.x1+','+d.y1+' to '+d.x2+','+d.y2+' direction: '+d.dir);
@@ -3818,9 +3717,10 @@ function redrawDim(d) {
     request.onerror=function(event) {
         console.log('dimension update failed');
     }
+    */
 }
 function refreshDim(d) {
-    // console.log('refresh dimension '+d.dim+' from node '+d.n1+' to node '+d.n2);
+    console.log('refresh dimension '+d.dim+' from node '+d.n1+' to node '+d.n2);
     var node1=nodes.find(function(node) {
         return (node.n==Number(d.n1));
     });
@@ -3829,6 +3729,8 @@ function refreshDim(d) {
         return (node.n==Number(d.n2));
     });
     // console.log('end node: '+node2);
+    // REDO DIRECT TO graphs[]
+    /*
     var request=db.transaction('graphs').objectStore('graphs').get(Number(d.dim));
     request.onsuccess=function(event) {
         dim=request.result;
@@ -3842,6 +3744,7 @@ function refreshDim(d) {
     request.onerror=function(event) {
         console.log('get dimension failed');
     }
+    */
 }
 function remove(n,keepNodes) {
     // console.log('remove element '+n);
@@ -3884,8 +3787,8 @@ function select(n,multiple,s) {
 		console.log('select graph '+n+' of '+graphs.length+' multiple is '+multiple+' s is '+s);
 		graph=graphs[n];
 		if(s) console.log('place mover on node '+s.n+' at '+s.x+','+s.y);
-		var elementLayers=graph.layer;
-		console.log('graph layers: '+elementLayers);
+		var elementLayers=graph.layer; // JUST USE graph.layer NO NEED FOR MULTIPLE LAYERS
+		console.log('graph type: '+graph.type+'; layer: '+elementLayers);
 		id('layers').innerText=elementLayers;
 		for(var l=0;l<elementLayers.length;l++) id('choice'+l).checked=true;
     	id('handles').innerHTML=''; // clear any handles then add handles for selected element 
@@ -4009,8 +3912,7 @@ function select(n,multiple,s) {
             	mode='edit';
 	            break;
     	    case 'text':
-    	    	var el=id(n);
-        	    var bounds=el.getBBox();
+        	    var bounds=element.getBBox();
             	w=Math.round(bounds.width);
 	            h=Math.round(bounds.height);
 	            // console.log('bounds: '+bounds.x+','+bounds.y+' - '+w+'x'+h+'; layer: '+elementLayers);
@@ -4037,15 +3939,16 @@ function select(n,multiple,s) {
         	    mode='edit';
             	break;
 	        case 'dim':
-    	        var line=el.firstChild;
+    	        var line=element.firstChild;
         	    var x1=graph.x1;
             	var y1=graph.y1;
 	            var x2=graph.x2;
     	        var y2=graph.y2;
-        	    var spin=graph.transform;
-            	// console.log('dim from '+x1+','+y1+' to '+x2+','+y2);
+        	    var spin=graph.spin;
+        	    if(!spin) spin=0;
+            	console.log('dim from '+x1+','+y1+' to '+x2+','+y2);
     	        var html="<use id='mover0' href='#mover' x='"+((x1+x2)/2)+"' y='"+((y1+y2)/2)+"' "; 
-        	    html+="transform='"+spin+"'/>";
+        	    html+="transform='rotate("+spin+")'/>";
             	id('handles').innerHTML+=html;
     	        mode='edit';
         	    break;
@@ -4114,9 +4017,7 @@ function setLayer() {
 	}
 	id('layers').innerText=elementLayer;
 	graph.layer=elementLayer;
-	// element.setAttribute('layer',elementLayers);
 	updateGraph(index,['layer',elementLayer]);
-	// updateGraph(element.id,['layer',elementLayers]);
 }
 function setLayers() {
 	// console.log('set layers');
@@ -4137,6 +4038,7 @@ function setLayerVisibility() {
 		// console.log('layer '+i+' show? '+id('layerCheck'+i).checked);
 		layers[i].show=id('layerCheck'+i).checked;
 	}
+	/*
 	var children=id('dwg').children;
 	for(i=0;i<children.length;i++) {
 		var elementLayers=children[i].getAttribute('layer'); // !!!!!!!!!!!!!!!!
@@ -4148,6 +4050,7 @@ function setLayerVisibility() {
 		}
 		children[i].style.display=(show)?'block':'none';
 	}
+	*/
 	var data={};
     data.layers=[];
     for(i=0;i<10;i++) {
@@ -4159,6 +4062,8 @@ function setLayerVisibility() {
 	var json=JSON.stringify(data);
 	// console.log('layers JSON: '+json);
 	window.localStorage.setItem('layers',json);
+	// NEW
+	draw();
 }
 function setLineType(g) {
     if(g.lineType=='dashed') return (4*g.lineW)+" "+(4*g.lineW);
@@ -4412,8 +4317,13 @@ function swopGraphs(g1,g2) {
     // console.log('swop graphs '+g1+' and '+g2);
     g1=Number(g1);
     g2=Number(g2);
-    var graph1={};
-    var graph2={};
+    // var graph1={};
+    // var graph2={};
+    // DO THIS DIRECTLY IN graphs[]
+    var temp=graphs[g1];
+    graphs[g1]=graphs[g2];
+    graphs[g2]=temp;
+    /*
     var transaction=db.transaction('graphs','readwrite');
     var graphs=transaction.objectStore('graphs');
     var request=graphs.get(g1);
@@ -4447,6 +4357,7 @@ function swopGraphs(g1,g2) {
     transaction.oncomplete=function(event) {
         console.log('swop complete');
     }
+    */
 }
 function textFormat(text,across) {
 	var chars=text.length;
@@ -4505,7 +4416,6 @@ function type(el) {
     else if(el instanceof SVGUseElement) {
         return 'set';
     }
-    // else if(el instanceof SVGImageElement) {return 'image';}
 }
 function updateGraph(n,parameters,text) {
 	console.log('update graph '+n+'... '+parameters);
@@ -4551,28 +4461,4 @@ else { //Register the ServiceWorker
 		console.log('Service worker has been registered for scope:'+ reg.scope);
 	});
 }
-var pattern=[];
-var tile=[];
-pattern[0]={'width':4, 'height':2, 'spin':0, 'tile':0};
-pattern[1]={'width':4, 'height':2, 'spin':90, 'tile':0};
-pattern[2]={'width':4, 'height':2, 'spin':0, 'tile':1};
-pattern[3]={'width':4, 'height':2, 'spin':90, 'tile':1};
-pattern[4]={'width':2, 'height':2, 'spin':0, 'tile':2};
-pattern[5]={'width':4, 'height':2, 'spin':-45, 'tile':0};
-pattern[6]={'width':4, 'height':2, 'spin':45, 'tile':0};
-pattern[7]={'width':4, 'height':2, 'spin':-45, 'tile':1};
-pattern[8]={'width':4, 'height':2, 'spin':45, 'tile':1};
-pattern[9]={'width':2, 'height':2, 'spin':45, 'tile':2};
-pattern[10]={'width':1, 'height':1, 'spin':0, 'tile':3};
-pattern[11]={'width':4, 'height':4, 'spin':0, 'tile':4};
-pattern[12]={'width':1, 'height':1, 'spin':0, 'tile':5};
-pattern[13]={'width':2, 'height':2, 'spin':0, 'tile':6};
-pattern[14]={'width':1, 'height':1, 'spin':45, 'tile':6};
 
-tile[0]='<rect x="0" y="1" width="4" height="0.5" stroke="none"/>';
-tile[1]='<rect x="0" y="1" width="4" height="1" stroke="none"/>';
-tile[2]='<rect x="0" y="1" width="2" height="0.5" stroke="none"/><rect x="1" y="0" width="0.5" height="2" stroke="none"/>';
-tile[3]='<rect x="0" y="0" width="0.5" height="0.5" stroke="none"/><rect x="0.5" y="0.5" width="0.5" height="0.5" stroke="none"/>'
-tile[4]='<rect x="0" y="0" width="2" height="2" stroke="none"/><rect x="2" y="2" width="2" height="2" stroke="none"/>';
-tile[5]='<circle cx="0.5" cy="0.5" r="0.25" stroke="none"/>';
-tile[6]='<circle cx="1" cy="1" r="0.5" stroke="none"/>';
