@@ -204,12 +204,12 @@ id('createNewDrawing').addEventListener('click',function() {
 	size=id('sizeSelect').value;
 	aspect=id('aspectSelect').value;
     scale=id('scaleSelect').value;
-    // console.log('create new drawing - size:'+size+'('+sizes[size]+') aspect:'+aspect+' scale:'+scale);
+    console.log('create new drawing - size:'+size+'('+sizes[size]+') aspect:'+aspect+' scale:'+scale);
     var index=parseInt(size);
     if(aspect=='portrait') index+=7;
     dwg.w=widths[index];
     dwg.h=heights[index];
-    // console.log('drawing size '+dwg.w+'x'+dwg.h+'(index: '+index+')');
+    console.log('drawing size '+dwg.w+'x'+dwg.h+'(index: '+index+')');
     window.localStorage.setItem('size',size);
     window.localStorage.setItem('aspect',aspect);
     window.localStorage.setItem('scale',scale);
@@ -217,7 +217,6 @@ id('createNewDrawing').addEventListener('click',function() {
     window.localStorage.setItem('name',name);
     index=0;
     // CLEAR DRAWING IN HTML & DATABASE
-    id('dwg').innerHTML=''; // clear drawing
     layer=0; // reset layers
 	for(var i=0;i<10;i++) {
 		id('layer'+i).checked=layers[i].checked=(i==0); // select current layer 0
@@ -226,9 +225,14 @@ id('createNewDrawing').addEventListener('click',function() {
 		id('layer').innerText=layer;
 	}
 	setLayers();
+	console.log('layers reset');
     id('handles').innerHTML=''; // clear any edit handles
     graphs=[];
     sets=[];
+    console.log('data cleared');
+    save();
+    id('dwg').innerHTML=''; // clear drawing
+    console.log('drawing cleared');
     showDialog('newDrawingDialog',false);
     window.localStorage.setItem('name',name);
     initialise();
@@ -253,12 +257,14 @@ id('confirmLoad').addEventListener('click',async function(){
     	if(method=='set') sets=json.sets;
     	else { // load drawing
     		name=file.name;
+    		console.log('load drawing '+name);
 			var n=name.indexOf('.json');
 			name=name.substr(0,n);
 			window.localStorage.setItem('name',name);
 			id('dwg').innerHTML=''; // clear drawing
     		id('handles').innerHTML=''; // clear any edit handles
       		graphs=json.graphs;
+      		console.log(graphs.length+' graphs loaded');
       		save();
     		load();
     	}
@@ -386,10 +392,10 @@ id('textButton').addEventListener('click',function() {
 });
 id('textOKbutton').addEventListener('click',function() {
 	var text=id('text').value;
-	// console.log('text: '+text);
+	console.log('text: '+text);
 	if(element) { // change selected text
-        element.innerHTML=text;
-        updateGraph(element.id,['text',text],true);
+        // element.innerHTML=text;
+        updateGraph(element.id,text);
     }
     else {
         // console.log('add text '+text+' - '+textFont+','+textStyle+','+textSize);
@@ -3463,7 +3469,7 @@ function id(el) {
 	return document.getElementById(el);
 }
 function initialise() {
-    // console.log('set up size '+size+' '+aspect+' 1:'+scale+' scale '+aspect+' drawing');
+    console.log('set up size '+size+' '+aspect+' 1:'+scale+' scale '+aspect+' drawing');
     scaleF=25.4*scale/96; // 96px/inch
     handleR=2*scale;
     snapD=2*scale;
@@ -3858,9 +3864,14 @@ function select(n,multiple,s) {
             	id('blueBox').setAttribute('height',h);
             	id('blueBox').setAttribute('transform','rotate(0)');
             	id('guides').style.display='block';
-            	var html="<use id='sizer' href='#sizer' x='"+(x+w)+"' y='"+(y+h)+"'/>"; // sizer at bottom/right
-            	if(s) html+="<use id='mover"+s.n%10+"' href='#mover' x='"+s.x+"' y='"+s.y+"'/>"; // mover at a node
-            	else html+="<use id='mover0' href='#mover' x='"+x+"' y='"+y+"'/>"; // mover at top/left
+            	if(s) {
+            		var html="<use id='mover"+s.n%10+"' href='#mover' x='"+s.x+"' y='"+s.y+"'/>"; // mover at a node
+            		html+="<use id='sizer' href='#sizer' x='"+x+"' y='"+y+"'/>"; // sizer at bottom/right
+            	}
+            	else {
+            		var html="<use id='mover0' href='#mover' x='"+x+"' y='"+y+"'/>"; // mover at top/left
+            		html+="<use id='sizer' href='#sizer' x='"+(x+w)+"' y='"+(y+h)+"'/>"; // sizer at bottom/right
+            	}
             	id('handles').innerHTML+=html;
             	setSizes('box',graph.spin,w,h);
             	showInfo(true,(w==h)?'SQUARE':'BOX',graph.layer);
@@ -4227,7 +4238,6 @@ function setTransform(el) {
     }
     if(spin!=0) t+='rotate('+spin+','+x+','+y+')';
     el.setAttribute('transform',t);
-    refreshNodes(el);
 }
 function showDialog(dialog,visible) {
     // console.log('show dialog '+dialog);
@@ -4417,19 +4427,22 @@ function type(el) {
         return 'set';
     }
 }
-function updateGraph(n,parameters,text) {
+function updateGraph(n,parameters) {
 	console.log('update graph '+n+'... '+parameters);
 	graph=graphs[n];
-	while(parameters.length>0) {
+	if(graph.type=='text') graph.text=parameters;
+	else while(parameters.length>0) {
 	    var attribute=parameters.shift();
 	    var val=parameters.shift();
-	    // console.log('set '+attribute+' to '+val);
-	    eval('graph.'+attribute+'='+val);
+	    console.log('set '+attribute+' to '+val);
+		eval('graph.'+attribute+'='+val);
 	}
 	graphs[n]=graph;
+	/*
 	if(graph.type=='text') {
 		document.getElementById(n).innerHTML=textFormat(graph.text,graph.x);
 	}
+	*/
 	save();
 	draw();
 }
