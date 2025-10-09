@@ -1,16 +1,16 @@
 {
-  "name": "Linea PWA",
-  "short_name": "Lines",
+  "name": "Draft PWA",
+  "short_name": "Draft",
   "version": "1.1",
   "icons": [
 	{
-		"src": "Linea.png",
+		"src": "Draft.png",
 		"sizes": "512x512",
 		"type": "image/png",
 		"purpose": "any maskable"
 	}
   ],
-  "start_url": "/Linea/",
+  "start_url": "/Draft/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "white",

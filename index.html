@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Linea - simple drawing app</title>
+    <title>Draft - simple drawing app</title>
     <meta name="description" content="scale drawings | simple CAD app | installable PWA">
     <meta name="robots" content="index nofollow">
     <meta name="keywords" content="CAD, drawing, design, scale drawing, PWA, app">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Linea</title>
-	<link rel="stylesheet" type="text/css" href="LineaStyle.css">
+	<title>Draft</title>
+	<link rel="stylesheet" type="text/css" href="DraftStyle.css">
   	<link rel="manifest" href="manifest.json">
-  	<meta name="application-name" content="Linea">
+  	<meta name="application-name" content="Draft">
 </head>
 <body>
     <div id='graphic' draggable='false'>
@@ -102,6 +102,7 @@
             	<g id='guides'>
                 	<rect class='blue' id='selectionBox' x='0' y='0' width='0' height='0' stroke='blue' fill='none'/>
                    	<polyline class='blue' id='bluePolyline' points='0,0' stroke='blue' fill='none'/>
+	            	<polygon class='blue' id='bluePolygon' points='0,0' stroke='blue' fill='none'/>
 	            	<rect class='blue' id='blueBox' x='0' y='0' width='0' height='0' stroke='blue' stroke-dasharray='2 2' fill='none'/>
 		            <ellipse class='blue' id='blueOval' cx='0' cy='0' rx='0' ry='0' transform-origin='center' transform-box='fill-box' stroke='blue' fill='none'/>
 		           	<path class='blue' id='bluePath' d='' stroke='blue' fill='none'/>
@@ -142,9 +143,9 @@
         <button id='doubleButton' class='iconButton'></button>
         <button id='repeatButton' class='iconButton'></button>
         <button id='filletButton' class='iconButton'></button>
-        <button id='anchorButton' class='iconButton'></button>
+        <!--button id='anchorButton' class='iconButton'></button-->
         <button id='joinButton' class='iconButton'></button>
-        <button id='returnButton' class='iconButton'></button>
+        <!--button id='returnButton' class='iconButton'></button-->
     </div>
     <div id='info'>
     	<span id='type'></span>
@@ -500,7 +501,7 @@
     		<rect id='#505' x='275' y='150' width='25' height='25' stroke='none' fill='#505'/>
     	</svg>
     </div>
-	<script src="LineaScript.js" async></script>
+	<script src="DraftScript.js" async></script>
 </body>
 </html>
  
