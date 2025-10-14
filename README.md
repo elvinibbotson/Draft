@@ -6,7 +6,7 @@ Draft is a 2D drawing app with the following features...
   <li>'snap' to drawing elements or to grid</li>
   <li>associative dimensions</li>
 </ul>
-Drawing elements are...
+<h3>Drawing</h3>
 <ul>
   <li>smooth curves using the <b>curve</b> tool</li>
   <li>lines, linked lines and polygons ('shapes') using the <b>line</b> tool</li>
@@ -17,7 +17,7 @@ Drawing elements are...
   <li>horizontal, vertical or oblique dimensions using the <b>dimension</b> tool</li>
   <li>pre-defined <b>set</b>s of elements</li>
 </ul>
-Editing tools are...
+<h3>Editing</h3>
 <ul>
   <li><b>move</b> single or multiple elements by dragging or x/y coordinates or distance and direction</li>
   <li><b>spin</b> (or rotate) single or multiple elements</li>
@@ -31,7 +31,7 @@ Editing tools are...
 </ul>
 Elements may also be resized or reshaped by dragging or by editing the <i>info</i> displayed when an element is selected
 
-Various <b>styles</b> can be applied to elements...
+<h3>Styling</h3>
 <ul>
   <li>line type, width and colour</li>
   <li>text font, size, style and colour</li>
