@@ -115,7 +115,7 @@
 		</svg>
 	</div>
     <div id='tools'>
-    	<button id='layersButton' class='iconButton'><span id='layer'>1</span></button>
+    	<button id='layersButton' class='iconButton'><span id='layer'>0</span></button>
         <button id='docButton' class='iconButton'></button>
         <button id='zoomInButton' class='iconButton'></button>
         <button id='zoomOutButton' class='iconButton'></button>
@@ -131,6 +131,7 @@
         <button id='setButton' class='iconButton'></button>
     </div>
     <div id='editTools'>
+    	<button id='layerButton' class='iconButton'><span id='graphLayer'>0</span></button>
         <button id='addButton' class='iconButton' disabled></button>
         <button id='deleteButton' class='iconButton'></button>
         <button id='forwardButton' class='iconButton'></button>
@@ -143,16 +144,14 @@
         <button id='doubleButton' class='iconButton'></button>
         <button id='repeatButton' class='iconButton'></button>
         <button id='filletButton' class='iconButton'></button>
-        <!--button id='anchorButton' class='iconButton'></button-->
         <button id='joinButton' class='iconButton'></button>
-        <!--button id='returnButton' class='iconButton'></button-->
     </div>
     <div id='info'>
     	<span id='type'></span>
-        <input id='first' type='number'/> <span id='between'>x</span>
+        <input id='first' type='number'/><span id='between'>x</span>
         <input id='second' type='number'/><span id='after'>mm</span>
-        <input id='spin' type='number'/>&deg; <span id='elementLayer'><img src='svg/layers.svg' style='border:none'> <span id='layers'></span></span>
-        <br><span id='hint'></span>
+        <input id='spin' type='number'/>&deg;<!--span id='elementLayer'><img src='svg/layers.svg' style='border:none'> <span id='layers'></span></span-->
+        <div id='hint'></div>
     </div>
     <div id='layerChooser' class='dialog'>
     	<ul id='layerChoice'>
@@ -396,7 +395,7 @@
         <button id='confirmMove'>MOVE</button> <button class='clearButton' onclick='clearDialog("move")'></button>
         <p><input type='number' id='moveRight'/><img src='svg/up.svg' class='spin90'/>
         <input type='number' id='moveDown'/><img src='svg/up.svg' class='spin180'/></p>
-        <p>...or <input type='number' id='moveDist'/> @ <input type='number' id='moveAngle'/> &deg;</p>
+        <p>...or <input type='number' id='moveDist'/> @ <input type='number' id='moveAngle'/>&deg;</p>
     </div>
     <div id='spinDialog' class='dialog'>
         <button id='confirmSpin'>SPIN</button> <button class='clearButton' onclick='clearDialog("spin")'></button>
@@ -422,8 +421,8 @@
     </div>
     <div id='repeatDialog' class='dialog'>
         <button id='confirmRepeat'>REPEAT</button> <button class='clearButton' onclick='clearDialog("repeat")'></button>
-        <p><input type='number' id='countH'/>@<input type='number' id='distH'/>mm<img src='svg/up.svg' class='spin90'/></p>
-        <p><input type='number' id='countV'/>@<input type='number' id='distV'/>mm<img src='svg/up.svg' class='spin180'/></p>
+        <p><input type='number' id='countH'/> @ <input type='number' id='distH'/>mm <img src='svg/up.svg' class='spin90'/></p>
+        <p><input type='number' id='countV'/> @ <input type='number' id='distV'/>mm <img src='svg/up.svg' class='spin180'/></p>
     </div>
     <div id='filletDialog' class='dialog'>
         <button id='confirmFillet'>FILLET</button>

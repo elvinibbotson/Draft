@@ -458,6 +458,14 @@ id('setList').addEventListener('change',function() {
     showDialog('setDialog',false);
 });
 // EDIT TOOLS
+id('layerButton').addEventListener('click',function() {
+	console.log('display layer choice for '+graph.type);
+	for(var i=0;i<10;i++) {
+		id('choice'+i).addEventListener('click',setLayer);
+		id('choice'+i).checked=(graph.layer==i);
+	}
+	id('layerChooser').style.display='block';
+});
 id('addButton').addEventListener('click',function() { // add point after selected point in line/shape
     var t=type(element);
     if((t!='line')&&(t!='shape')) return; // can only add points to lines/shapes
@@ -634,9 +642,9 @@ id('flipButton').addEventListener('click',function() {
     showDialog('flipDialog',true);
 });
 id('flipOptions').addEventListener('click',function() {
-    var opt=Math.floor((event.clientX-parseInt(id('flipDialog').offsetLeft)+5)/32);
+    var opt=Math.floor(event.clientX-87); // was -parseInt(id('flipDialog').offsetLeft)+5)/32);
     console.log('click on '+opt+': flip '+(opt<1)?'horizontal':'vertical'); // 0: horizontal; 1: vertical
-    var axis={};
+    // var axis={};
     var elNodes=null;
     var el=id(selection[0]);
     var box=getBounds(el);
@@ -654,22 +662,13 @@ id('flipOptions').addEventListener('click',function() {
         if((box.y+box.height)>maxY) maxY=box.y+box.height;
     }
     // console.log('overall box '+minX+'-'+maxX+'x'+minY+'-'+maxY);
-    if(anchor) { // flip around anchor
-        axis.x=parseInt(id('anchor').getAttribute('x'));
-        axis.y=parseInt(id('anchor').getAttribute('y'));
-    }
-    else { // flip in-situ around mid-point
-        axis.x=(minX+maxX)/2;
-        axis.y=(minY+maxY)/2;
-    }
-    // console.log('axis: '+axis.x+','+axis.y);
     re('member');
     while(selection.length>0) { // for each selected item...
         index=selection.shift();
         graph=graphs[index];
         element=id(index);
         console.log('flip '+graph.type+' element '+el.id);
-        switch (graph.type) {
+        switch(graph.type) {
             case 'curve': // reverse x-coord of each point and each node
             case 'line':
             case 'shape':
@@ -677,54 +676,98 @@ id('flipOptions').addEventListener('click',function() {
                 for(i=0;i<points.length;i++) {
                     if(opt<1) {
                     	console.log('flip side-side');
-                        dx=points[i].x-axis.x;
-                        points[i].x=axis.x-dx;
+                        dx=points[i].x-anchor.x;
+                        points[i].x=anchor.x-dx;
                     }
                     else {
                     	console.log('flip top-bottom');
-                        dy=points[i].y-axis.y;
-                        points[i].y=axis.y-dy;
+                        dy=points[i].y-anchor.y;
+                        points[i].y=anchor.y-dy;
                     }
                 }
                 break;
             case 'box':
-                var spin=graph.spin; // parseInt(el.getAttribute('spin'));
-                if(spin!=0) {graph.spin*=-1;}
+                if(opt<1) { // flip left-right
+                    console.log('flip left/right');
+                    for(var i in graph.points) {
+                    	dx=graph.points[i].x-anchor.x;
+                    	graph.points[i].x=anchor.x-dx; 
+                    }
+                    console.log('swop points 0&1 and 2&3');
+                    var p=graph.points[0];
+                    graph.points[0]=graph.points[1];
+                    graph.points[1]=p;
+                    p=graph.points[2];
+                    graph.points[2]=graph.points[3];
+                    graph.points[3]=p;
+                }
+                else { // flip top-bottom
+                	console.log('flip top/bottom');
+                    for(var i in graph.points) {
+                    	dy=graph.points[i].y-anchor.y;
+                    	graph.points[i].y=anchor.y-dy; 
+                    }
+                    console.log('swop points 0&3 and 1&2');
+                    var p=graph.points[0];
+                    graph.points[0]=graph.points[3];
+                    graph.points[3]=p;
+                    p=graph.points[1];
+                    graph.points[1]=graph.points[2];
+                    graph.points[2]=p;
+                }
+                console.log('reset x,y');
+                graph.x=graph.points[0].x;
+                graph.y=graph.points[0].y;
+                graph.spin*=-1;
                 break;
             case 'oval':
             	if(opt<1) {
-            		var dx=graph.cx-axis.x; // Number(el.getAttribute('cx'))-axis.x;
-            		x=axis.x-dx
-            		graph.cx=x;
+            		for(var i in graph.points) {
+            			dx=graph.points[i].x-anchor.x;
+            			graph.points[i].x=anchor.x-dx;
+            			console.log('point '+i+': '+graph.points[i].x+','+graph.points[i].y);
+            		}
+            		var p=graph.points[2];
+            		graph.points[2]=graph.points[4];
+            		graph.points[4]=p;
             	}
             	else {
-            		var dy=graph.cy-axis.y; // Number(el.getAttribute('cy'))-axis.y;
-            		y=axis.y-dy;
-            		graph.cy=y;
+            		for(var i in graph.points) {
+            			dy=graph.points[i].y-anchor.y;
+            			graph.points[i].y=anchor.y-dy;
+            			console.log('point '+i+': '+graph.points[i].x+','+graph.points[i].y);
+            		}
+            		var p=graph.points[1];
+            		graph.points[1]=graph.points[3];
+            		graph.points[3]=p;
             	}
-                var spin=graph.spin; // parseInt(el.getAttribute('spin'));
-                if(spin!=0) {
-                    graph.spin*=-1; // spin*=-1;
-                }
+                graph.spin*=-1;
                 break;
             case 'arc':
                 if(opt<1) { // flip left-right
-                console.log('flip left-right');
-                	dx=graph.cx-axis.x;
-                    graph.cx=axis.x-dx;
-                    dx=graph.x1-axis.x;
-                    graph.x1=axis.x-dx;
-                    dx=graph.x2-axis.x;
-                    graph.x2=axis.x-dx;
+                	console.log('flip left-right');
+                	for(var i in graph.points) {
+            			dx=graph.points[i].x-anchor.x;
+            			graph.points[i].x=anchor.x-dx;
+            			console.log('point '+i+': '+graph.points[i].x+','+graph.points[i].y);
+            		}
+                	/*
+                	dx=graph.cx-anchor.x;
+                    graph.cx=anchor.x-dx;
+                    dx=graph.x1-anchor.x;
+                    graph.x1=anchor.x-dx;
+                    dx=graph.x2-anchor.x;
+                    graph.x2=anchor.x-dx;
+                    */
                 }
                 else {
                 	console.log('flip top-bottom');
-                	dy=graph.cy-axis.y;
-                    graph.cy=axis.y-dy;
-                    dy=graph.y1-axis.y;
-                    graph.y1=axis.y-dy;
-                    dy=graph.y2-axis.y;
-                    graph.y2=axis.y-dy;
+                	dy=graph.cy-anchor.y;
+                    graph.cy=anchor.y-dy;
+                    dy=graph.y1-anchor.y;
+                    graph.y1=anchor.y-dy;
+                    dy=graph.y2-anchor.y;
+                    graph.y2=anchor.y-dy;
                 }
                 graph.sweep=(graph.sweep<1)? 1:0; // CHECK THIS
                 break;
@@ -732,29 +775,31 @@ id('flipOptions').addEventListener('click',function() {
                 showDialog('textDialog',false);
                 var flip=graph.flip; // parseInt(el.getAttribute('flip'));
                 if(opt<1) { // flip left-right
-                        // console.log('current flip: '+flip);
+                        console.log('current flip: '+flip);
                         graph.flip^=1; // toggle horizontal flip;
-                        dx=graph.x-axis.x; // parseInt(el.getAttribute('x'))-axis.x;
-                        graph.x=axis.x-dx; // el.setAttribute('x',(axis.x-dx));
+                        dx=graph.x-anchor.x;
+                        graph.x=anchor.x-dx;
                     }
                 else { // flip top-bottom
+                		console.log('flip vertically');
                         graph.flip^=2; // toggle vertical flip
-                        dy=graph.y-axis.y; // parseInt(el.getAttribute('y'))-axis.y;
-                        graph.y=axis.y-dy; // el.setAttribute('y',(axis.y-dy));
+                        dy=graph.y-anchor.y;
+                        graph.y=anchor.y-dy;
                     }
+                graph.spin*=-1;
                 break;
             case 'set':
                 var flip=graph.flip; // parseInt(el.getAttribute('flip'));
                 if(opt<1) { // flip left-right
                     // console.log('current flip: '+flip);
                     flip^=1; // toggle horizontal flip;
-                    dx=graph.ax-axis.x; // parseInt(el.getAttribute('ax'))-axis.x;
-                    graph.ax=axis.x-dx; // el.setAttribute('ax',(axis.x-dx));
+                    dx=graph.ax-anchor.x;
+                    graph.ax=anchor.x-dx;
                 }
                 else { // flip top-bottom
                     flip^=2; // toggle vertical flip
-                    dy=graph.ay-axis.y; // parseInt(el.getAttribute('ay'))-axis.y;
-                    graph.ay=axis.y-dy; // el.setAttribute('ay',(axis.y-dy));
+                    dy=graph.ay-anchor.y;
+                    graph.ay=anchor.y-dy;
                 }
                 // refreshNodes(el);
                 w=graph.x; // parseInt(el.getAttribute('x'));
@@ -763,17 +808,14 @@ id('flipOptions').addEventListener('click',function() {
                 var ver=flip&2;
                 var t='translate('+(hor*w)+','+(ver*h/2)+') ';
                 t+='scale('+((hor>0)? -1:1)+','+((ver>0)? -1:1)+')';
-                graph.flip=flip; // el.setAttribute('flip',flip);
-                graph.transform= t; // el.setAttribute('transform',t);
+                graph.flip=flip;
+                graph.transform=t;
                 break;
         }
     }
+    graphs[index]=graph;
     draw();
     cancel();
-    if(anchor) {
-        id('blue').removeChild(id('anchor'));
-        anchor=false;
-    }
     showDialog('flipDialog',false);
 });
 id('alignButton').addEventListener('click',function() {
@@ -1593,10 +1635,10 @@ id('graphic').addEventListener('pointerdown',function(e) {
                     console.log('oval path: '+path);
                     break;
                 case 'arc':
-                	x0=graph.cx;
-                	y0=graph.cy;
-                	path='m '+(graph.x1-x)+' '+(graph.y1-y); // move to start of x-arc
-                    path+=' a '+graph.r+' '+graph.r+' '+' 0 '+graph.major+' '+graph.sweep+' '+(graph.x2-graph.x1)+' '+(graph.y2-graph.y1);
+                	x0=graph.points[0].x;
+                	y0=graph.points[0].y;
+                	path='m '+(graph.points[1].x-x)+' '+(graph.points[1].y-y); // move to start of x-arc
+                    path+=' a '+graph.r+' '+graph.r+' '+' 0 '+graph.major+' '+graph.sweep+' '+(graph.points[2].x-graph.points[1].x)+' '+(graph.points[2].y-graph.points[1].y);
                     // console.log('arc path: '+path);
                     break;
                 case 'text':
@@ -1867,7 +1909,7 @@ function drag(event) {
             		console.log('bluePath: '+d);
             		id('bluePath').setAttribute('d',d);
             	}
-            	else { // moving text, dimension, set
+            	else { // moving text or set
             		id('blueBox').setAttribute('x',Number(x)+Number(offset.x));
                		id('blueBox').setAttribute('y',Number(y)+Number(offset.y));
             	}
@@ -2485,6 +2527,8 @@ id('graphic').addEventListener('pointerup',function(e) {
             var graph={};
             graph.type='arc';
             graph.points=[];
+            graph.cx=arc.cx;
+            graph.cy=arc.cy;
             graph.points.push({'x':arc.cx,'y':arc.cy}); // centre
             graph.points.push({'x':arc.x1,'y':arc.y1}); // start
             graph.points.push({'x':arc.x2,'y':arc.y2}); // end
@@ -2926,21 +2970,14 @@ id('second').addEventListener('change',function() { // CHANGE OTHERS TO MATCH BO
 id('spin').addEventListener('change',function() {
     re('member');
     var val=parseInt(id('spin').value);
-    // console.log('set spin to '+val+' degrees');
+    console.log('set spin to '+val+' degrees');
     element=id(index);
-    if(graph.spin) graph.spin=val;
-    graph.points=setPoints(graph,val);
+    graph.spin=val;
+    console.log('set points for spin '+graph.spin);
+    graph.points=setPoints(graph);
     graphs[index]=graph;
+    id('bluePolygon').setAttribute('points','0,0');
     draw();
-});
-id('elementLayer').addEventListener('click',function() {
-	// console.log('display layer choice for element '+element.id);
-	for(var i=0;i<10;i++) {
-		id('choice'+i).addEventListener('click',setLayer);
-		// id('choice'+i).checked=(element.getAttribute('layer').indexOf(i)>=0)
-		id('choice'+i).checked=(graph.layer==i);
-	}
-	id('layerChooser').style.display='block';
 });
 id('undoButton').addEventListener('click',function() {
     re('call'); // recall & reinstate previous positions/points/sizes/spins/flips
@@ -3060,7 +3097,7 @@ function copy(x,y) {
         case 'text':
             g.x=graph.x+x; // Number(el.getAttribute('x'))+x;
             g.y=graph.y+y; // Number(el.getAttribute('y'))+y;
-            g.flip=graph.flip; // Number(el.getAttribute('flip'));
+            // g.flip=graph.flip; // Number(el.getAttribute('flip'));
             g.text=graph.text; // el.getAttribute('text');
             g.textSize=graph.textSize; // Number(el.getAttribute('font-size'));
             g.textStyle=graph.textStyle;
@@ -3100,6 +3137,11 @@ function curvePath(pts) {
 	}
 	console.log('curve path: '+d);
 	return d;
+}
+function decimal(n) {
+	n*=10;
+	n=Math.floor(n);
+	return (n/10);
 }
 function draw() {
 	var el;
@@ -3211,7 +3253,7 @@ function draw() {
             nodes.push({'x':g.points[3].x,'y':g.points[3].y,'n':(n*10+6)}); // bottom/left - node 6
             nodes.push({'x':(g.points[2].x+g.points[3].x)/2,'y':(g.points[2].y+g.points[3].y)/2,'n':(n*10+7)}); // bottom/centre - node 7
             nodes.push({'x':g.points[2].x,'y':g.points[2].y,'n':(n*10+8)}); // bottom/right - node 8
-            if(g.spin!=0) setTransform(el);
+            if((g.spin!=0)||(g.flip!=0)) setTransform(el);
             for(var d in g.dims) drawDim(n,g.dims[d]);
             break;
         case 'oval':
@@ -3228,19 +3270,13 @@ function draw() {
             el.setAttribute('fillType',g.fillType);
             el.setAttribute('fill',g.fill);
             if(g.opacity<1) el.setAttribute('fill-opacity',g.opacity);
-            for(var p in g.points) {
+            for(var p=0;p<g.points.length;p++) {
             	nodes.push({'x':g.points[p].x,'y':g.points[p].y,'n':n*10+p});
             }
-            /*
-            nodes.push({'x':g.cx,'y':g.cy,'n':(n*10)}); // centre - node 0
-            nodes.push({'x':g.points[1].x,'y':g.points[1].y,'n':Number(n*10+1)}); // ...top/centre - node 1
-            nodes.push({'x':g.points,'y':g.cy,'n':Number(n*10+2)}); // centre/left - node 2
-            nodes.push({'x':Number(g.cx)+Number(g.rx),'y':g.cy,'n':Number(n*10+3)}); // centre/right - node 3
-            nodes.push({'x':g.cx,'y':Number(g.cy+g.ry),'n':Number(n*10+4)}); // bottom/centre - node 4
-            // if(g.spin!=0) setTransform(el);
-            */
             break;
         case 'arc':
+        	console.log('draw '+g.type+' points...');
+        	for(var p=0;p<g.points.length;p++) console.log(p+': '+g.points[p].x+','+g.points[p].y);
             var el=document.createElementNS(ns,'path');
             el.setAttribute('id',n);
             el.setAttribute('cx',g.points[0].x);
@@ -3256,9 +3292,10 @@ function draw() {
             el.setAttribute('fill',g.fill);
             if(g.opacity<1) el.setAttribute('fill-opacity',g.opacity);
             // create nodes for arc start, centre & end points
-            nodes.push({'x':g.cx,'y':g.cy,'n':(n*10)}); // centre - node 0
-            nodes.push({'x':g.x1,'y':g.y1,'n':Number(n*10+1)}); // start - node 1
-            nodes.push({'x':g.x2,'y':g.y2,'n':Number(n*10+2)}); // end - node 2
+            console.log('add nodes for graph '+n+' in range '+n*10);
+            for(var p=0;p<g.points.length;p++) {
+            	nodes.push({'x':g.points[p].x,'y':g.points[p].y,'n':n*10+p});
+            }
             if(g.spin!=0) setTransform(el);
             break;
         case 'text':
@@ -3434,7 +3471,7 @@ function hint(text) {
     id('hint').innerHTML=text; //display text for 10 secs
     var t=parseInt(id('info').style.top);
     // console.log('info top: '+t);
-    id('info').style.height='50px';
+    id('info').style.height='60px';
 	setTimeout(function(){id('info').style.height='30px';},10000);
 }
 function id(el) {
@@ -3535,12 +3572,12 @@ function move(dx,dy) { // CHANGE OTHER TO MATCH BOX, ETC
             	graphs[index]=graph;
             	break;
         	case 'arc':
-        		graph.cx+=dx;
-        		graph.cy+=dy;
-        		graph.x1+=dx;
-        		graph.y1+=dy;
-        		graph.x2+=dx;
-        		graph.y2+=dy;
+        		graph.points[0].x+=dx;
+        		graph.points[0].y+=dy;
+        		graph.points[1].x+=dx;
+        		graph.points[1].y+=dy;
+        		graph.points[2].x+=dx;
+        		graph.points[2].y+=dy;
     	}
 	}
     draw();
@@ -3679,10 +3716,8 @@ function select(n,multiple,s) {
 		console.log('select graph '+n+' of '+graphs.length+' multiple is '+multiple+' s is '+s);
 		graph=graphs[n];
 		if(s) console.log('place mover on node '+s.n+' at '+s.x+','+s.y);
-		var elementLayers=graph.layer; // JUST USE graph.layer NO NEED FOR MULTIPLE LAYERS
-		console.log('graph type: '+graph.type+'; layer: '+elementLayers);
-		id('layers').innerText=elementLayers;
-		for(var l=0;l<elementLayers.length;l++) id('choice'+l).checked=true;
+		console.log('graph type: '+graph.type+'; layer: '+graph.layer);
+		id('choice'+graph.layer).checked=true;
     	id('handles').innerHTML=''; // clear any handles then add handles for selected element 
     	elNodes=nodes.filter(function(node) { // get nodes for selected element
         	return (Math.floor(node.n/10)==n);
@@ -3750,7 +3785,7 @@ function select(n,multiple,s) {
             	id('bluePolyline').setAttribute('points',el.getAttribute('points'));
             	id('guides').style.display='block';
             	// console.log('type: '+type(el)+'; layer: '+el.getAttribute('layer'));
-            	showInfo(true,(type(el)=='shape')?'SHAPE':'LINE',el.getAttribute('layer'));
+            	// showInfo(true,(type(el)=='shape')?'SHAPE':'LINE',el.getAttribute('layer'));
             	node=0; // default anchor node
             	mode='pointEdit';
             	break;
@@ -3782,8 +3817,8 @@ function select(n,multiple,s) {
         		id('blueBox').setAttribute('width',w);
         		id('blueBox').setAttribute('height',h);
         		console.log('box at '+x+','+y);
-            	setSizes('box',graph.spin,w,h);
-            	showInfo(true,(w==h)?'SQUARE':'BOX',graph.layer);
+            	// setSizes('box',graph.spin,w,h);
+            	// showInfo(true,(w==h)?'SQUARE':'BOX',graph.layer);
             	node=0; // default anchor node
             	mode='edit';
             	break;
@@ -3811,40 +3846,41 @@ function select(n,multiple,s) {
             	}
             	html+="<use id='sizer' href='#sizer' x='"+(x+w/2)+"' y='"+(y+h/2)+"'/>"; // bottom/right
             	id('handles').innerHTML+=html;
-            	setSizes('box',graph.spin,w,h);
-            	showInfo(true,(w==h)?'CIRCLE':'OVAL',graph.layer);
+            	// setSizes('box',graph.spin,w,h);
+            	// showInfo(true,(w==h)?'CIRCLE':'OVAL',graph.layer);
             	node=0; // default anchor node
             	mode='edit';
             	break;
         	case 'arc':
-            	html="<use id='sizer1' href='#sizer' x='"+graph.x1+"' y='"+graph.y1+"'/>"; // sizers at start...
-            	html+="<use id='sizer2' href='#sizer' x='"+graph.x2+"' y='"+graph.y2+"'/>"; // ...and end or arc
+            	html="<use id='sizer1' href='#sizer' x='"+graph.points[1].x+"' y='"+graph.points[1].y+"'/>"; // sizers at start...
+            	html+="<use id='sizer2' href='#sizer' x='"+graph.points[2].x+"' y='"+graph.points[2].y+"'/>"; // ...and end or arc
             	if(s) {
             		html+="<use id='mover"+s.n%10+"' href='#mover' x='"+s.x+"' y='"+s.y+"'/>"; // mover at a node
             		anchor.x=s.x;
             		anchor.y=s.y;
             	}
             	else {
-            		html+="<use id='mover0' href='#mover' x='"+graph.cx+"' y='"+graph.cy+"'/>"; // mover at centre
-            		anchor.x=graph.cx;
-            		anchor.y=graph.cy;
+            		html+="<use id='mover0' href='#mover' x='"+graph.points[0].x+"' y='"+graph.points[0].y+"'/>"; // mover at centre
+            		anchor.x=graph.points[0].x;
+            		anchor.y=graph.points[0].y;
             	}
+            	console.log('handle html: '+html);
             	id('handles').innerHTML+=html;
-            	var a1=Math.atan((graph.y1-graph.cy)/(graph.x1-graph.cx));
-            	if(graph.x1<graph.cx) a1+=Math.PI;
-            	var a=Math.atan((graph.y2-graph.cy)/(graph.x2-graph.cx));
+            	var a1=Math.atan((graph.points[1].y-graph.points[0].y)/(graph.points[1].x-graph.points[0].x));
+            	if(graph.points[1].x<graph.points[0].x) a1+=Math.PI;
+            	var a=Math.atan((graph.points[2].y-graph.points[0].y)/(graph.points[2].x-graph.points[0].x));
             	// console.log('end angle: '+a);
-            	if(graph.x2<graph.cx) a+=Math.PI;
-            	x0=graph.cx; // centre
-            	y0=graph.cy;
+            	if(graph.points[2].x<graph.points[0].x) a+=Math.PI;
+            	x0=graph.points[0].x; // centre
+            	y0=graph.points[0].y;
             	x=x0+graph.r*Math.cos(a); // end point
 	            y=y0+graph.r*Math.sin(a);
     	        a=Math.abs(a-a1); // swept angle - radians
         	    a*=180/Math.PI; // degrees
             	a=Math.round(a);
 	            if(graph.major>0) a=360-a;
-    	        setSizes('graph',graph.spin,graph.r,a);
-        	    showInfo(true,'ARC',graph.layer);
+    	        // setSizes('graph',graph.spin,graph.r,a);
+        	    // showInfo(true,'ARC',graph.layer);
             	mode='edit';
 	            break;
     	    case 'text':
@@ -3870,8 +3906,8 @@ function select(n,multiple,s) {
 	            }
 	            else content=t;
 	            id('text').value=content;
-            	setSizes('text',graph.spin,w,h);
-            	showInfo(true,'TEXT',elementLayers);
+            	// setSizes('text',graph.spin,w,h);
+            	// showInfo(true,'TEXT',elementLayers);
             	showDialog('textDialog',true);
             	node=0; // default anchor node
         	    mode='edit';
@@ -3900,10 +3936,11 @@ function select(n,multiple,s) {
 	            anchor.x=x;
 	            anchor.y=y;
     	        id('handles').innerHTML=html;
-        	    setSizes('box',element.getAttribute('spin'),w,h);
-            	showInfo(true,'SET',element.layer);
+        	    // setSizes('box',element.getAttribute('spin'),w,h);
+            	// showInfo(true,'SET',element.layer);
 	            mode='edit';
     	};
+    	showInfo('true');
 	}
 	else { // one of multiple selection - highlight in blue
 		var el=id(n);
@@ -3922,19 +3959,15 @@ function select(n,multiple,s) {
 function setButtons() {
     var n=selection.length;
     // console.log('set buttons for '+n+' selected elements');
-    var active=[3,9,11,13,17,25,29]; // active - remove, move, spin, flip, copy, anchor & return buttons always active
-    // childNodes of editTools are... 0:add 1:remove 2:forward 3:back 4:move 5:spin 6:flip 7:align 8:copy 9:double 10:repeat 11:fillet 12: anchor 13:join
+    var active=[5,11,13,15]; // remove,move,spin,flip buttons always active (buttons are odd-number children of edit)
     if(n>1) { // multiple selection
-        if(anchor) { // join active if anchor available for multiple selection
-            active.push(27);
-        }
-        active.push(15); // align and anchor active for multiple selection
+        active.push(17,27); // align & join active for multiple selection
     }
     else { // single element selected
-    	active.push(19,21); // double and repeat only for single selection
+    	active.push(1,7,9,19,21,23); // layer, forward, back,copy,double,repeat only for single selection
         var t=type(id(selection[0]));
-        if((t=='line')||(t=='shape')) active.push(1); // can add points to selected line/shape
-        else if(t=='box') active.push(23); // fillet tool active for a selected box
+        if((t=='line')||(t=='shape')) active.push(3); // can add points to selected line/shape
+        else if(t=='box') active.push(25); // fillet tool active for a selected box
         if(selectedPoints.length<1) { // unless editing line/shape active tools include...
             active.push(5); // push/pull back/forwards
             active.push(7);
@@ -4085,20 +4118,20 @@ function setPoints(g,spin) {
 			s=spin*Math.PI/180; // radians
 			c=Math.cos(s);
 			s=Math.sin(s);
-			console.log('start point moves from '+g.x1+','+g.y1+'...');
-			dx=g.x1-x0; // start point
-			dy=g.y1-y0;
+			console.log('start point moves from '+g.points[1].x+','+g.points[1].y+'...');
+			dx=g.points[1].x-x0; // start point
+			dy=g.points[1].y-y0;
 			x=dx*c-dy*s;
 			y=dy*c+dx*s;
 			g.x1=x0+x;
 			g.y1=y0+y;
-			console.log('...to '+g.x1+','+g.y1);
-			dx=g.x2-x0; // end point
-			dy=g.y2-y0;
+			console.log('...to '+g.points[1].x+','+g.points[1].y);
+			dx=g.points[2].x-x0; // end point
+			dy=g.points[2].y-y0;
 			x=dx*c-dy*s;
 			y=dy*c+dx*s;
-			g.x2=x0+x;
-			g.y2=y0+y;
+			g.points[2].x=x0+x;
+			g.points[2].y=y0+y;
 			break;
 		case 'text':
 		case 'set':
@@ -4123,16 +4156,14 @@ function setSizes(mode,spin,p1,p2,p3,p4) {
         if(p3<p1) a+=180;
         id('first').value=d;
         id('between').innerHTML='mm';
-        id('second').value=a;
-        id('after').innerHTML='&deg;';
+        id('second').style.display='none';
+        id('spin').value=a;
     }
     else { // arc
         id('first').value=Math.round(p1); // radius
-        id('between').innerHTML='mm';
-        id('second').value=Math.round(p2); // angle of arc
-        id('after').innerHTML='&deg;';
+        id('second').style.display='none';
+        id('spin').value=Math.round(p2); // angle of arc
     }
-    id('spin').value=spin;
 }
 function setStyle() {
 	// console.log('setStyle: '+selection.length+' items selected');
@@ -4289,22 +4320,94 @@ function showEditTools(visible) {
         id('tools').style.display='block';
     }
 }
-function showInfo(visible,type,layer,hint) {
-	// console.log((visible)?'show info':'hide info');
+function showInfo(visible) {
 	if(!visible) {
-		id('info').style.top='-30px';
+		id('info').style.top='-30px'; // hide info
 		return;
 	}
-	// console.log(type+'; '+layer+'; '+hint);
-	id('type').innerText=type;
-	id('layers').innerText=layer;
-	id('info').style.top='0px';
-	if(!hint) id('info').style.height='30px';
-	else {
-		id('info').style.height='50px';
-		id('hint').innerText=hint;
-		setTimeout(function(){id('info').style.height='30px';},10000);
+	switch(graph.type) { // show info for currently selected (single) element
+		case 'curve':
+			id('info').style.top='-30px'; // no info
+			hint('curve'); // just show element type
+			break;
+		case 'line':
+			if(graph.points.length>2) {
+				id('info').style.top='-30px'; // no info
+				hint('lines'); // just show element type
+			}
+			else { // single line - show length and angle
+				dx=graph.points[1].x-graph.points[0].x;
+				dy=graph.points[0].y-graph.points[1].y;
+				var d=Math.sqrt((dx*dx)+(dy*dy));
+				id('first').value=d; // distance
+				d=Math.atan(dx/dy)*180/Math.PI;
+				id('spin').value=d;
+				id('between').innerText='@';
+				id('between').style.display='block';
+				id('second').style.display='none';
+				id('info').style.top='0px';
+				hint('line');
+			}
+			break;
+		case 'shape':
+			id('info').style.top='-30px'; // no info
+			hint('shape'); // just show element type
+			break;
+		case 'box': // width height & spin & 'square box' or 'box'
+			id('first').value=graph.width;
+			id('between').innerText='x';
+			id('between').style.display='block';
+			id('second').style.display='block';
+			id('second').value=graph.height;
+			id('after').innerText='mm';
+			id('spin').value=graph.spin;
+			id('info').style.top='0px';
+			hint((graph.width==graph.height)?'square box':'box');
+			break;
+		case 'oval': // ditto & ''circle' or 'oval'
+			id('first').value=graph.rx*2;
+			id('between').innerText='x';
+			id('between').style.display='block';
+			id('second').style.display='block';
+			id('second').value=graph.ry*2;
+			id('after').innerText='mm';
+			id('spin').value=graph.spin;
+			id('info').style.top='0px';
+			hint((graph.rx==graph.ry)?'circle':'oval');
+			break;
+		case 'arc': // radius and angle
+			dx=graph.points[1].x-graph.points[0].x;
+			dy=graph.points[1].y-graph.points[0].y;
+			var d=Math.atan(dx/dy);
+			console.log('angle to start point: '+d+'rad');
+			dx=graph.points[2].x-graph.points[0].x;
+			dy=graph.points[2].y-graph.points[0].y;
+			d-=Math.atan(dx/dy);
+			console.log('included angle: '+d+'rad');
+			d=Math.abs(d*180/Math.PI);
+			id('first').value=decimal(graph.r); // radius
+			id('between').style.display='none';
+			id('second').style.display='none';
+			id('spin').value=decimal(d);
+			id('info').style.top='0px';
+			hint('arc');
+			break;
+		case 'text': // nowt
+			id('info').style.top='-30px'; // no info
+			break;
+		case 'set': // width, height, spin & set: name
+			var bounds=getBounds(element);
+	        id('first').value=bounds.width;
+	        id('between').innerText='x';
+			id('between').style.display='block';
+			id('second').style.display='block';
+			id('second').value=bounds.height;
+			id('after').innerText='mm';
+			id('spin').value=graph.spin;
+			id('info').style.top='0px';
+			hint('set: '+graph.name);
 	}
+	id('graphLayer').innerText=graph.layer; // layer for (first) selected element
 }
 function snapCheck() {
     var near=nodes.filter(function(node) {

@@ -60,8 +60,8 @@ li {
 }
 .dialog {
 	position: fixed;
-	left: 50px;
-	top: 50px;
+	left: 40px;
+	top: 60px;
 	padding: 5px;
 	border: 5px solid gray;
 	border-radius: 10px;
@@ -112,6 +112,7 @@ li {
 .spin270 {
     transform: rotate(270deg);
 }
+/*
 #monitor {
 	position: fixed;
 	top: 0;
@@ -121,6 +122,7 @@ li {
 	background-color: black;
 	z-index: 1000;
 }
+*/
 #graphic {
 	position: fixed;
 	left: 0;
@@ -153,8 +155,8 @@ li {
 }
 #tools {
     position: fixed;
-    left: 6px;
-    top: 48px;
+    left: 0;
+    top: 32px;
     width: 32px;
     border: none;
     border-radius: 3px;
@@ -164,8 +166,8 @@ li {
 }
 #editTools {
     position: fixed;
-    left: 6px;
-    top: 48px;
+    left: 0;
+    top: 32px;
     width: 32px;
     border: none;
     border-radius: 3px;
@@ -176,24 +178,24 @@ li {
 #info {
     position: fixed;
     top: -30px;
-    left: 48px;
-    right: 0;
-    width: 400px;
+    left: 32px;
     height: 30px;
     font-size: 1em;
     color: black;
     background-color: #ffffffC0;
     z-index: 10;
-    display: block;
+    display: flex;
     overflow: hidden;
 }
-#layerChooser {
-	left: 250px;
+#hint {
+	position: absolute;
+	top: 30px;
+	left: 0;
 }
 #checks {
     position: fixed;
-    left: 6px;
-    top: 4px;
+    left: 0;
+    top: 0;
     width: 32px;
     height: 32px;
     background-image: url('svg/checks.svg');
@@ -201,8 +203,8 @@ li {
 }
 #fill {
     position: fixed;
-    left: 6px;
-    top: 4px;
+    left: 0;
+    top: 0;
     width: 32px;
     height: 32px;
     background: gray;
@@ -212,8 +214,8 @@ li {
 }
 #line {
 	position: fixed;
-    left: 6px;
-    top: 4px;
+    left: 0;
+    top: 0;
     width: 32px;
     height: 32px;
     border-bottom-style: solid;
@@ -224,8 +226,8 @@ li {
 }
 #undoButton {
     position: fixed;
-    left:6px;
-    top: 4px;
+    left: 0;
+    top: 0;
     background: url(svg/undo.svg) center center no-repeat;
     z-index: 12;
     display: none;
@@ -238,7 +240,7 @@ li {
 }
 #layer {
 	position: absolute;
-	top: 2px;
+	top: 0;
 	left: 8px;
 	color: white;
 	font-size: 20pt;
@@ -286,6 +288,9 @@ li {
 }
 #setButton {
     background: url(svg/set.svg) center center no-repeat;
+}
+#layerButton {
+	background: url(svg/layers.svg) center center no-repeat;
 }
 #addButton {
     background: url(svg/add.svg) center center no-repeat;
