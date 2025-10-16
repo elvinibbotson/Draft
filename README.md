@@ -5,6 +5,7 @@ Draft is a 2D drawing app with the following features...
   <li>scale drawing from full-size to 1/100</li>
   <li>'snap' to drawing elements or to grid</li>
   <li>associative dimensions</li>
+  <li>organise on 10 layers</li>
 </ul>
 <h3>Drawing</h3>
 <ul>
