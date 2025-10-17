@@ -39,7 +39,7 @@ button {
     font-size: 1.2em;
     font-weight: bold;
     background-color: #EEE;
-    border: 3px solid gray;
+    border: none;
     border-radius: 5px;
 }
 ul {
@@ -60,15 +60,15 @@ li {
 }
 .dialog {
 	position: fixed;
-	left: 40px;
-	top: 60px;
+	left: 0;
+	top: 0;
 	padding: 5px;
-	border: 5px solid gray;
-	border-radius: 10px;
+	border: none;
 	display: none;
 	color: black;
 	background-color: #EEE;
-	z-index: 10;
+	opacity: 0.9;
+	z-index: 15;
 }
 .clearButton {
 	margin: 2px;
@@ -79,6 +79,13 @@ li {
 	float: right;
 	background-color: white;
 	background-image: url('svg/clear.svg');
+}
+.editButton {
+	position: absolute;
+	width: 24px;
+	height: 24px;
+	right:0;
+	background: url(svg/edit.svg);
 }
 .layerChooser {
 	margin: 0 5px 0 0;
@@ -112,17 +119,6 @@ li {
 .spin270 {
     transform: rotate(270deg);
 }
-/*
-#monitor {
-	position: fixed;
-	top: 0;
-	right: 0;
-	height: 30px;
-	color: white;
-	background-color: black;
-	z-index: 1000;
-}
-*/
 #graphic {
 	position: fixed;
 	left: 0;
@@ -160,7 +156,7 @@ li {
     width: 32px;
     border: none;
     border-radius: 3px;
-    background-color: #ffffffC0;
+    background-color: #EEEEEEC0;
     display: block;
     z-index: 10;
 }
@@ -171,7 +167,7 @@ li {
     width: 32px;
     border: none;
     border-radius: 3px;
-    background-color: #ffffffC0;
+    background-color: #EEEEEEC0;
     display: none;
     z-index: 11;
 }
@@ -182,7 +178,7 @@ li {
     height: 30px;
     font-size: 1em;
     color: black;
-    background-color: #ffffffC0;
+    background-color: #EEEEEEC0;
     z-index: 10;
     display: flex;
     overflow: hidden;
@@ -192,37 +188,24 @@ li {
 	top: 30px;
 	left: 0;
 }
-#checks {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 32px;
-    height: 32px;
-    background-image: url('svg/checks.svg');
-    z-index: 10;
-}
-#fill {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 32px;
-    height: 32px;
-    background: gray;
-    opacity: 0.5;
-    border: none;
-    z-index: 11;
-}
-#line {
+#style {
 	position: fixed;
-    left: 0;
-    top: 0;
-    width: 32px;
-    height: 32px;
-    border-bottom-style: solid;
-    border-width: 0.25mm;
-    border-color: black;
-    background: none;
-    z-index: 12;
+	top:0;
+	left: 0;
+	width: 32px;
+	height: 32px;
+	background-color: #EEE;
+}
+#styleBox {
+	position: absolute;
+	top: 4px;
+	left: 4px;
+	width: 24px;
+	height: 24px;
+	border-style: solid;
+	border-width: 0.25mm;
+	border-color: black;
+	background: none;
 }
 #undoButton {
     position: fixed;
@@ -358,7 +341,7 @@ li {
 }
 #colorMenu {
 	position: fixed;
-    top: 50px;
+    top: 100px;
     left: 100px;
     display: none;
 }

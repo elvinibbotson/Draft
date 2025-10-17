@@ -1291,9 +1291,9 @@ id('confirmJoin').addEventListener('click',function() {
     showDialog('joinDialog',false);
 });
 // STYLES
-id('line').addEventListener('click',function() {
-    showDialog('stylesDialog',true);
-});
+id('style').addEventListener('click',function(){
+	showDialog('stylesDialog',true);
+})
 id('lineType').addEventListener('change',function() {
     var type=event.target.value;
     if(selection.length>0) {
@@ -1308,7 +1308,7 @@ id('lineType').addEventListener('change',function() {
     else { // change default line type
         lineType=type;
     }
-    id('line').style.borderBottomStyle=type;
+    id('styleBox').style.borderStyle=type;
 });
 id('lineStyle').addEventListener('change',function() {
 	var style=event.target.value;
@@ -1337,7 +1337,7 @@ id('penSelect').addEventListener('change',function() {
     else { // change default pen width
         pen=val;
     }
-    id('line').style.borderWidth=(pen/scaleF)+'px';
+    id('styleBox').style.borderWidth=(pen/scaleF)+'px';
 });
 id('textSize').addEventListener('change',function() {
     var val=event.target.value;
@@ -1401,7 +1401,7 @@ id('fillType').addEventListener('change',function() {
     else { // change default fillType type
         fillType=type;
     }
-    id('fill').style.background=(type=='none')?'none':fillColor;
+    id('styleBox').style.background=(type=='none')?'none':fillColor;
 });
 id('fillColor').addEventListener('click',function() {
 	// console.log('show colour menu');
@@ -1419,7 +1419,7 @@ id('opacity').addEventListener('change',function() {
     	draw();
     }
     else opacity=val; // change default opacity
-    id('fill').style.opacity=val;
+    id('styleBox').style.opacity=val;
 });
 id('blur').addEventListener('change',function() {
     var val=event.target.value;
@@ -1493,7 +1493,7 @@ id('colorPicker').addEventListener('click',function(e) {
             if(val=='white') val='black'; // cannot have white lines
             lineColor=val;
         }
-        id('line').style.borderColor=val;
+        id('styleBox').style.borderColor=val;
         id('lineColor').style.backgroundColor=val;
     }
     else { // fill colour
@@ -1513,13 +1513,13 @@ id('colorPicker').addEventListener('click',function(e) {
     		draw();
     	}
         else {fillColor=val;} // change default fill shade
-        id('fill').style.background=val;
+        id('styleBox').style.background=val;
         id('fillColor').style.backgroundColor=val;
     }
 });
 // POINTER ACTIONS
 id('graphic').addEventListener('pointerdown',function(e) { 
-    console.log('pointer down - mode is '+mode+' '+graphs.length+' graphs');
+    console.log('pointer down - mode is '+mode);
     re('wind');
     event.preventDefault();
     if(currentDialog) showDialog(currentDialog,false); // clicking drawing removes any dialogs/menus
@@ -1838,6 +1838,12 @@ id('graphic').addEventListener('pointerdown',function(e) {
 	        cancel();
             break;
         case 'select':
+        	
+        	// TRY THIS AS 'ESCAPE'
+        	console.log('ESCAPE');
+        	cancel();
+        	
+        	
         case 'pointEdit':
             id('selectionBox').setAttribute('x',x0);
             id('selectionBox').setAttribute('y',y0);
@@ -2696,7 +2702,7 @@ id('graphic').addEventListener('pointerup',function(e) {
                 }
                 if(selection.length>0) { // highlight selected elements
                     mode='edit';
-                    showEditTools(true);
+                    showTools('edit');
                     // console.log(selection.length+' elements selected');
                     if(selection.length<2) {
                         // console.log('only one selection');
@@ -2775,7 +2781,7 @@ id('graphic').addEventListener('pointerup',function(e) {
                     	setStyle();
                     	setButtons();
                 	} // else ignore clicks on items already selected
-                	showEditTools(true);
+                	showTools('edit');
             	}
             }
             else { // click on background clears selection
@@ -2990,7 +2996,8 @@ function addGraph(graph) {
 }
 function cancel() { // cancel current operation and return to select mode
     mode='select';
-    id('tools').style.display='block';
+    // show('editTools',false);
+    // id('tools').style.display='block';
     element=index=null;
     selection=[];
     selectedPoints=[];
@@ -3011,7 +3018,7 @@ function cancel() { // cancel current operation and return to select mode
     id('blue').setAttribute('transform','rotate(0)');
     id('selection').setAttribute('transform','translate(0,0)');
     showInfo(false);
-    showEditTools(false);
+    showTools('tools');
     id('textDialog').style.display='none';
     id('layerChooser').style.display='none';
     id('info').style.top='-30px';
@@ -3441,6 +3448,10 @@ function drawDim(n,d) {
     el.appendChild(dimText);
     id('dwg').appendChild(el);
 }
+function editText() {
+	console.log('edit text');
+	showDialog('textDialog',true);
+}
 function getAngle(x0,y0,x1,y1) {
     var dx=x1-x0;
     var dy=y1-y0;
@@ -3630,7 +3641,7 @@ function re(op) {
             memory.push(props);
             // console.log('selection['+i+']: '+props.id);
         }
-        id('line').style.display='none';
+        id('style').style.display='none';
         id('undoButton').style.display='block';
         return;
     }
@@ -3672,7 +3683,7 @@ function re(op) {
         graph.spin=item.spin;
     }
     id('undoButton').style.display='none';
-    id('line').style.display='block';
+    id('style').style.display='block';
 }
 function remove(n,keepNodes) {
     // console.log('remove element '+n);
@@ -3907,8 +3918,9 @@ function select(n,multiple,s) {
 	            else content=t;
 	            id('text').value=content;
             	// setSizes('text',graph.spin,w,h);
-            	// showInfo(true,'TEXT',elementLayers);
-            	showDialog('textDialog',true);
+            	console.log('show info for text');
+            	// showInfo(true,true);
+            	// showDialog('textDialog',true);
             	node=0; // default anchor node
         	    mode='edit';
             	break;
@@ -3940,7 +3952,7 @@ function select(n,multiple,s) {
             	// showInfo(true,'SET',element.layer);
 	            mode='edit';
     	};
-    	showInfo('true');
+    	showInfo(true,(graph.type=='text'));
 	}
 	else { // one of multiple selection - highlight in blue
 		var el=id(n);
@@ -4169,20 +4181,20 @@ function setStyle() {
 	// console.log('setStyle: '+selection.length+' items selected');
 	// default style settings
     id('lineType').value=lineType;
-    id('line').style.borderBottomStyle=lineType;
-    id('line').style.borderWidth=pen+'mm';
+    id('styleBox').style.borderStyle=lineType;
+    id('styleBox').style.borderWidth=pen+'mm';
     id('lineStyle').value=lineStyle;
     id('penSelect').value=pen;
     id('lineColor').style.backgroundColor=lineColor;
-    id('line').style.borderColor=lineColor;
+    id('styleBox').style.borderColor=lineColor;
     // console.log('default text: '+textFont+','+textStyle+','+textSize+','+lineColor);
     id('textFont').value=textFont;
     id('textStyle').value=textStyle;
     id('textSize').value=textSize;
     id('fillType').value=fillType;
     id('fillColor').style.backgroundColor=fillColor;
-    if(fillType=='solid') id('fill').style.backgroundColor=fillColor;
-    id('fill').style.opacity=opacity;
+    if(fillType=='solid') id('styleBox').style.background=fillColor;
+    id('styleBox').style.opacity=opacity;
     id('patternOption').disabled=true;
     id('opacity').value=opacity;
     // set styles to suit selected element?
@@ -4193,7 +4205,7 @@ function setStyle() {
     // console.log('set style for element '+el.id);
     val=getLineType(el);
     id('lineType').value=val;
-    id('line').style.borderBottomStyle=val;
+    id('styleBox').style.borderStyle=val;
     val=el.getAttribute('stroke-linecap');
     // console.log('element lineStyle '+val+'; current lineStyle: '+id('lineStyle').value);
     if(val) {
@@ -4203,7 +4215,7 @@ function setStyle() {
     val=el.getAttribute('stroke-width');
     // console.log('pen: '+val);
     if(val) {
-        id('line').style.borderWidth=(val/scaleF)+'px';
+        id('styleBox').style.borderWidth=(val/scaleF)+'px';
         val=Math.floor(val/10);
         if(val>3) val=3;
         // console.log('select option '+val);
@@ -4212,7 +4224,7 @@ function setStyle() {
     val=el.getAttribute('stroke');
     if(val) {
         id('lineColor').style.backgroundColor=val;
-        id('line').style.borderColor=val;
+        id('styleBox').style.borderColor=val;
     }
     id('patternOption').disabled=false;
     val=el.getAttribute('fillType');
@@ -4222,7 +4234,7 @@ function setStyle() {
     	id('fillColor').style.backgroundColor=id('pattern'+el.id).firstChild.getAttribute('fill');
     }
     else if(val=='none') {
-    	id('fill').style.background='#00000000';
+    	id('styleBox').style.background='#00000000';
     	id('fillType').value='none';
     }
     else {
@@ -4234,13 +4246,13 @@ function setStyle() {
         }
         else {
             id('fillColor').style.backgroundColor=val;
-            id('fill').style.background=val;
+            id('styleBox').style.background=val;
         }
     }
     val=el.getAttribute('fill-opacity');
     if(val) {
     	id('opacity').value=val;
-        id('fill').style.opacity=val;
+        id('styleBox').style.opacity=val;
     }
     if(type(el)=='text') {
         val=el.getAttribute('font-family');
@@ -4297,10 +4309,11 @@ function setTransform(el) {
 }
 function showDialog(dialog,visible) {
     // console.log('show dialog '+dialog);
-    if(currentDialog) id(currentDialog).style.display='none'; // hide any currentDialog
+    if(currentDialog) id(currentDialog).style.display='none'; // hide any currentDialog...
     id('colorPicker').style.display='none';
     id(dialog).style.display=(visible)?'block':'none'; // show/hide dialog
     currentDialog=(visible)?dialog:null; // update currentDialog
+    showTools((visible)?'none':'edit');
 }
 function showColorPicker(visible,x,y) {
     // console.log('show colorPicker');
@@ -4310,17 +4323,14 @@ function showColorPicker(visible,x,y) {
     }
     id('colorPicker').style.display=(visible)?'block':'none';
 }
-function showEditTools(visible) {
-    if(visible) {
-        id('tools').style.display='none';
-        id('editTools').style.display='block';
-    }
-    else {
-        id('editTools').style.display='none';
-        id('tools').style.display='block';
-    }
+function showTools(which) {
+	console.log('show tools: '+which);
+	id('tools').style.display=(which=='tools')?'block':'none';
+	id('editTools').style.display=(which=='edit')?'block':'none';
+	id('info').style.display=(which=='edit')?'flex':'none';
 }
-function showInfo(visible) {
+function showInfo(visible,text) {
+	console.log('showInfo - visible: '+visible+'; text: '+text);
 	if(!visible) {
 		id('info').style.top='-30px'; // hide info
 		return;
@@ -4392,8 +4402,11 @@ function showInfo(visible) {
 			id('info').style.top='0px';
 			hint('arc');
 			break;
-		case 'text': // nowt
-			id('info').style.top='-30px'; // no info
+		case 'text': // start of text and edit button
+			var html="text: <button id='editButton' onclick='editText()'><b>EDIT</b></button>";
+			console.log('html: '+html);
+			hint(html);
+			id('info').style.top='-30px';
 			break;
 		case 'set': // width, height, spin & set: name
 			var bounds=getBounds(element);
