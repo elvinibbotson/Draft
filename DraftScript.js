@@ -371,28 +371,31 @@ id('panButton').addEventListener('click',function() {
 // DRAWING TOOLS
 id('curveButton').addEventListener('click',function() {
     mode='curve';
-    hint('CURVE: drag from start',3);
+    hint('<b>curve</b>: drag from start');
 });
 id('lineButton').addEventListener('click',function() {
     mode='line';
-    showInfo(true,'LINE',layer,'drag from start');
+    hint('<b>line</b>: drag from start');
 });
 id('boxButton').addEventListener('click',function() {
     mode='box';
     rad=0;
-    showInfo(true,'BOX',layer,'drag from corner');
+    hint('<b>box</b>: drag from corner');
+    // showInfo(true,'box',layer,'drag from corner');
 });
 id('ovalButton').addEventListener('click',function() { // OVAL/CIRCLE
     mode='oval';
-    showInfo(true,'OVAL',layer,'drag from centre');
+    hint('<b>oval</b>: drag from centre');
+    // showInfo(true,'oval',layer,'drag from centre');
 })
 id('arcButton').addEventListener('click', function() {
    mode='arc';
-   showInfo(true,'ARC',layer,'drag from start');
+   hint('<b>arc</b>: drag from start');
+   // showInfo(true,'ARC',layer,'drag from start');
 });
 id('textButton').addEventListener('click',function() {
     mode='text';
-    hint('TEXT: tap at start');
+    hint('<b>text</b>: tap at start');
 });
 id('textOKbutton').addEventListener('click',function() {
 	var text=id('text').value;
@@ -423,7 +426,7 @@ id('textOKbutton').addEventListener('click',function() {
 })
 id('dimButton').addEventListener('click',function() {
    mode='dimStart';
-   hint('DIMENSION: tap start node');
+   hint('<b>dimension</b>: tap start node');
 });
 id('confirmDim').addEventListener('click',function() {
     dim.dir=document.querySelector('input[name="dimDir"]:checked').value;
@@ -1790,7 +1793,7 @@ id('graphic').addEventListener('pointerdown',function(e) {
             blueline.points.appendItem(point);
             // refreshNodes(blueline); // set blueline nodes to match new point
             id('guides').style.display='block';
-            hint('LINES: drag to next point; tap twice to end lines or on start to close shape');
+            hint('<b>line</b>: next point; double-tap to end');
             break;
         case 'box':
             id('blueBox').setAttribute('x',x0);
@@ -1838,12 +1841,8 @@ id('graphic').addEventListener('pointerdown',function(e) {
 	        cancel();
             break;
         case 'select':
-        	
-        	// TRY THIS AS 'ESCAPE'
         	console.log('ESCAPE');
         	cancel();
-        	
-        	
         case 'pointEdit':
             id('selectionBox').setAttribute('x',x0);
             id('selectionBox').setAttribute('y',y0);
@@ -3023,6 +3022,7 @@ function cancel() { // cancel current operation and return to select mode
     id('layerChooser').style.display='none';
     id('info').style.top='-30px';
     id('info').style.height='30px';
+    id('editButton').style.display='none';
     setStyle(); // set styles to defaults
 }
 function clearDialog(dialog) {
@@ -3478,12 +3478,13 @@ function getValue(el) {
 	return val;
 }
 function hint(text) {
-    // console.log('HINT '+text);
+    console.log('HINT '+text);
     id('hint').innerHTML=text; //display text for 10 secs
     var t=parseInt(id('info').style.top);
     // console.log('info top: '+t);
     id('info').style.height='60px';
-	setTimeout(function(){id('info').style.height='30px';},10000);
+    id('info').style.display='flex';
+	// setTimeout(function(){id('info').style.height='30px';},30000);
 }
 function id(el) {
 	return document.getElementById(el);
@@ -4152,6 +4153,7 @@ function setPoints(g,spin) {
 }
 function setSizes(mode,spin,p1,p2,p3,p4) {
     // console.log('setSizes - '+mode+','+p1+','+p2+','+p3+','+p4+' spin '+spin);
+    id('editButton').style.display='none';
     if((mode=='box')||(mode=='oval')) {
         id('first').value=Math.round(p1);
         id('between').innerHTML='x';
@@ -4167,7 +4169,7 @@ function setSizes(mode,spin,p1,p2,p3,p4) {
         a+=90; // from North
         if(p3<p1) a+=180;
         id('first').value=d;
-        id('between').innerHTML='mm';
+        id('between').style.display='none';
         id('second').style.display='none';
         id('spin').value=a;
     }
@@ -4176,6 +4178,8 @@ function setSizes(mode,spin,p1,p2,p3,p4) {
         id('second').style.display='none';
         id('spin').value=Math.round(p2); // angle of arc
     }
+    id('info').style.display='flex';
+    id('info').style.top='0';
 }
 function setStyle() {
 	// console.log('setStyle: '+selection.length+' items selected');
@@ -4328,6 +4332,7 @@ function showTools(which) {
 	id('tools').style.display=(which=='tools')?'block':'none';
 	id('editTools').style.display=(which=='edit')?'block':'none';
 	id('info').style.display=(which=='edit')?'flex':'none';
+	id('style').style.display=((which=='tools')||(which=='edit'))?'block':'none';
 }
 function showInfo(visible,text) {
 	console.log('showInfo - visible: '+visible+'; text: '+text);
@@ -4335,6 +4340,7 @@ function showInfo(visible,text) {
 		id('info').style.top='-30px'; // hide info
 		return;
 	}
+	id('editButton').style.display='none'; // default is no edit button
 	switch(graph.type) { // show info for currently selected (single) element
 		case 'curve':
 			id('info').style.top='-30px'; // no info
@@ -4355,8 +4361,8 @@ function showInfo(visible,text) {
 				id('between').innerText='@';
 				id('between').style.display='block';
 				id('second').style.display='none';
+				id('type').innerText='line';
 				id('info').style.top='0px';
-				hint('line');
 			}
 			break;
 		case 'shape':
@@ -4371,8 +4377,8 @@ function showInfo(visible,text) {
 			id('second').value=graph.height;
 			id('after').innerText='mm';
 			id('spin').value=graph.spin;
+			id('type').innerText=(graph.width==graph.height)?'square box':'box';
 			id('info').style.top='0px';
-			hint((graph.width==graph.height)?'square box':'box');
 			break;
 		case 'oval': // ditto & ''circle' or 'oval'
 			id('first').value=graph.rx*2;
@@ -4382,8 +4388,8 @@ function showInfo(visible,text) {
 			id('second').value=graph.ry*2;
 			id('after').innerText='mm';
 			id('spin').value=graph.spin;
+			id('type').innerText=(graph.rx==graph.ry)?'circle':'oval';
 			id('info').style.top='0px';
-			hint((graph.rx==graph.ry)?'circle':'oval');
 			break;
 		case 'arc': // radius and angle
 			dx=graph.points[1].x-graph.points[0].x;
@@ -4399,14 +4405,18 @@ function showInfo(visible,text) {
 			id('between').style.display='none';
 			id('second').style.display='none';
 			id('spin').value=decimal(d);
+			id('type').innerText='arc';
 			id('info').style.top='0px';
-			hint('arc');
 			break;
 		case 'text': // start of text and edit button
-			var html="text: <button id='editButton' onclick='editText()'><b>EDIT</b></button>";
-			console.log('html: '+html);
-			hint(html);
-			id('info').style.top='-30px';
+			id('first').style.display='none';
+			id('between').style.display='none';
+			id('second').style.display='none';
+			id('after').style.display='none';
+			id('spin').value=graph.spin;
+			id('editButton').style.display='block';
+			id('type').innerText='text';
+			id('info').style.top='0px';
 			break;
 		case 'set': // width, height, spin & set: name
 			var bounds=getBounds(element);
@@ -4417,8 +4427,8 @@ function showInfo(visible,text) {
 			id('second').value=bounds.height;
 			id('after').innerText='mm';
 			id('spin').value=graph.spin;
+			id('type').innerText='set: '+graph.name;
 			id('info').style.top='0px';
-			hint('set: '+graph.name);
 	}
 	id('graphLayer').innerText=graph.layer; // layer for (first) selected element
 }

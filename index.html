@@ -147,10 +147,11 @@
         <button id='joinButton' class='iconButton'></button>
     </div>
     <div id='info'>
-    	<span id='type'></span>
+    	<span id='type'></span>&nbsp;
         <input id='first' type='number'/><span id='between'>x</span>
         <input id='second' type='number'/><span id='after'>mm</span>
-        <input id='spin' type='number'/>&deg;<!--span id='elementLayer'><img src='svg/layers.svg' style='border:none'> <span id='layers'></span></span-->
+        <input id='spin' type='number'/>&deg;
+        <button id='editButton' onclick='editText();'>EDIT</button>
         <div id='hint'></div>
     </div>
     <div id='layerChooser' class='dialog'>
@@ -433,71 +434,71 @@
         <p>name: <input type='text' id='setName'/></p>
     </div>
     <div id='colorPicker' class='dialog'>
-    	<svg width='450' height='175'>
-    		<rect id='#000' x='175' y='0' width='25' height='25' stroke='none' fill='#000'/>
-    		<rect id='#555' x='200' y='0' width='25' height='25' stroke='none' fill='#555'/>
-    		<rect id='#AAA' x='225' y='0' width='25' height='25' stroke='none' fill='#AAA'/>
-    		<rect id='#FFF' x='250' y='0' width='25' height='25' stroke='#AAA' fill='#FFF'/>
-    		<rect id='#A55' x='150' y='25' width='25' height='25' stroke='none' fill='#A55'/>
-    		<rect id='#AA5' x='175' y='25' width='25' height='25' stroke='none' fill='#AA5'/>
-    		<rect id='#5A5' x='200' y='25' width='25' height='25' stroke='none' fill='#5A5'/>
-    		<rect id='#5AA' x='225' y='25' width='25' height='25' stroke='none' fill='#5AA'/>
-    		<rect id='#55A' x='250' y='25' width='25' height='25' stroke='none' fill='#55A'/>
-    		<rect id='#A5A' x='275' y='25' width='25' height='25' stroke='none' fill='#A5A'/>
-    		<rect id='#FAA' x='150' y='50' width='25' height='25' stroke='none' fill='#FAA'/>
-    		<rect id='#FFA' x='175' y='50' width='25' height='25' stroke='none' fill='#FFA'/>
-    		<rect id='#AFA' x='200' y='50' width='25' height='25' stroke='none' fill='#AFA'/>
-    		<rect id='#AFF' x='225' y='50' width='25' height='25' stroke='none' fill='#AFF'/>
-    		<rect id='#AAF' x='250' y='50' width='25' height='25' stroke='none' fill='#AAF'/>
-    		<rect id='#FAF' x='275' y='50' width='25' height='25' stroke='none' fill='#FAF'/>
-    		<rect id='#F55' x='75' y='75' width='25' height='25' stroke='none' fill='#F55'/>
-    		<rect id='#FA5' x='100' y='75' width='25' height='25' stroke='none' fill='#FA5'/>
-    		<rect id='#FF5' x='125' y='75' width='25' height='25' stroke='none' fill='#FF5'/>
-    		<rect id='#AF5' x='150' y='75' width='25' height='25' stroke='none' fill='#AF5'/>
-    		<rect id='#5F5' x='175' y='75' width='25' height='25' stroke='none' fill='#5F5'/>
-    		<rect id='#5FA' x='200' y='75' width='25' height='25' stroke='none' fill='#5FA'/>
-    		<rect id='#5FF' x='225' y='75' width='25' height='25' stroke='none' fill='#5FF'/>
-    		<rect id='#5AF' x='250' y='75' width='25' height='25' stroke='none' fill='#5AF'/>
-    		<rect id='#55F' x='275' y='75' width='25' height='25' stroke='none' fill='#55F'/>
-    		<rect id='#A5F' x='300' y='75' width='25' height='25' stroke='none' fill='#A5F'/>
-    		<rect id='#F5F' x='325' y='75' width='25' height='25' stroke='none' fill='#F5F'/>
-    		<rect id='#F5A' x='350' y='75' width='25' height='25' stroke='none' fill='#F5A'/>
-    		<rect id='#F00' x='0' y='100' width='25' height='25' stroke='none' fill='#F00'/>
-    		<rect id='#F50' x='25' y='100' width='25' height='25' stroke='none' fill='#F50'/>
-    		<rect id='#FA0' x='50' y='100' width='25' height='25' stroke='none' fill='#FA0'/>
-    		<rect id='#FF0' x='75' y='100' width='25' height='25' stroke='none' fill='#FF0'/>
-    		<rect id='#AF0' x='100' y='100' width='25' height='25' stroke='none' fill='#AF0'/>
-    		<rect id='#5F0' x='125' y='100' width='25' height='25' stroke='none' fill='#5F0'/>
-    		<rect id='#0F0' x='150' y='100' width='25' height='25' stroke='none' fill='#0F0'/>
-    		<rect id='#0F5' x='175' y='100' width='25' height='25' stroke='none' fill='#0F5'/>
-    		<rect id='#0FA' x='200' y='100' width='25' height='25' stroke='none' fill='#0FA'/>
-    		<rect id='#0FF' x='225' y='100' width='25' height='25' stroke='none' fill='#0FF'/>
-    		<rect id='#0AF' x='250' y='100' width='25' height='25' stroke='none' fill='#0AF'/>
-    		<rect id='#05F' x='275' y='100' width='25' height='25' stroke='none' fill='#05F'/>
-    		<rect id='#00F' x='300' y='100' width='25' height='25' stroke='none' fill='#00F'/>
-    		<rect id='#50F' x='325' y='100' width='25' height='25' stroke='none' fill='#50F'/>
-    		<rect id='#A0F' x='350' y='100' width='25' height='25' stroke='none' fill='#A0F'/>
-    		<rect id='#F0F' x='375' y='100' width='25' height='25' stroke='none' fill='#F0F'/>
-    		<rect id='#F0A' x='400' y='100' width='25' height='25' stroke='none' fill='#F0A'/>
-    		<rect id='#F0F' x='425' y='100' width='25' height='25' stroke='none' fill='#F0F'/>
-    		<rect id='#A00' x='75' y='125' width='25' height='25' stroke='none' fill='#A00'/>
-    		<rect id='#A50' x='100' y='125' width='25' height='25' stroke='none' fill='#A50'/>
-    		<rect id='#AA0' x='125' y='125' width='25' height='25' stroke='none' fill='#AA0'/>
-    		<rect id='#5A0' x='150' y='125' width='25' height='25' stroke='none' fill='#5A0'/>
-    		<rect id='#0A0' x='175' y='125' width='25' height='25' stroke='none' fill='#0A0'/>
-    		<rect id='#0A5' x='200' y='125' width='25' height='25' stroke='none' fill='#0A5'/>
-    		<rect id='#0AA' x='225' y='125' width='25' height='25' stroke='none' fill='#0AA'/>
-    		<rect id='#05A' x='250' y='125' width='25' height='25' stroke='none' fill='#05A'/>
-    		<rect id='#00A' x='275' y='125' width='25' height='25' stroke='none' fill='#00A'/>
-    		<rect id='#50A' x='300' y='125' width='25' height='25' stroke='none' fill='#50A'/>
-    		<rect id='#A0A' x='325' y='125' width='25' height='25' stroke='none' fill='#A0A'/>
-    		<rect id='#A05' x='350' y='125' width='25' height='25' stroke='none' fill='#A05'/>
-    		<rect id='#500' x='150' y='150' width='25' height='25' stroke='none' fill='#500'/>
-    		<rect id='#550' x='175' y='150' width='25' height='25' stroke='none' fill='#550'/>
-    		<rect id='#050' x='200' y='150' width='25' height='25' stroke='none' fill='#050'/>
-    		<rect id='#055' x='225' y='150' width='25' height='25' stroke='none' fill='#055'/>
-    		<rect id='#005' x='250' y='150' width='25' height='25' stroke='none' fill='#005'/>
-    		<rect id='#505' x='275' y='150' width='25' height='25' stroke='none' fill='#505'/>
+    	<svg width='100' height='400'>
+    		<rect id='#000' x='0' y='0' width='25' height='25' stroke='none' fill='#000'/>
+    		<rect id='#500' x='25' y='0' width='25' height='25' stroke='none' fill='#500'/>
+    		<rect id='#A00' x='50' y='0' width='25' height='25' stroke='none' fill='#A00'/>
+    		<rect id='#F00' x='75' y='0' width='25' height='25' stroke='none' fill='#F00'/>
+    		<rect id='#005' x='0' y='25' width='25' height='25' stroke='none' fill='#005'/>
+    		<rect id='#505' x='25' y='25' width='25' height='25' stroke='none' fill='#505'/>
+    		<rect id='#A05' x='50' y='25' width='25' height='25' stroke='none' fill='#A05'/>
+    		<rect id='#F05' x='75' y='25' width='25' height='25' stroke='none' fill='#F05'/>
+    		<rect id='#00A' x='0' y='50' width='25' height='25' stroke='none' fill='#00A'/>
+    		<rect id='#50A' x='25' y='50' width='25' height='25' stroke='none' fill='#50A'/>
+    		<rect id='#A0A' x='50' y='50' width='25' height='25' stroke='none' fill='#A0A'/>
+    		<rect id='#F0A' x='75' y='50' width='25' height='25' stroke='none' fill='#F0A'/>
+    		<rect id='#00F' x='0' y='75' width='25' height='25' stroke='none' fill='#00F'/>
+    		<rect id='#50F' x='25' y='75' width='25' height='25' stroke='none' fill='#50F'/>
+    		<rect id='#A0F' x='50' y='75' width='25' height='25' stroke='none' fill='#A0F'/>
+    		<rect id='#F0F' x='75' y='75' width='25' height='25' stroke='none' fill='#F0F'/>
+    		<rect id='#050' x='0' y='100' width='25' height='25' stroke='none' fill='#050'/>
+    		<rect id='#550' x='25' y='100' width='25' height='25' stroke='none' fill='#550'/>
+    		<rect id='#A50' x='50' y='100' width='25' height='25' stroke='none' fill='#A50'/>
+    		<rect id='#F50' x='75' y='100' width='25' height='25' stroke='none' fill='#F50'/>
+    		<rect id='#055' x='0' y='125' width='25' height='25' stroke='none' fill='#055'/>
+			<rect id='#555' x='25' y='125' width='25' height='25' stroke='none' fill='#555'/>
+			<rect id='#A55' x='50' y='125' width='25' height='25' stroke='none' fill='#A55'/>
+			<rect id='#F55' x='75' y='125' width='25' height='25' stroke='none' fill='#F55'/>
+			<rect id='#05A' x='0' y='150' width='25' height='25' stroke='none' fill='#05A'/>
+			<rect id='#55A' x='25' y='150' width='25' height='25' stroke='none' fill='#55A'/>
+			<rect id='#A5A' x='50' y='150' width='25' height='25' stroke='none' fill='#A5A'/>
+			<rect id='#F5A' x='75' y='150' width='25' height='25' stroke='none' fill='#F5A'/>
+			<rect id='#05F' x='0' y='175' width='25' height='25' stroke='none' fill='#05F'/>
+			<rect id='#55F' x='25' y='175' width='25' height='25' stroke='none' fill='#55F'/>
+			<rect id='#A5F' x='50' y='175' width='25' height='25' stroke='none' fill='#A5F'/>
+			<rect id='#F5F' x='75' y='175' width='25' height='25' stroke='none' fill='#F5F'/>
+			<rect id='#0A0' x='0' y='200' width='25' height='25' stroke='none' fill='#0A0'/>
+			<rect id='#5A0' x='25' y='200' width='25' height='25' stroke='none' fill='#5A0'/>
+			<rect id='#AA0' x='50' y='200' width='25' height='25' stroke='none' fill='#AA0'/>
+			<rect id='#FA0' x='75' y='200' width='25' height='25' stroke='none' fill='#FA0'/>
+			<rect id='#0A5' x='0' y='225' width='25' height='25' stroke='none' fill='#0A5'/>
+			<rect id='#5A5' x='25' y='225' width='25' height='25' stroke='none' fill='#5A5'/>
+			<rect id='#AA5' x='50' y='225' width='25' height='25' stroke='none' fill='#AA5'/>
+			<rect id='#FA5' x='75' y='225' width='25' height='25' stroke='none' fill='#FA5'/>
+			<rect id='#0AA' x='0' y='250' width='25' height='25' stroke='none' fill='#0AA'/>
+			<rect id='#5AA' x='25' y='250' width='25' height='25' stroke='none' fill='#5AA'/>
+			<rect id='#AAA' x='50' y='250' width='25' height='25' stroke='none' fill='#AAA'/>
+			<rect id='#FAA' x='75' y='250' width='25' height='25' stroke='none' fill='#FAA'/>
+			<rect id='#0AF' x='0' y='275' width='25' height='25' stroke='none' fill='#0AF'/>
+			<rect id='#5AF' x='25' y='275' width='25' height='25' stroke='none' fill='#5AF'/>
+			<rect id='#AAF' x='50' y='275' width='25' height='25' stroke='none' fill='#AAF'/>
+			<rect id='#FAF' x='75' y='275' width='25' height='25' stroke='none' fill='#FAF'/>
+			<rect id='#0F0' x='0' y='300' width='25' height='25' stroke='none' fill='#0F0'/>
+			<rect id='#5F0' x='25' y='300' width='25' height='25' stroke='none' fill='#5F0'/>
+			<rect id='#AF0' x='50' y='300' width='25' height='25' stroke='none' fill='#AF0'/>
+			<rect id='#FF0' x='75' y='300' width='25' height='25' stroke='none' fill='#FF0'/>
+			<rect id='#0F5' x='0' y='325' width='25' height='25' stroke='none' fill='#0F5'/>
+			<rect id='#5F5' x='25' y='325' width='25' height='25' stroke='none' fill='#5F5'/>
+			<rect id='#AF5' x='50' y='325' width='25' height='25' stroke='none' fill='#AF5'/>
+			<rect id='#FF5' x='75' y='325' width='25' height='25' stroke='none' fill='#FF5'/>
+			<rect id='#0FA' x='0' y='350' width='25' height='25' stroke='none' fill='#0FA'/>
+			<rect id='#5FA' x='25' y='350' width='25' height='25' stroke='none' fill='#5FA'/>
+			<rect id='#AFA' x='50' y='350' width='25' height='25' stroke='none' fill='#AFA'/>
+			<rect id='#FFA' x='75' y='350' width='25' height='25' stroke='none' fill='#FFA'/>
+			<rect id='#0FF' x='0' y='375' width='25' height='25' stroke='none' fill='#0FF'/>
+			<rect id='#5FF' x='25' y='375' width='25' height='25' stroke='none' fill='#5FF'/>
+			<rect id='#AFF' x='50' y='375' width='25' height='25' stroke='none' fill='#AFF'/>
+			<rect id='#FFF' x='75' y='375' width='25' height='25' stroke='#AAA' fill='#FFF'/>
     	</svg>
     </div>
 	<script src="DraftScript.js" async></script>

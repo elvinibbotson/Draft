@@ -38,7 +38,7 @@ button {
     color: black;
     font-size: 1.2em;
     font-weight: bold;
-    background-color: #EEE;
+    background: none;
     border: none;
     border-radius: 5px;
 }
@@ -66,26 +66,19 @@ li {
 	border: none;
 	display: none;
 	color: black;
-	background-color: #EEE;
-	opacity: 0.9;
+	background-color: #FFFFFFC0;
+    box-shadow: 0 0 4px #88888888;
+	/* opacity: 0.9; */
 	z-index: 15;
 }
 .clearButton {
 	margin: 2px;
 	border: none;
-	border-radius: 0;
 	width: 24px;
 	height: 24px;
 	float: right;
 	background-color: white;
 	background-image: url('svg/clear.svg');
-}
-.editButton {
-	position: absolute;
-	width: 24px;
-	height: 24px;
-	right:0;
-	background: url(svg/edit.svg);
 }
 .layerChooser {
 	margin: 0 5px 0 0;
@@ -156,7 +149,8 @@ li {
     width: 32px;
     border: none;
     border-radius: 3px;
-    background-color: #EEEEEEC0;
+    background-color: #FFFFFFC0;
+    box-shadow: 0 0 4px #88888888;
     display: block;
     z-index: 10;
 }
@@ -167,7 +161,8 @@ li {
     width: 32px;
     border: none;
     border-radius: 3px;
-    background-color: #EEEEEEC0;
+    background-color: #FFFFFFC0;
+    box-shadow: 0 0 4px #88888888;
     display: none;
     z-index: 11;
 }
@@ -176,32 +171,47 @@ li {
     top: -30px;
     left: 32px;
     height: 30px;
+    padding: 4px;
     font-size: 1em;
     color: black;
-    background-color: #EEEEEEC0;
-    z-index: 10;
+    background-color: #FFFFFFC0;
+    box-shadow: 0 0 4px #88888888;
+    z-index: 13;
     display: flex;
     overflow: hidden;
 }
+
 #hint {
 	position: absolute;
-	top: 30px;
-	left: 0;
+	top: 36px;
+	left: 4px;
+	display: inline-block;
+	white-space: nowrap;
+	padding-left: 50%;
+	animation: marquee 10s linear infinite;
 }
+
+@keyframes marquee {
+	0% {transform: translateX(0);}
+	100% {transform: translateX(-100%);}
+}
+
 #style {
 	position: fixed;
 	top:0;
 	left: 0;
 	width: 32px;
 	height: 32px;
-	background-color: #EEE;
+	background-color: #FFFFFFC0;
+    box-shadow: 0 0 4px #88888888;
+    z-index: 12;
 }
 #styleBox {
 	position: absolute;
 	top: 4px;
 	left: 4px;
-	width: 24px;
-	height: 24px;
+	right:4px;
+	bottom: 4px;
 	border-style: solid;
 	border-width: 0.25mm;
 	border-color: black;
