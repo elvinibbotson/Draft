@@ -40,7 +40,6 @@ button {
     font-weight: bold;
     background: none;
     border: none;
-    border-radius: 5px;
 }
 ul {
 	padding: 0;
@@ -212,14 +211,6 @@ li {
 	border-width: 0.25mm;
 	border-color: black;
 	background: none;
-}
-#undoButton {
-    position: fixed;
-    left: 0;
-    top: 0;
-    background: url(svg/undo.svg) center center no-repeat;
-    z-index: 12;
-    display: none;
 }
 #guides {
     display: none;

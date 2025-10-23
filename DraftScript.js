@@ -45,7 +45,6 @@ var dims=[]; // array of links between elements and dimensions
 var layers=[]; // array of layer objects
 var layer=0;
 var thisLayerOnly=false; // limit select & edit to current layer?
-var memory=[]; // holds element states to allow undo
 var blueline=null; // bluePolyline
 var path=''; // bluePath definition
 var set=null; // current set
@@ -471,10 +470,6 @@ id('layerButton').addEventListener('click',function() {
 	id('layerChooser').style.display='block';
 });
 id('addButton').addEventListener('click',function() { // add point after selected point in line/shape
-    /*
-    var t=type(element);
-    if((t!='line')&&(t!='shape')) return;
-    */
     if((graph.type!='curve')&&(graph.type!='line')&&(graph.type!='shape')) return; // can only add points to lines/shapes
     // console.log('add point');
     var points=id('bluePolyline').points;
@@ -576,7 +571,6 @@ id('confirmMove').addEventListener('click',function() {
         moveY=moveD*Math.sin(moveA);
     }
     if(selection.length<1) selection.push(index);
-    re('member'); // remember positions/points/spins/flips for all selected elements
     if(selectedPoints.length>0) { // move all selected points in a line or shape...
         var points=element.points;
         while(selectedPoints.length>0) {
@@ -596,7 +590,6 @@ id('spinButton').addEventListener('click',function() {
 });
 id('confirmSpin').addEventListener('click',function() {
     var spin=getValue('spinAngle'); // Number(id('spinAngle').value);
-    re('member');
     console.log('spin '+selection.length+' elements by '+spin+' degrees around '+anchor.x+','+anchor.y);
     // move-rotate elements around anchor by spin degrees
     for(var i in selection) {
@@ -610,7 +603,7 @@ id('confirmSpin').addEventListener('click',function() {
     		x0=graph.x;
     		y0=graph.y;
     	}
-    	console.log(graph.type+' starts at '+x0+','+y0);
+    	console.log(graph.type+' moves from '+x0+','+y0);
     	dx=x0-anchor.x;
     	dy=y0-anchor.y;
     	var s=spin*Math.PI/180; // radians
@@ -620,7 +613,7 @@ id('confirmSpin').addEventListener('click',function() {
     	y=dy*c+dx*s;
     	x+=anchor.x;
     	y+=anchor.y;
-    	console.log('moves to '+x+','+y);
+    	console.log('...to '+x+','+y);
     	if((graph.type=='oval')||(graph.type=='arc')) {
     		graph.cx=x;
     		graph.cy=y;
@@ -647,7 +640,7 @@ id('flipButton').addEventListener('click',function() {
     showDialog('flipDialog',true);
 });
 id('flipOptions').addEventListener('click',function() {
-    var opt=Math.floor(event.clientX-87); // was -parseInt(id('flipDialog').offsetLeft)+5)/32);
+    var opt=Math.floor(event.clientX-32); // was -parseInt(id('flipDialog').offsetLeft)+5)/32);
     console.log('click on '+opt+': flip '+(opt<1)?'horizontal':'vertical'); // 0: horizontal; 1: vertical
     // var axis={};
     var elNodes=null;
@@ -667,7 +660,6 @@ id('flipOptions').addEventListener('click',function() {
         if((box.y+box.height)>maxY) maxY=box.y+box.height;
     }
     // console.log('overall box '+minX+'-'+maxX+'x'+minY+'-'+maxY);
-    re('member');
     while(selection.length>0) { // for each selected item...
         index=selection.shift();
         graph=graphs[index];
@@ -754,25 +746,14 @@ id('flipOptions').addEventListener('click',function() {
                 	for(var i in graph.points) {
             			dx=graph.points[i].x-anchor.x;
             			graph.points[i].x=anchor.x-dx;
-            			console.log('point '+i+': '+graph.points[i].x+','+graph.points[i].y);
             		}
-                	/*
-                	dx=graph.cx-anchor.x;
-                    graph.cx=anchor.x-dx;
-                    dx=graph.x1-anchor.x;
-                    graph.x1=anchor.x-dx;
-                    dx=graph.x2-anchor.x;
-                    graph.x2=anchor.x-dx;
-                    */
                 }
                 else {
                 	console.log('flip top-bottom');
-                	dy=graph.cy-anchor.y;
-                    graph.cy=anchor.y-dy;
-                    dy=graph.y1-anchor.y;
-                    graph.y1=anchor.y-dy;
-                    dy=graph.y2-anchor.y;
-                    graph.y2=anchor.y-dy;
+                	for(var i in graph.points) {
+            			dy=graph.points[i].y-anchor.y;
+            			graph.points[i].y=anchor.x-dy;
+            		}
                 }
                 graph.sweep=(graph.sweep<1)? 1:0; // CHECK THIS
                 break;
@@ -853,7 +834,6 @@ id('alignOptions').addEventListener('click',function() {
     var midX=(minX+maxX)/2;
     var midY=(minY+maxY)/2;
     // console.log('overall box '+minX+'-'+maxX+'x'+minY+'-'+maxY);
-    re('member');
     for(i=0;i<selection.length;i++) {
     	index=selecton[i];
     	graph=graphs[index];
@@ -911,7 +891,6 @@ id('confirmDouble').addEventListener('click',function() {
     showDialog('doubleDialog',false);
     var g={}; // initiate new element
     g.type=graph.type;
-    // g.type=type(element);
     g.layer=layer;
     switch(g.type) {
         case 'line':
@@ -1178,7 +1157,6 @@ id('confirmDouble').addEventListener('click',function() {
     cancel();
 });
 id('repeatButton').addEventListener('click',function() {
-    if(type(element)=='dim') return; // cannot move dimensions
     showDialog('textDialog',false);
     showDialog('repeatDialog',true);
 });
@@ -1198,12 +1176,13 @@ id('confirmRepeat').addEventListener('click',function() {
     cancel();
 });
 id('filletButton').addEventListener('click',function() {
-    if(type(element!='box')) return; // can only fillet box corners
-    id('filletR').value=parseInt(element.getAttribute('rx'));
+	if(graph.type!='box') return; // can only fillet box corners
+	id('filletR').value=graph.r;
+    // if(type(element!='box')) return; // can only fillet box corners
+    // id('filletR').value=parseInt(element.getAttribute('rx'));
     showDialog('filletDialog',true);
 });
 id('confirmFillet').addEventListener('click',function() {
-    re('member');
     var r=parseInt(id('filletR').value);
     console.log('set corner radius to '+r);
     graph.radius=r;
@@ -1527,7 +1506,6 @@ id('colorPicker').addEventListener('click',function(e) {
 // POINTER ACTIONS
 id('graphic').addEventListener('pointerdown',function(e) { 
     console.log('pointer down - mode is '+mode);
-    re('wind');
     event.preventDefault();
     if(currentDialog) showDialog(currentDialog,false); // clicking drawing removes any dialogs/menus
     id('colorPicker').style.display='none';
@@ -1552,7 +1530,6 @@ id('graphic').addEventListener('pointerdown',function(e) {
         // console.log('move group selection');
         mode='move';
         hint('drag to <b>move</b> selection');
-        re('member');
     }
     else if(holder=='handles') { // handle
         // console.log('HANDLE '+val);
@@ -1565,7 +1542,6 @@ id('graphic').addEventListener('pointerdown',function(e) {
         id('blueBox').setAttribute('height',bounds.height);
         console.log('box at '+bounds.x+','+bounds.y);
         id('guides').style.display='block';
-        re('member');
         if(val.startsWith('mover')) {
         	graph=graphs[index];
             node=parseInt(val.substr(5));
@@ -1724,7 +1700,7 @@ id('graphic').addEventListener('pointerdown',function(e) {
             	case 'curve':
                 case 'line':
                 case 'shape':
-                	// console.log('drag sizer for '+type(element))
+                	// console.log('drag sizer for '+graph.type))
                     mode='movePoint'+node;
                     var points='';
                     for(var i in graph.points) {
@@ -1742,10 +1718,10 @@ id('graphic').addEventListener('pointerdown',function(e) {
                     mode='ovalSize';
                     break;
                 case 'arc':
-                	graph={};
                     mode='arcSize';
                     x0=graph.cx;
                     y0=graph.cy;
+                    console.log('arc centre: '+graph.cx+','+graph.cy+'; radius: '+graph.r);
                     id('blueBox').setAttribute('width',0);
                     id('blueBox').setAttribute('height',0);
                     id('blueOval').setAttribute('cx',x0); // circle for radius
@@ -2250,8 +2226,10 @@ id('graphic').addEventListener('pointerup',function(e) {
             }
             dx=x-x0;
             dy=y-y0;
-            r=Math.sqrt((dx*dx)+(dy*dy));
-            // console.log('pointer up - radius: '+r);
+            graph=graphs[index];
+            var r=graph.r;
+            r+=Math.sqrt((dx*dx)+(dy*dy));
+            console.log('pointer up - radius: '+r);
             graph=graphs[index];
             if(Math.abs(r-graph.r)<snapD) { // radius unchanged - set angle
             	console.log('radius unchanged');
@@ -2266,7 +2244,14 @@ id('graphic').addEventListener('pointerup',function(e) {
                 }
             }
             else { // radius changed - adjust arc start...
-            console.log('radius changed');
+            	console.log('radius changed');
+            	var theta=Math.atan((graph.points[1].y-graph.cy)/(graph.points[1].x-graph.cx)); // angle to start point
+            	graph.points[1].x=r*Math.cos(theta);
+            	graph.points[1].y=r*Math.sin(theta);
+            	theta=Math.atan((graph.points[2].y-graph.cy)/(graph.points[2].x-graph.cx)); // angle to end point
+            	graph.points[2].x=r*Math.cos(theta);
+            	graph.points[2].y=r*Math.sin(theta);
+            	/*
                 dx=graph.x1-graph.cx;
                 dy=graph.y1-graph.cy;
                 dx*=r/graph.r;
@@ -2279,6 +2264,7 @@ id('graphic').addEventListener('pointerup',function(e) {
                 dy*=r/graph.r;
                 graph.x2=graph.cx+dx;
                 graph.y2=graph.cy+dy; // ...and radius 
+                */
                 graph.r=r;
             }
             draw();
@@ -2683,7 +2669,6 @@ id('graphic').addEventListener('pointerup',function(e) {
                 for(var i=0;i<items.length;i++) { // collect elements entirely within selectionBox
                     // console.log('item '+i+': '+items[i].id);
                     var el=id(items[i].id);
-                    if((type(el)=='dim')||!el) continue; // don't include dimensions or 'null' nodes
                     var box=getBounds(items[i]);
                     // console.log('bounds for '+items[i].id+": "+box.x+','+box.y);
                     // console.log('item '+items[i].id+' box: '+box.width+'x'+box.height+' at '+box.x+','+box.y);
@@ -2794,7 +2779,6 @@ id('graphic').addEventListener('pointerup',function(e) {
 id('first').addEventListener('change',function() { // CHANGE OTHERS TO MATCH BOX
 	console.log('first dimension changed');
     var val=parseInt(id('first').value);
-    re('member');
     console.log('graph '+index);
     switch(graph.type) {
         case 'line':
@@ -2873,9 +2857,10 @@ id('first').addEventListener('change',function() { // CHANGE OTHERS TO MATCH BOX
 });
 id('second').addEventListener('change',function() { // CHANGE OTHERS TO MATCH BOX
     var val=parseInt(id('second').value);
-    re('member');
     element=id(index);
-    switch(type(element)) {
+    graph=graphs[index];
+    // switch(type(element))
+    switch(graph.type) {
         case 'line':
         case 'shape':
             if(index=='bluePolyline') { // adjust angle of latest line segment
@@ -2974,7 +2959,6 @@ id('second').addEventListener('change',function() { // CHANGE OTHERS TO MATCH BO
     select(index);
 });
 id('spin').addEventListener('change',function() {
-    re('member');
     var val=parseInt(id('spin').value);
     console.log('set spin to '+val+' degrees');
     element=id(index);
@@ -2984,9 +2968,6 @@ id('spin').addEventListener('change',function() {
     graphs[index]=graph;
     id('bluePolygon').setAttribute('points','0,0');
     draw();
-});
-id('undoButton').addEventListener('click',function() {
-    re('call'); // recall & reinstate previous positions/points/sizes/spins/flips
 });
 // FUNCTIONS
 function addGraph(graph) {
@@ -3054,7 +3035,7 @@ function clearDialog(dialog) {
 }
 function copy(x,y) {
 	var g={};
-	g.type=graph.type; // type(el);
+	g.type=graph.type;
 	console.log('copy '+g.type+' at '+x+','+y);
 	g.layer=graph.layer;
 	if(g.type!='set') { // sets don't have style
@@ -3269,7 +3250,7 @@ function draw() {
             nodes.push({'x':g.points[3].x,'y':g.points[3].y,'n':(n*10+6)}); // bottom/left - node 6
             nodes.push({'x':(g.points[2].x+g.points[3].x)/2,'y':(g.points[2].y+g.points[3].y)/2,'n':(n*10+7)}); // bottom/centre - node 7
             nodes.push({'x':g.points[2].x,'y':g.points[2].y,'n':(n*10+8)}); // bottom/right - node 8
-            if((g.spin!=0)||(g.flip!=0)) setTransform(el);
+            if(g.spin!=0) el.setAttribute('transform','rotate('+g.spin+','+g.x+','+g.y+')');
             for(var d in g.dims) drawDim(n,g.dims[d]);
             break;
         case 'oval':
@@ -3312,7 +3293,7 @@ function draw() {
             for(var p=0;p<g.points.length;p++) {
             	nodes.push({'x':g.points[p].x,'y':g.points[p].y,'n':n*10+p});
             }
-            if(g.spin!=0) setTransform(el);
+            if(g.spin!=0) el.setAttribute('transform','rotate('+g.spin+','+g.cx+','+g.cy+')');
             break;
         case 'text':
             var el=document.createElementNS(ns,'text');
@@ -3332,7 +3313,15 @@ function draw() {
             var t=document.createTextNode(g.text);
 			el.appendChild(t).then
 				el.innerHTML=textFormat(g.text,g.x);
-            if((g.spin!=0)||(g.flip!=0)) setTransform(el);
+			t=''; // reuse t foor transformations
+            if(g.spin!=0) t='rotate('+g.spin+','+g.x+','+g.y+')';
+            if(g.flip!=0) {
+            	var hor=g.flip&1;
+        		var ver=g.flip&2;
+        		t+='translate('+(hor*g.x*2)+','+(ver*g.y)+') ';
+        		t+='scale('+((hor>0)? -1:1)+','+((ver>0)? -1:1)+')';
+            }
+            if(t.length>0) el.setAttribute('transform',t);
             break;
         case 'set':
         	console.log('add set');
@@ -3344,7 +3333,15 @@ function draw() {
             el.setAttribute('spin',g.spin);
             el.setAttribute('flip',g.flip);
             nodes.push({'x':g.x,'y':g.y,'n':(n*10)});
-            if((g.spin!=0)||(g.flip!=0)) setTransform(el);
+            var t='';
+            if(g.spin!=0) t='rotate('+g.spin+','+g.x+','+g.y+')';
+            if(g.flip!=0) {
+            	var hor=g.flip&1;
+        		var ver=g.flip&2;
+        		t+='translate('+(hor*g.x*2)+','+(ver*g.y)+') ';
+        		t+='scale('+((hor>0)? -1:1)+','+((ver>0)? -1:1)+')';
+            }
+            if(t.length>0) el.setAttribute('transform',t);
     	}
     	el.setAttribute('layer',g.layer); // layers element appears on
     	if((g.type!='text')&&(g.type!='dim')&&(g.type!='set')) { // set style
@@ -3603,97 +3600,6 @@ function move(dx,dy) { // CHANGE OTHER TO MATCH BOX, ETC
 	}
     draw();
     cancel();
-}
-function re(op) {
-	// op is 're-member' (memorise and show undo), 're-call' (reinstate and hide undo) or 're-wind' (hide undo)
-    // console.log('re'+op+'; '+selection.length+' selected items; '+memory.length+' memory items');
-    if(op=='member') {
-        memory=[];
-        // console.log('REMEMBER');
-        for(var i=0;i<selection.length;i++) {
-            index=selection[i];
-            // console.log('selected item '+i+': '+elID);
-            graph=graphs[index]; // *** NEW
-            // var el=id(index);
-            var props={};
-            props.id=index; // all elements have an index
-            // console.log('element '+elID+' - '+type(el));
-            switch(graph.type) {
-                case 'line':
-                case 'shape':
-                	props.points=graph.points;
-                    break;
-                case 'box':
-                    // console.log('remember box '+elID);
-                    props.x=graph.x;
-                    props.y=graph.y;
-                    props.width=graph.width;
-                    props.height=graph.height;
-                    props.rx=graph.rx;
-                    break;
-                case 'oval':
-                	props.cx=graph.cx;
-                	props.cy=graph.cy;
-                	props.rx=graph.rx;
-                	props.ry=graph.ry;
-                    break;
-                case 'arc':
-                	props.cx=graph.cx;
-                	props.cy=graph.cy;
-                	props.r=graph.r;
-                case 'text':
-                case 'set':
-                	props.x=graph.x;
-                	props.y=graph.y;
-                	props.flip=graph.flip;
-            }
-            props.spin=graph.spin;
-            memory.push(props);
-            // console.log('selection['+i+']: '+props.id);
-        }
-        id('style').style.display='none';
-        id('undoButton').style.display='block';
-        return;
-    }
-    else if(op=='call') for(var i=0;i<memory.length;i++) { // reinstate from memory
-        var item=memory[i];
-        // console.log('reinstate item '+item.id);
-        index=item.id; // *** NEW
-        graph=graphs[index];
-        element=id(index);
-        switch(graph.type) {
-            case 'line':
-            case 'shape':
-                // console.log(item.points.length+' points - from '+item.points[0].x+','+item.points[0].y);
-                graph.points=item.points;
-                break;
-            case 'box':
-                // console.log('reinstate box element');
-                graph.x=item.x;
-                graph.y=item.y;
-                graph.width=item.width;
-                graph.height=item.height;
-                graph.rx=item.rx;
-                break;
-            case 'text':
-            case 'set':
-            	graph.x=item.x;
-            	graph.y=item.y;
-            	graph.flip=item.flip;
-                break;
-            case 'oval':
-            	graph.cx=item.cx;
-            	graph.cy=item.cy;
-            	graph.rx=item.rx;
-            	graph.ry=item.ry;
-                break;
-            case 'arc':
-            	element.setAttribute('d',item.d);
-        }
-        graph.spin=item.spin;
-    }
-    id('undoButton').style.display='none';
-    id('style').style.display='block';
 }
 function remove(n,keepNodes) {
     // console.log('remove element '+n);
@@ -3974,7 +3880,7 @@ function setButtons() {
     }
     else { // single element selected
     	active.push(1,7,9,19,21,23); // layer, forward, back,copy,double,repeat only for single selection
-        var t=type(id(selection[0]));
+        var t=graphs[selection[0]].type; // type(id(selection[0]));
         if((t=='line')||(t=='shape')) active.push(3); // can add points to selected line/shape
         else if(t=='box') active.push(25); // fillet tool active for a selected box
         if(selectedPoints.length<1) { // unless editing line/shape active tools include...
@@ -4128,20 +4034,20 @@ function setPoints(g,spin) {
 			s=spin*Math.PI/180; // radians
 			c=Math.cos(s);
 			s=Math.sin(s);
+			points=[];
+			points.push({'x':x0,'y':y0}); // centre
 			console.log('start point moves from '+g.points[1].x+','+g.points[1].y+'...');
 			dx=g.points[1].x-x0; // start point
 			dy=g.points[1].y-y0;
 			x=dx*c-dy*s;
 			y=dy*c+dx*s;
-			g.x1=x0+x;
-			g.y1=y0+y;
+			points.push({'x':x0+x,'y':y0+y});
 			console.log('...to '+g.points[1].x+','+g.points[1].y);
 			dx=g.points[2].x-x0; // end point
 			dy=g.points[2].y-y0;
 			x=dx*c-dy*s;
 			y=dy*c+dx*s;
-			g.points[2].x=x0+x;
-			g.points[2].y=y0+y;
+			points.push({'x':x0+x,'y':y0+y});
 			break;
 		case 'text':
 		case 'set':
@@ -4202,10 +4108,6 @@ function setStyle() {
     // set styles to suit selected element?
     var el=(selection.length==1)?id(selection[0]):null;
     if(!el) return; // no selection or multiple selection
-    /*
-    var t=type(el);
-    if((t=='set')||(t=='dim')) return;
-    */
     if(graph.type=='set') return;
     // console.log('set style for element '+el.id);
     val=getLineType(el);
@@ -4278,41 +4180,6 @@ function setStyle() {
         id('patternOption').disabled=true;
         id('patternOption').disabled=true;
     } 
-}
-function setTransform(el) {
-    // console.log('set transform for element '+el.id);
-    var spin=parseInt(el.getAttribute('spin'));
-    var flip=el.getAttribute('flip');
-    switch(type(el)) {
-        case 'line':
-        case 'shape':
-            x=parseInt(el.points[0].x);
-            y=parseInt(el.points[0].y);
-            break;
-        case 'box':
-            x=parseInt(el.getAttribute('x')); // +parseInt(el.getAttribute('width'))/2;
-            y=parseInt(el.getAttribute('y')); // +parseInt(el.getAttribute('height'))/2;
-            break;
-        case 'text':
-        case 'set':
-            x=parseInt(el.getAttribute('x'));
-            y=parseInt(el.getAttribute('y'));
-            break;
-        case 'oval':
-        case 'arc':
-            x=parseInt(el.getAttribute('cx'));
-            y=parseInt(el.getAttribute('cy'));
-    }
-    // console.log('x,y: '+x+','+y);
-    var t='';
-    if(flip) {
-        var hor=flip&1;
-        var ver=flip&2;
-        t='translate('+(hor*x*2)+','+(ver*y)+') ';
-        t+='scale('+((hor>0)? -1:1)+','+((ver>0)? -1:1)+')';
-    }
-    if(spin!=0) t+='rotate('+spin+','+x+','+y+')';
-    el.setAttribute('transform',t);
 }
 function showDialog(dialog,visible) {
     // console.log('show dialog '+dialog);
@@ -4450,7 +4317,7 @@ function snapCheck() {
                 snap={'x':near[i].x,'y':near[i].y,'n':near[i].n};
             }
         }
-        // console.log('SNAP x: '+snap.x+' y: '+snap.y+' n: '+snap.n);
+        console.log('SNAP x: '+snap.x+' y: '+snap.y+' n: '+snap.n);
         if(snap.n!=datum2.n) {
             datum1.x=datum2.x;
             datum1.y=datum2.y;
@@ -4479,19 +4346,6 @@ function snapCheck() {
         return false;
     }
 }
-/*
-function swopGraphs(g1,g2) {
-    // console.log('swop graphs '+g1+' and '+g2);
-    g1=Number(g1);
-    g2=Number(g2);
-    // var graph1={};
-    // var graph2={};
-    // DO THIS DIRECTLY IN graphs[]
-    var temp=graphs[g1];
-    graphs[g1]=graphs[g2];
-    graphs[g2]=temp;
-}
-*/
 function textFormat(text,across) {
 	var chars=text.length;
 	// console.log('text: '+text+' - '+chars+' characters');
@@ -4514,41 +4368,6 @@ function textFormat(text,across) {
 	}
 	// console.log('text content: '+content);
 	return content;
-}
-function type(el) {
-	if(el instanceof(SVGPathElement)) {
-		var d=el.getAttribute('d');
-		// console.log('d:'+d);
-		if(d.indexOf('Q')>0) return 'curve';
-		else return 'arc';
-	}
-    else if(el instanceof SVGPolylineElement) {
-        return 'line';
-    }
-    else if(el instanceof SVGPolygonElement) {
-        return'shape';
-    }
-    else if(el instanceof SVGRectElement) {
-        return 'box';
-    }
-    else if(el instanceof SVGEllipseElement) {
-        return 'oval';
-    }
-    else if(el instanceof SVGTextElement) {
-        return 'text';
-    }
-    else if(el instanceof SVGGElement) {
-        return 'dim';
-    }
-    else if(el instanceof SVGSVGElement) {
-        return 'set';
-    }
-    else if(el instanceof SVGCircleElement) {
-        return 'anchor';
-    }
-    else if(el instanceof SVGUseElement) {
-        return 'set';
-    }
 }
 function updateGraph(n,parameters) {
 	console.log('update graph '+n+'... '+parameters);
