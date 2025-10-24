@@ -12,7 +12,7 @@ var size=0; // drawing size default to A4
 var aspect='landscape'; // default orientation
 var scale=1; // default scale is 1:1
 var scaleF=3.78; // default scale factor for mm (1:1 scale)
-var gridSize=300; // default grid size is 300mm
+var gridSize=5; // default grid size is 5mm (at default scale of 1:1)
 var gridSnap=false; // grid snap off by default
 var handleR=2; // 2mm handle radius at 1:1 scale - increase for smaller scales (eg. 100 at 1:50)
 var boxR=5; // radius for corners of round-cornered boxes
@@ -109,13 +109,13 @@ name=window.localStorage.getItem('name');
 size=window.localStorage.getItem('size');
 aspect=window.localStorage.getItem('aspect');
 scale=window.localStorage.getItem('scale');
-gridSize=window.localStorage.getItem('gridSize');
+// gridSize=window.localStorage.getItem('gridSize');
 gridSnap=window.localStorage.getItem('gridSnap');
 layerData=window.localStorage.getItem('layers');
 if(name===null) name='unnamed';
 if(size===null) size=0;
 if(scale===null) scale=1;
-if(!gridSize) gridSize=300;
+if(!gridSize) gridSize=(scale<20)?(scale*5):100; // default grid size depends on scale
 if(!gridSnap) gridSnap=0;
 // console.log('grid checked: '+id('gridSnap').checked);
 // console.log('name: '+name+'; aspect: '+aspect+'; scale: '+scale+'; grid: '+gridSize+' '+gridSnap);
@@ -196,7 +196,7 @@ id('gridSnap').addEventListener('change',function() {
 id('gridSize').addEventListener('change',function() {
     gridSize=parseInt(id('gridSize').value);
     window.localStorage.setItem('gridSize',gridSize);
-    // console.log('grid is '+gridSize);
+    console.log('grid is '+gridSize);
 });
 id('new').addEventListener('click',function() {
     // console.log("show newDrawingDialog - screen size: "+scr.w+'x'+scr.h);
@@ -374,23 +374,28 @@ id('panButton').addEventListener('click',function() {
 // DRAWING TOOLS
 id('curveButton').addEventListener('click',function() {
     mode='curve';
+    id('type').innerText='curve';
     hint('<b>curve</b>: drag from start');
 });
 id('lineButton').addEventListener('click',function() {
     mode='line';
+    id('type').innerText='line';
     hint('<b>line</b>: drag from start');
 });
 id('boxButton').addEventListener('click',function() {
     mode='box';
+    id('type').innerText='box';
     rad=0;
     hint('<b>box</b>: drag from corner');
 });
 id('ovalButton').addEventListener('click',function() { // OVAL/CIRCLE
     mode='oval';
+    id('type').innerText='oval';
     hint('<b>oval</b>: drag from centre');
 })
 id('arcButton').addEventListener('click', function() {
    mode='arc';
+   id('type').innerText='arc';
    hint('<b>arc</b>: drag from start');
 });
 id('textButton').addEventListener('click',function() {
@@ -1740,11 +1745,11 @@ id('graphic').addEventListener('pointerdown',function(e) {
         }
     }
     snap=snapCheck(); //  JUST DO if(snapCheck())?
-    // console.log('SNAP: '+snap);
-    if(snap) { // snap start/centre to snap target
+    console.log('SNAP: '+snap+' x/y: '+x+','+y);
+    // if(snap) { // snap start/centre to snap target
         x0=x;
         y0=y;
-    }
+    // }
     // console.log('mode: '+mode);
     switch(mode) {
     	case 'curve':
@@ -1833,7 +1838,7 @@ id('graphic').addEventListener('pointerdown',function(e) {
     console.log('exit pointer down code - graphs: '+graphs.length);
 });
 function drag(event) {
-	console.log('dragging - mode: '+mode+' - '+graphs.length+' graphs');
+	console.log('dragging - mode: '+mode);
     event.preventDefault();
     id('datumSet').style.display='block'; // show datum lines while dragging
     scr.x=Math.round(event.clientX);
@@ -2108,7 +2113,7 @@ id('graphic').addEventListener('pointerup',function(e) {
     id('graphic').removeEventListener('pointermove',drag);
     id('bluePath').setAttribute('d','');
     snap=snapCheck();
-    console.log('snap - x:'+snap.x+' y:'+snap.y+' n:'+snap.n);
+    if(snap) console.log('snap - x:'+snap.x+' y:'+snap.y+' n:'+snap.n);
     if(mode.startsWith('movePoint')) { // move polyline/polygon point
         id('handles').innerHTML='';
         graph=graphs[index];
@@ -2841,6 +2846,7 @@ id('first').addEventListener('change',function() { // CHANGE OTHERS TO MATCH BOX
             }
             graph.x=x;
             graph.width=val;
+            graph.points=setPoints(graph);
             break;
         case 'oval':
         	graph.rx=val/2;
@@ -2938,6 +2944,7 @@ id('second').addEventListener('change',function() { // CHANGE OTHERS TO MATCH BO
             }
             graph.y=y;
             graph.height=val;
+            graph.points=setPoints(graph);
             break;
         case 'oval':
         	graph.ry=val/2;
@@ -3142,6 +3149,7 @@ function decimal(n) {
 	return (n/10);
 }
 function draw() {
+	cancel();
 	var el;
 	id('dwg').innerHTML='';
 	nodes=[];
@@ -4308,7 +4316,7 @@ function snapCheck() {
     var near=nodes.filter(function(node) {
         return (Math.abs(node.x-x)<snapD)&&(Math.abs(node.y-y)<snapD);
     });
-    if(near.length) { // snap to nearest node...
+    if(near.length) { // near a node
         var min=snapD*2;
         for(var i=0;i<near.length;i++) {
             var d=Math.abs(near[i].x-x)+Math.abs(near[i].y-y);
@@ -4317,7 +4325,7 @@ function snapCheck() {
                 snap={'x':near[i].x,'y':near[i].y,'n':near[i].n};
             }
         }
-        console.log('SNAP x: '+snap.x+' y: '+snap.y+' n: '+snap.n);
+        console.log('SNAP TO NODE x: '+snap.x+' y: '+snap.y+' n: '+snap.n);
         if(snap.n!=datum2.n) {
             datum1.x=datum2.x;
             datum1.y=datum2.y;
@@ -4337,12 +4345,31 @@ function snapCheck() {
         return snap;
     }
     else { // if no nearby nodes...
-        if(Math.abs(x-datum.x1)<snapD) x=datum.x1;
-        else if(Math.abs(x-datum.x2)<snapD) x=datum.x2;
-        else if(gridSnap>0) x=Math.round(x/gridSize)*gridSize;
-        if(Math.abs(y-datum.y1)<snapD) y=datum.y1;
-        else if(Math.abs(y-datum.y2)<snapD) y=datum.y2;
-        else if(gridSnap>0) y=Math.round(y/gridSize)*gridSize;
+        if(Math.abs(x-datum.x1)<snapD) { // near datum X?
+        	x=datum.x1;
+        	console.log('SNAP X TO DATUM');
+        }
+        else if(Math.abs(x-datum.x2)<snapD) {
+        	x=datum.x2;
+        	console.log('SNAP X TO DATUM');
+        }
+        else if(gridSnap>0) {
+        	x=Math.round(x/gridSize)*gridSize;
+        	console.log('SNAP TO GRID');
+        }
+        if(Math.abs(y-datum.y1)<snapD) {
+        	y=datum.y1;
+        	console.log('SNAP Y TO DATUM');
+        }
+        else if(Math.abs(y-datum.y2)<snapD) {
+        	y=datum.y2;
+        	console.log('SNAP Y TO DATUM');
+        }
+        else if(gridSnap>0) {
+        	y=Math.round(y/gridSize)*gridSize;
+        	console.log('SNAP TO GRID');
+        }
+        console.log('snap to '+x+','+y);
         return false;
     }
 }
