@@ -57,6 +57,13 @@ li {
 .iconButton:disabled {
     opacity: 0.5;
 }
+.menuButton {
+	width: 32px;
+	height: 12px;
+	border: none;
+	color: white;
+	background: url(svg/more.svg) center center no-repeat;
+}
 .info {
 	margin-top: 8px;
 }

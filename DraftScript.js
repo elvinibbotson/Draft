@@ -4205,6 +4205,10 @@ function showColorPicker(visible,x,y) {
     }
     id('colorPicker').style.display=(visible)?'block':'none';
 }
+function showMore() {
+	console.log('show more options dialog');
+	cancel();
+}
 function showTools(which) {
 	console.log('show tools: '+which);
 	id('tools').style.display=(which=='tools')?'block':'none';
