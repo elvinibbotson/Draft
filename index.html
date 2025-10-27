@@ -144,15 +144,15 @@
         <button id='copyButton' class='iconButton'></button>
         <button id='doubleButton' class='iconButton'></button>
         <button id='repeatButton' class='iconButton'></button>
-        <button id='filletButton' class='iconButton'></button>
         <button id='joinButton' class='iconButton'></button>
         <button class='menuButton' onclick='showMore()'></button>
     </div>
     <div id='info'>
     	<span id='type' class='info'></span>&nbsp;
-        <input id='first' type='number'/><span id='between' class='info'>x</span>
-        <input id='second' type='number'/><span id='after' class='info'>mm</span>
-        <input id='spin' type='number'/><span class='info'>&deg;</span>
+        <input id='i1' type='number'/><span id='i2' class='info'>x</span>
+        <input id='i3' type='number'/><span id='i4' class='info'> r</span>
+        <input id='i5' type='number'/><span id='i6' class='info'>mm @</span>
+        <input id='i7' type='number'/><span id='i8' class='info'>&deg;</span>
         <button id='editButton' onclick='editText();'>EDIT</button>
         <div id='hint'></div>
     </div>
@@ -288,19 +288,18 @@
         </p>
     </div>
     <div id='saveDialog' class='dialog'>
-        <button id='confirmSave'>SAVE</button>
-        <p>
-            <input type='radio' name='saveMethod' id='data' checked>
-            <label for='data'>drawing (json)</label><br>
-            <input type='radio' name='saveMethod' id='print'>
-            <label for='print'>drawing as SVG (to print)</label><br>
-            <input type='radio' name='saveMethod' id='sets'>
-            <label for='sets'>one or more sets...</label>
-            <ul id='setChooser'></ul>
+        <button id='confirmSave'>SAVE</button><br>
+        <input type='radio' name='saveMethod' id='data' checked>
+        <label for='data'>drawing (json)</label><br>
+        <input type='radio' name='saveMethod' id='print'>
+        <label for='print'>drawing as SVG (to print)</label><br>
+        <input type='radio' name='saveMethod' id='sets'>
+        <label for='sets'>one or more sets...</label>
+        <ul id='setChooser'></ul>
         </p>
     </div>
     <div id='dimDialog' class='dialog'>
-        <button id='confirmDim'>DIMENSION</button>
+        <button id='confirmDim'>DIMENSION</button><br>
         <input type='radio' name='dimDir' id='horizontal' value='h'>
         <label for='horizontal'>horizontal</label><br>
         <input type='radio' name='dimDir' id='vertical' value='v'>
@@ -314,11 +313,10 @@
             <option onclick='prompt("select a set");' value=null>select a set</option>
         </select></p>
     </div>
-    <div id='imageDialog' class='dialog'>
-    	<b>IMAGES</b>
-        <p><select id='imageList'>
-            <option onclick='prompt("select a set");' value=null>select an image</option>
-        </select></p>
+    <div id='moreDialog' class='dialog'>
+    	<b>more...</b>
+    	<p>If something went wrong you can <button onclick='load()'>RESET</button></p>
+    	<p>If you're unsure how to use <b>Draft</b> there is <button onclick='showHelp()'>HELP</button></p>
     </div>
     <div id='stylesDialog' class='dialog'>
         <p>line 

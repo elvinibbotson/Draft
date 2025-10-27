@@ -77,7 +77,6 @@ li {
 	color: black;
 	background-color: #FFFFFFEE;
     box-shadow: 0 0 4px #88888888;
-	/* opacity: 0.9; */
 	z-index: 15;
 }
 .clearButton {
@@ -319,21 +318,8 @@ li {
 #repeatButton {
     background: url(svg/repeat.svg) center center no-repeat;
 }
-#filletButton {
-    background: url(svg/roundbox.svg) center center no-repeat;
-}
-#anchorButton {
-    background: url(svg/anchor.svg) center center no-repeat;
-}
 #joinButton {
     background: url(svg/set.svg) center center no-repeat;
-}
-#returnButton {
-    background: url(svg/up.svg) center center no-repeat;
-    transform: rotate(270deg);
-}
-#spin {
-    width: 2em;
 }
 #lineColor {
     width: 24px;
