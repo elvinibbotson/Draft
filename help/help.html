@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Draft Help</title>
+	<!--link rel="stylesheet" type="text/css" href="help.css"-->
+	<style>
+		html {
+			font-family: monospace;
+		}
+		a {
+			text-decoration: none;
+			font-weight: bold;
+			color: #000088;
+		}
+	</style>
+</head>
+<body>
+<h1>Draft</h1>
+<p>Draft is a simple but functional 2D drafting application written as a PWA - a progressive web app.<br>
+PWAs can be run online like any web app but can also be installed on your device via the menu in your browser.</p>
+<p>The app uses SVG - scalable vector graphics - and is general-purpose but especially useful for technical drawings.</p>
+<p>You can select various drawing sizes up to A4 in portrait or landscape orientations and you can draw to scale, organising drawings on up to 10 layers. Accurate drawing is aided by 'snap' to drawing elements, to a grid or orthogonally.</p>
+<p>Keep reading and tap links to jump to particular sections.</p>
+<h2>screen layout</h2>
+<p>Toolboxes appear on the left of the screen with either <a href='#draw'>drawing tools</a> or <a href='#edit'>editing tools</a>.</p>
+<p>Whichever toolbox is visible there will be the <a href='#styles'>styles</a> box at the top with <a href='#layers'>layers</a> below it.</p>
+<p>While drawing or editing elements you will often have <a href='#info'>information</a> at the top of the screen, and sometimes you will interact with <a href='#dialogs'>dialog boxes which appear at the top left corner.</a></p>
+<p>The sequence is <a href='#draw'>draw</a>, <a href='#select'>select</a>, <a href='#edit'>edit</a> and <a href='#files'>save</a>.</p>
+<p><img src='screen.png'></p>
+<h2 id='draw'>Draw</h2>
+<p>Drawing is slightly different for the various drawing tools but usually involves tapping or dragging to position and size a drawing element. You use a mouse or a touch screen.</p>
+<p><img src='../svg/document.svg'><br>
+The document tool displays the <b>DRAWING</b> information - size, orientation and scale. You set these when you started a new drawing.</p>
+<p><img src='drawing.png'><br>
+You can choose a grid size and whether to 'snap' elements to the grid, and there are buttons for saving drawings, starting new drawings and loading saved ones - see the <a href='#files'>files</a> section.</p>
+</p>
+<p><img src='../svg/zoomin.svg'> <img src='../svg/zoomout.svg'> <img src='../svg/extents.svg'> <img src='../svg/pan.svg'><br>
+The view controls let you <i>zoom</i> in or out (doubling or halving the magnification) or quickly return to the initial magnification and drawing position after zooming or moving around the drawing with the <i>pan</i> tool. The zoom tools are single-tap but you drag the drawing after tapping pan.</p>
+<p><img src='../svg/curve.svg'><br>
+The <i>curve</i> tool lets you draw smoothed Bezier curves by dragging and the curve is drawn when you release the mouse button or lift your finger or stylus from a touchscreen.</p>
+<p><img src='../svg/line.svg'><br>
+Use the <i>line</i> tool to draw lines and shapes. Drag to draw a line segment. If you just want a single line, tap again at the end point. Otherwise, lifting the pointer ends the first segment and starts the next one. A tap at the end point finishes the line(s) and there is a limit of 10 segments. If you end a segment close to the start of the lines you will have a closed polygonal <i>shape</i>. While you are dragging a line segment you will see its length and direction at the top of the screen. Directions are shown as on a compass - degrees clockwise from 'north' at the top.</p>
+<p><img src='../svg/box.svg'><br>
+The <i>box</i> tool draws rectangles and squares. As you drag from a corner, the width and height will be shown and there is a degree of 'snap' making it easy to draw a square.</p>
+<p><img src='../svg/oval.svg'><br>
+Draw circles or ellipses with the <i>oval</i> tool. This is very like drawing an box, but you start at the centre. Again, it is easy to constrain the oval to be circular.</p>
+<p><img src='../svg/arc.svg'><br>
+The <i>arc</i> tool is for drawing circular arcs.You are prompted to drag from the start to the centre of the arc. 
+Often the arc will start from an existing node such as the end of a line. 
+When you release at the centre a blue radius is drawn with small arrows indicating clockwise or anticlockwise rotation and you can drag the radius to the end of the arc. 
+The radius and arc angle appear at the top of the screen.</p>
+<p><img src='../svg/text.svg'><br>
+To add <i>text</i> to a drawing, tap where you want it to start then type into the dialog which appears when you tap the <i>text</i> tool, then tap the TEXT button and your text will appear in the drawing.<br>
+<img src='text.png'></p>
+<p><img src='../svg/dimension.svg'><br>
+You can use the <i>dimension</i> tool to add dimensions to drawing elements. Dimensions are 'attached' to <i>nodes</i> such as the ends of line segments or the corners of a box. 
+You will see prompts to tap on the start and end nodes of the element you are dimensioning, then to drag the blue guide line to where you want the dimension line drawn. 
+If the start and end points are not aligned horizontally of vertically, you must choose whether to draw the dimensiion orthoganally or obliquely (aligned with the element). 
+Tap the DIMENSION button to move on to positioning the dimension. 
+Dimensions are associated with the elements they are attached to and move with elements if they are moved and are recalculated if elements are resized. You cannot, though, have dimensions attached to separate elements.<br>
+<img src='dimension.png'></p>
+<p><img src='../svg/set.svg'><br>
+Draft allows you to combine a number of drawing elements - boxes, lines, ovals, text, etc. - into <i>sets</i> A set can be any more complex item that yoou might want to repeat easily or which you might use in other drawings. 
+There is more about sets below, but this tool is how you add a set to your drawing: it brings up a list of the sets you have available and the one you choose is added - easy!.<br>
+<img src='set.png'></p>
+<h2>Select</h2>
+<p>Tapping any drawing element will select it allowing you to view its properties and move, edit or delete it if you wish. 
+Blue guides are shown: lines denoting the shape of the element, a circle <i>mover</i> handle, one or more <i>sizer</i> handles, and small dots at nodes. 
+The node dots are reminders to help you snap to element nodes, the sizer(s) can be dragged to resize or reshape elements, while the mover can be dragged to move the element and can act as an axis for rotating or mirroring it. 
+When you select elements the drawing tools are replaced by editing tools .
+In this example the selected box has <i>spin</i> (it has 30&deg; rotation) but the sizing box remains un-rotated to aid orthogonal snapping.</p>
+<p>The selected element's <i>style</i> is reflected in the style box at the top left and its size and spin are shown in the information panel. 
+When no elements are selected the style box shows the current default styling, used for new drawing elements.</p>
+<p><img src='select.png'></p>
+<p>You can select more then one element at a time, by tapping on the ones you want or by dragging a selection box around them. 
+In this case styling and sizes differ from one element to another so no styling or sizes are shown, while blue rectangles indicate which elements are selected. 
+You can drag them all at once or perform other operations such as aligning them. 
+Tapping any blank part of the drawing cancels the selection and switches back to the drawing tools.</p>
+<h2>edit</h2>
+<p>You can make changes to any selected drawing element, including the styling of the element or which layer it appears on, but styles and layers are described below.</p>
+<p><img src='../svg/add.svg'><br>
+The <i>add tool</i> is used to add segments to curves, lines or shapes. Tap add then tap a node. A new node will be inserted or appended after the node you choose and can then be dragged if you wish.</p>
+<p><img src='../svg/cross.svg'><br>
+The reverse is <i>remove</i>. This tool is used to remove nodes (and thus segments) from curves, lines and shapes or to delete whole elements or all selected elements.<br>
+<img src='remove.png'></p>
+</body>
+</html>
