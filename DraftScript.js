@@ -371,31 +371,37 @@ id('curveButton').addEventListener('click',function() {
     mode='curve';
     id('type').innerText='curve';
     hint('<b>curve</b>: drag from start');
+    id('tools').style.display='none';
 });
 id('lineButton').addEventListener('click',function() {
     mode='line';
     id('type').innerText='line';
     hint('<b>line</b>: drag from start');
+    id('tools').style.display='none';
 });
 id('boxButton').addEventListener('click',function() {
     mode='box';
     id('type').innerText='box';
     rad=0;
     hint('<b>box</b>: drag from corner');
+    id('tools').style.display='none';
 });
 id('ovalButton').addEventListener('click',function() { // OVAL/CIRCLE
     mode='oval';
     id('type').innerText='oval';
     hint('<b>oval</b>: drag from centre');
+    id('tools').style.display='none';
 })
 id('arcButton').addEventListener('click', function() {
    mode='arc';
    id('type').innerText='arc';
    hint('<b>arc</b>: drag from start');
+   id('tools').style.display='none';
 });
 id('textButton').addEventListener('click',function() {
     mode='text';
     hint('<b>text</b>: tap at start');
+    id('tools').style.display='none';
 });
 id('textOKbutton').addEventListener('click',function() {
 	var text=id('text').value;
@@ -427,6 +433,7 @@ id('textOKbutton').addEventListener('click',function() {
 id('dimButton').addEventListener('click',function() {
    mode='dimStart';
    hint('<b>dimension</b>: tap start node');
+   id('tools').style.display='none';
 });
 id('confirmDim').addEventListener('click',function() {
     dim.dir=document.querySelector('input[name="dimDir"]:checked').value;
@@ -442,6 +449,7 @@ id('confirmDim').addEventListener('click',function() {
 });
 id('setButton').addEventListener('click',function() {
     showDialog('setDialog',true);
+    id('tools').style.display='none';
 });
 id('setList').addEventListener('change',function() {
     // console.log('choose '+event.target.value);
@@ -515,7 +523,9 @@ id('deleteButton').addEventListener('click',function() {
     showDialog('removeDialog',true);
 });
 id('confirmRemove').addEventListener('click',function() { // complete deletion
+	console.log('remove '+selection.length+' element(s)');
     if(selection.length>0) {
+    	selection.sort(); // delete last graphs first to avoid problems with changing array indeces
         while(selection.length>0) remove(selection.pop());
     }
     else remove(index); // WAS remove(elID);
@@ -525,7 +535,8 @@ id('confirmRemove').addEventListener('click',function() { // complete deletion
     id('blueBox').setAttribute('width',0); // ...and text outline...
     id('blueBox').setAttribute('height',0);
     showDialog('removeDialog',false);
-    cancel();
+    draw();
+    // cancel();
 });
 id('backButton').addEventListener('click',function() {
 	console.log('push graph '+index+' back');
@@ -1300,6 +1311,7 @@ id('penSelect').addEventListener('change',function() {
 		var lineW=val*scale;
     	for(var i=0;i<selection.length;i++) {
     		var n=selection[i];
+    		console.log('set line width for element '+n+' to '+lineW);
     		graph=graphs[n].lineW=lineW;
     	}
     	draw();
@@ -1452,6 +1464,7 @@ id('colorPicker').addEventListener('click',function(e) {
         if(selection.length>0) { // change line shade of selected elements
         	for(var i=0;i<selection.length;i++) {
         		var n=selection[i];
+        		console.log('set colour of element '+n+' to '+val);
     			console.log('change line color for graph/element '+n);
     			if(graphs[n].type=='text') graphs[n].fill=val;
     			else graphs[n].stroke=val;
@@ -1478,6 +1491,7 @@ id('colorPicker').addEventListener('click',function(e) {
         			id('pattern'+n).firstChild.setAttribute('fill',val);
         			id('pattern'+n).lastChild.setAttribute('fill',val);
         		}
+        		else if(fill=='none') graph.fillType='solid';
         		graphs[n].fill=val;
     		}
     		draw();
@@ -1861,7 +1875,13 @@ function drag(event) {
                		id('blueBox').setAttribute('y',Number(y)+Number(offset.y));
             	}
             }
-            setSizes('polar',null,x0,y0,x,y);
+            /*
+            var d=Math.round(Math.sqrt(((x-x0)*(x-x0)+(y-y0)*(y-y0))));
+            var a=Math.round(Math.atan((x-x0)/(y0-y))*180/Math.PI);
+            info(['move',d,null,null,a]); // WAS setSizes('polar',null,x0,y0,x,y);
+            */
+            var vector=polar(x-x0,y0-y);
+            info(['move',vector.d,null,null,vector.a]);
             break;
         case 'boxSize':
             var aspect=w/h;
@@ -1875,9 +1895,11 @@ function drag(event) {
             h=graph.height;
             w+=dx;
             h+=dy;
+            w=Math.round(w);
+            h=Math.round(h);
             id('blueBox').setAttribute('width',w);
             id('blueBox').setAttribute('height',h);
-            setSizes('box',null,w,h);
+            info(['box',w,h,null,null]); // WAS setSizes('box',null,w,h);
             break;
         case 'ovalSize':
         	var aspect=w/h;
@@ -1902,28 +1924,28 @@ function drag(event) {
             id('blueBox').setAttribute('y',y);
             id('blueBox').setAttribute('width',w);
             id('blueBox').setAttribute('height',h);
-            setSizes('oval',null,w,h);
+            info(['oval',Math.round(w),Math.round(h) ,null,null]); // WAS setSizes('oval',null,w,h);
             break;
         case 'arcSize':
             dx=x-x0;
             dy=y-y0;
-            var r=Math.sqrt((dx*dx)+(dy*dy));
+            var r=Math.round(Math.sqrt((dx*dx)+(dy*dy)));
             if(Math.abs(r-graph.r)<snapD) { // change angle but not radius
                 id('blueLine').setAttribute('x2',x);
                 id('blueLine').setAttribute('y2',y);
                 id('blueOval').setAttribute('rx',graph.r);
                 id('blueOval').setAttribute('ry',graph.r);
                 var a=Math.atan(dy/dx); // radians
-                a=a*180/Math.PI+90; // 'compass' degrees
+                a=Math.round(a*180/Math.PI+90); // 'compass' degrees
                 if(dx<0) a+=180;
-                id('second').value=a; // new angle
+                id('i7').value=a; // new angle
             }
             else { // change radius but not angle
                 id('blueOval').setAttribute('rx',r);
                 id('blueOval').setAttribute('ry',r);
                 id('blueLine').setAttribute('x2',x0);
                 id('blueLine').setAttribute('y2',y0);
-                id('first').value=r; // new radius
+                id('i5').value=r; // new radius
             }
             break;
         case 'pan':
@@ -1940,7 +1962,8 @@ function drag(event) {
             point.x=x;
             point.y=y;
             blueline.points[n-1]=point;
-            setSizes('polar',null,x0,y0,x,y);
+            var vector=polar((x-x0),(y0-y));
+            info(['line',null,null,vector.d,vector.a]); // WAS setSizes('polar',null,x0,y0,x,y);
             break;
         case 'box':
             w=Math.abs(x-x0);
@@ -1952,7 +1975,7 @@ function drag(event) {
             id('blueBox').setAttribute('y',top);
             id('blueBox').setAttribute('width',w);
             id('blueBox').setAttribute('height',h);
-            setSizes('box',null,w,h);
+            info(['box',w,h,null,null]); // WAS setSizes('box',null,w,h);
             break;
         case 'oval':
         	w=Math.abs(x-x0);
@@ -1962,7 +1985,7 @@ function drag(event) {
             id('blueOval').setAttribute('cy',y0);
             id('blueOval').setAttribute('rx',w/2);
             id('blueOval').setAttribute('ry',h/2);
-            setSizes('oval',null,w,h);
+            info(['oval',w,h,null,null]); // WAS setSizes('oval',null,w,h);
             break;
         case 'arc':
         	console.log('drag to arc centre from '+arc.x1+','+arc.y1);
@@ -1980,7 +2003,8 @@ function drag(event) {
             id('blueOval').setAttribute('cy',y);
             id('blueOval').setAttribute('rx',arc.r);
             id('blueOval').setAttribute('ry',arc.r);
-            setSizes('polar',null,x0,y0,x,y);
+            var vector=polar((x-x0),(y-y0));
+            info(['line',null,null,vector.d,vector.a]); // WAS setSizes('polar',null,x0,y0,x,y);
             break;
         case 'arcEnd':
             if((x==x0)&&(y==y0)) break;
@@ -2013,7 +2037,9 @@ function drag(event) {
             y=arc.y2;
             x0=arc.cx;
             y0=arc.cy;
-            setSizes('polar',null,x0,y0,x,y);
+            var radius=Math.round(Math.sqrt((x-x0)*(x-x0)+(y-y0)*(y-y0)));
+            var angle=Math.round(Math.abs(arc.a2-arc.a1));
+            info(['arc',null,null,radius,angle]) // WAS setSizes('polar',null,x0,y0,x,y);
             id('blueRadius').setAttribute('x2',arc.x2);
             id('blueRadius').setAttribute('y2',arc.y2);
             break;
@@ -2061,7 +2087,7 @@ function drag(event) {
             selectionBox.y=boxY;
             selectionBox.w=w;
             selectionBox.h=h;
-            setSizes('box',null,w,h);
+            info([null,w,h,null,null]); // WAS setSizes('box',null,w,h);
     }
     event.stopPropagation();
 };
@@ -2717,7 +2743,7 @@ id('graphic').addEventListener('pointerup',function(e) {
 // ADJUST ELEMENT SIZES
 id('i1').addEventListener('change',function() { // CHANGE OTHERS TO MATCH BOX
 	console.log('first dimension changed');
-    var val=parseInt(id('first').value);
+    var val=parseInt(id('i1').value);
     console.log('graph '+index);
     switch(graph.type) {
         case 'line':
@@ -2796,7 +2822,7 @@ id('i1').addEventListener('change',function() { // CHANGE OTHERS TO MATCH BOX
 
 });
 id('i3').addEventListener('change',function() { // CHANGE OTHERS TO MATCH BOX
-    var val=parseInt(id('second').value);
+    var val=parseInt(id('i3').value);
     element=id(index);
     graph=graphs[index];
     // switch(type(element))
@@ -2904,12 +2930,12 @@ id('i5').addEventListener('change',function() {
     console.log('set corner radius to '+r);
     graph.radius=r;
     // showDialog('filletDialog',false);
-    info(null); // WAS showInfo(false);
+    // info(null); // WAS showInfo(false);
     draw();
-    cancel();
+    // cancel();
 });
 id('i7').addEventListener('change',function() {
-    var val=parseInt(id('spin').value);
+    var val=parseInt(id('i7').value);
     console.log('set spin to '+val+' degrees');
     element=id(index);
     graph.spin=val;
@@ -2956,6 +2982,7 @@ function cancel() { // cancel current operation and return to select mode
     id('info').style.top='-32px';
     id('info').style.height='30px';
     id('editButton').style.display='none';
+    id('tools').style.display='block';
     setStyle(); // set styles to defaults
 }
 function clearDialog(dialog) {
@@ -3093,7 +3120,7 @@ function decimal(n) {
 	return (n/10);
 }
 function draw() {
-	cancel();
+	// cancel();
 	var el;
 	id('dwg').innerHTML='';
 	nodes=[];
@@ -3471,7 +3498,6 @@ function info(p) {
 		id('editButton').style.display='block'
 	}
 	else id('editButton').style.display='none';
-	id('graphLayer').innerText=graph.layer; // layer for (first) selected element
 }
 function initialise() {
     console.log('set up size '+size+' '+aspect+' 1:'+scale+' scale '+aspect+' drawing');
@@ -3579,8 +3605,28 @@ function move(dx,dy) { // CHANGE OTHER TO MATCH BOX, ETC
     draw();
     cancel();
 }
+function polar(dx,dy) {
+	var d=0;
+	var a=0;
+	if(dx==0) { // vertical
+		d=Math.abs(dy);
+		a=(dy>0)? 0:180;
+	}
+	else if(dy==0) { // horizontal
+		d=Math.abs(dx);
+		a=(dx>0)? 90:270;
+	}
+	else { // calculate distance and direction
+		d=Math.round(Math.sqrt(dx*dx+dy*dy));
+		a=Math.round(Math.atan(dx/dy)*180/Math.PI);
+		if((dx>0)&&(dy<0)) a=180+a;
+		else if(dx<0) a+=(dy>0)? 360:180;
+	}
+	return({'d':d,'a':a});
+}
 function remove(n,keepNodes) {
-    // console.log('remove element '+n);
+    console.log('REMOVE ELEMENT '+n);
+    /* no need to worry about dimensions - they go with elements
     var linkedDims=[]; // first check for any linked dimensions
     for(var i=0;i<dims.length;i++) {
         if((Math.floor(dims[i].n1/10)==Number(n))||(Math.floor(dims[i].n2/10)==Number(n))) {
@@ -3588,11 +3634,12 @@ function remove(n,keepNodes) {
             dims.splice(i,1); // remove dimension link
         }
     }
+    */
     var ptn=id('pattern'+n); // remove any associated pattern
     if(ptn) ptn.remove();
     graphs.splice(n,1); // remove graph
-    draw();
-	while(linkedDims.length>0) remove(linkedDims.pop()); // remove any linked dimensions
+    // draw();
+	// NO NEED... while(linkedDims.length>0) remove(linkedDims.pop()); // remove any linked dimensions
 }
 function rezoom() {
 	w=Math.round(scr.w*scaleF/zoom);
@@ -3693,16 +3740,9 @@ function select(n,multiple,s) {
             	// console.log('type: '+type(el)+'; layer: '+el.getAttribute('layer'));
             	node=0; // default anchor node
             	mode='pointEdit';
-            	if((graph.type==line)&&(graph.points.length<3)) {
-            		var p=[];
-            		p.push('line');
-            		dx=graph.points[1].x-graph.points[0].x;
-					dy=graph.points[0].y-graph.points[1].y;
-					p.push(decimal(Math.sqrt((dx*dx)+(dy*dy)))); // line length...
-					p.push(null);
-					p.push(null);
-					p.push(Math.round(Math.atan(dx/dy)*180/Math.PI)); // ..and angle
-					info(p);
+            	if((graph.type=='line')&&(graph.points.length<3)) {
+            		var vector=polar((graph.points[1].x-graph.points[0].x),(graph.points[0].y-graph.points[1].y));
+            		info(['line',null,null,vector.d,vector.a]);
             	}					
             	else {
             		info(null);
@@ -3841,7 +3881,7 @@ function select(n,multiple,s) {
 	            var bounds=getBounds(element);
 	            info([('set: '+graph.name),bounds.width,bounds.height,null,graph.spin]);
     	};
-    	// showInfo(true,(graph.type=='text'));
+    	id('graphLayer').innerText=graph.layer;
 	}
 	else { // one of multiple selection - highlight in blue
 		var el=id(n);
@@ -4022,14 +4062,15 @@ function setPoints(g,spin) {
 	}
 	return points;
 }
+/*
 function setSizes(mode,spin,p1,p2,p3,p4) {
     // console.log('setSizes - '+mode+','+p1+','+p2+','+p3+','+p4+' spin '+spin);
     id('editButton').style.display='none';
     if((mode=='box')||(mode=='oval')) {
-        id('first').value=Math.round(p1);
-        id('between').innerHTML='x';
-        id('second').value=Math.round(p2);
-        id('after').innerHTML='mm';
+        id('i1').value=Math.round(p1);
+        id('i2').innerHTML='x';
+        id('i3').value=Math.round(p2);
+        id('i6').innerHTML='mm';
     }
     else if(mode=='polar') { // drawing line or arc
         var h=p3-p1;
@@ -4039,20 +4080,21 @@ function setSizes(mode,spin,p1,p2,p3,p4) {
         a=Math.round(a*180/Math.PI); // degrees
         a+=90; // from North
         if(p3<p1) a+=180;
-        id('first').value=d;
-        id('first').style.display='block'; 
-        id('between').style.display='none';
-        id('second').style.display='none';
-        id('spin').value=a;
+        id('i1').value=d;
+        id('i1').style.display='block'; 
+        id('i2').style.display='none';
+        id('i3').style.display='none';
+        id('i7').value=a;
     }
     else { // arc
-        id('first').value=Math.round(p1); // radius
-        id('second').style.display='none';
-        id('spin').value=Math.round(p2); // angle of arc
+        id('i1').value=Math.round(p1); // radius
+        id('i3').style.display='none';
+        id('i7').value=Math.round(p2); // angle of arc
     }
     id('info').style.display='flex';
     id('info').style.top='0';
 }
+*/
 function setStyle() {
 	// console.log('setStyle: '+selection.length+' items selected');
 	// default style settings

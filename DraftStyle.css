@@ -69,14 +69,15 @@ li {
 }
 .dialog {
 	position: fixed;
-	left: 0;
-	top: 0;
+	left: 5px;
+	top: 5px;
 	padding: 5px;
-	border: none;
+	border: solid gray 2px;
+	border-radius: 5px;
 	display: none;
 	color: black;
 	background-color: #FFFFFFEE;
-    box-shadow: 0 0 4px #88888888;
+    /* box-shadow: 0 0 4px #88888888; */
 	z-index: 15;
 }
 .clearButton {
@@ -151,9 +152,8 @@ li {
     top: 32px;
     width: 32px;
     border: none;
-    border-radius: 3px;
     background-color: #FFFFFFEE;
-    box-shadow: 0 0 4px #88888888;
+    /* box-shadow: 0 0 4px #88888888; */
     display: block;
     z-index: 10;
 }
@@ -163,9 +163,8 @@ li {
     top: 32px;
     width: 32px;
     border: none;
-    border-radius: 3px;
     background-color: #FFFFFFEE;
-    box-shadow: 0 0 4px #88888888;
+    /* box-shadow: 0 0 4px #88888888; */
     display: none;
     z-index: 11;
 }
@@ -174,11 +173,12 @@ li {
     top: -32px;
     left: 32px;
     height: 30px;
+    min-width: 200px;
     padding: 4px;
     font-size: 1em;
     color: black;
     background-color: #FFFFFFEE;
-    box-shadow: 0 0 4px #88888888;
+    /* box-shadow: 0 0 4px #88888888; */
     z-index: 13;
     display: flex;
     overflow: hidden;
@@ -204,7 +204,7 @@ li {
 	width: 32px;
 	height: 32px;
 	background-color: #FFFFFFC0;
-    box-shadow: 0 0 4px #88888888;
+    /* box-shadow: 0 0 4px #88888888; */
     z-index: 12;
 }
 #styleBox {
