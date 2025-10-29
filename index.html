@@ -114,6 +114,10 @@
 		   	<g id='handles'></g>
 		</svg>
 	</div>
+	<div id='style'>
+    	<div id='styleBox'></div>
+    </div>
+    <button id='moreButton' onclick='showMore()'></button>
     <div id='tools'>
     	<button id='layersButton' class='iconButton'><span id='layer'>0</span></button>
         <button id='docButton' class='iconButton'></button>
@@ -129,7 +133,7 @@
         <button id='textButton' class='iconButton'></button>
         <button id='dimButton' class='iconButton'></button>
         <button id='setButton' class='iconButton'></button>
-        <button class='menuButton' onclick='showMore()'></button>
+        <!--button class='menuButton' onclick='showMore()'></button-->
     </div>
     <div id='editTools'>
     	<button id='layerButton' class='iconButton'><span id='graphLayer'>0</span></button>
@@ -145,7 +149,7 @@
         <button id='doubleButton' class='iconButton'></button>
         <button id='repeatButton' class='iconButton'></button>
         <button id='joinButton' class='iconButton'></button>
-        <button class='menuButton' onclick='showMore()'></button>
+        <!--button class='menuButton' onclick='showMore()'></button-->
     </div>
     <div id='info'>
     	<span id='type' class='info'></span>&nbsp;
@@ -153,7 +157,7 @@
         <input id='i3' type='number'/><span id='i4' class='info'> r</span>
         <input id='i5' type='number'/><span id='i6' class='info'>mm @</span>
         <input id='i7' type='number'/><span id='i8' class='info'>&deg;</span>
-        <button id='editButton' onclick='editText();'>EDIT</button>
+        <button id='actionButton' onclick='action();'>FINISH</button>
         <div id='hint'></div>
     </div>
     <div id='layerChooser' class='dialog'>
@@ -169,9 +173,6 @@
     		<li>8 <input type='radio' id='choice8' name='elementLayer' class='layerCheck'><span id='choiceName8'></span></li>
     		<li>9 <input type='radio' id='choice9' name='elementLayer' class='layerCheck'><span id='choiceName9'></span></li>
     	</ul>
-    </div>
-    <div id='style'>
-    	<div id='styleBox'></div>
     </div>
     <div id='layerDialog' class='dialog'>
     	<b>LAYERS</b>
@@ -313,10 +314,10 @@
             <option onclick='prompt("select a set");' value=null>select a set</option>
         </select></p>
     </div>
-    <div id='moreDialog' class='dialog'>
-    	<b>more...</b>
-    	<p>If something went wrong you can <button onclick='load()'>RESET</button></p>
-    	<p>If you're unsure how to use <b>Draft</b> there is <button onclick='showHelp()'>HELP</button></p>
+    <div id='moreDialog' class='dialogRight'>
+    	<p><button onclick='load()'>RESET</button></p>
+    	<p><button onclick='showHelp()'>HELP</button></p>
+    	<p><a href='mailto:elvin.ibbotson@gmail.com?subject=Draft feedback'>FEEDBACK</a></p>
     </div>
     <div id='stylesDialog' class='dialog'>
         <p>line 

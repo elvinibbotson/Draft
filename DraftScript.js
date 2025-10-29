@@ -1420,11 +1420,13 @@ id('patternOption').addEventListener('click',function() {
 	if(element && element.getAttribute('fill').startsWith('url')) showDialog('patternMenu',true);
 });
 id('patternMenu').addEventListener('click',function(event) {
-	x=Math.floor((event.clientX-53)/30); // column 0-4
-	y=Math.floor((event.clientY-52)/30); // row 0-2
+	x=Math.floor((event.clientX-7)/30); // column 0-4
+	y=Math.floor((event.clientY-7)/30); // row 0-2
 	var n=y*5+x; // 5 per row - n is 0-14
+	console.log('use pattern# '+n);
 	var fill=element.getAttribute('fill'); // fill colour/pattern
 	console.log('set element fill (currently '+fill+') to pattern'+n);
+	/*
 	if(fill.startsWith('url')) { // amend pattern choice
 		var p=id('pattern'+element.id);
 		var color=pattern.firstChild.getAttribute('fill');
@@ -1433,9 +1435,10 @@ id('patternMenu').addEventListener('click',function(event) {
 		p.setAttribute('height',pattern[n].height);
 		p.innerHTML=tile[pattern[n].tile];
 		p.firstChild.setAttribute('fill',color);
-		updateGraph(element.id,['fillType','pattern'+n]);
+		updateGraph(index,['fillType','"p'+n+'"']);
 	}
 	else { // set fill to pattern
+	*/
 		console.log('set pattern for element '+element.id);
 		console.log(' pattern '+n+' size: '+pattern[n].width+'x'+pattern[n].height);
 		var html="<pattern id='pattern"+element.id+"' index='"+n+"' width='"+pattern[n].width+"' height='"+pattern[n].height+"' patternUnits='userSpaceOnUse'";
@@ -1453,9 +1456,8 @@ id('patternMenu').addEventListener('click',function(event) {
 		id('pattern'+element.id).lastChild.setAttribute('fill',fill);
 		element.setAttribute('fillType','pattern');
 		element.setAttribute('fill','url(#pattern'+element.id+')');
-		updateGraph(element.id,['fillType','pattern'+n]);
-		
-	}
+		updateGraph(index,['fillType','"p'+n+'"']);
+	// }
 });
 id('colorPicker').addEventListener('click',function(e) {
 	var val=e.target.id;
@@ -2287,36 +2289,7 @@ id('graphic').addEventListener('pointerup',function(e) {
                 else if(n>9) hint('10 node limit');
                 var points=id('bluePolyline').points;
                 console.log('points: '+points.length);
-                // create polyline element
-                graph={};
-	            graph.type='line';
-	            graph.x=points[0].x;
-                graph.y=points[0].y;
-                console.log('line.x/y: '+points[0].x+','+points[0].y);
-                graph.points=[];
-                var pt={'x':graph.x,'y':graph.y};
-                graph.points.push(pt);
-                for(var i=1;i<points.length;i++) {
-                	if((points[i].x==points[i-1].x)&&(points[i].y==points[i-1].y)) continue;
-                	else graph.points.push({'x':points[i].x,'y':points[i].y});
-                }
-	            var len=0;
-	            for(var i=0;i<points.length-1;i++) {
-	            	console.log('point '+i+': '+points[i].x+','+points[i].y);
-	                if(i>0) len+=Math.abs(points[i].x-points[i-1].x)+Math.abs(points[i].y-points[i-1].y);
-	            }
-	            console.log('linelength: '+len);
-	            graph.dims=[];
-	            graph.stroke=lineColor;
-	            graph.lineW=(pen*scale);
-	            graph.lineType=lineType;
-	        	graph.lineStyle=lineStyle;
-	            graph.fillType='none';
-	            graph.fill='none';
-	            graph.layer=layer;
-	            if(len>=scale) addGraph(graph); // avoid zero-size lines
-	            blueline.setAttribute('points','0,0');
-	            cancel();
+                finishLine();
             }
             else { // check if close to start point
                 point=blueline.points[0]; // start point
@@ -2946,6 +2919,15 @@ id('i7').addEventListener('change',function() {
     draw();
 });
 // FUNCTIONS
+function action() {
+	var opt=id('actionButton').innerText;
+	console.log('action: '+opt);
+	if(opt=='EDIT') showDialog('textDialog',true);
+	else { // finish drawing line(s)
+		console.log('FINISH LINE');
+		finishLine();
+	}
+}
 function addGraph(graph) {
     // console.log('add '+graph.type+' element - spin: '+graph.spin+' to layer '+graph.layer);
 	graphs.push(graph);
@@ -2981,7 +2963,7 @@ function cancel() { // cancel current operation and return to select mode
     id('layerChooser').style.display='none';
     id('info').style.top='-32px';
     id('info').style.height='30px';
-    id('editButton').style.display='none';
+    id('actionButton').style.display='none';
     id('tools').style.display='block';
     setStyle(); // set styles to defaults
 }
@@ -3337,22 +3319,29 @@ function draw() {
 			};
 			var dash=setLineType(g);
 			if(dash) el.setAttribute('stroke-dasharray',dash);
-			if(g.fillType.startsWith('pattern')) {
-				var n=Number(g.fillType.substr(7));
-				console.log('fillType is '+g.fillType+' n: '+n);
-				console.log(tile.length+' tiles');
-				console.log('pattern width is '+pattern[n].width);
-				var html="<pattern id='pattern"+index+"' width='"+pattern[n].width+"' height='"+pattern[n].height+"' patternUnits='userSpaceOnUse'";
-				// var html="<pattern id='pattern"+index+"' index='"+n+"' width='"+pattern[n].width+"' height='"+pattern[n].height+"' patternUnits='userSpaceOnUse'";
-				if(pattern[n].spin>0) html+=" patternTransform='rotate("+pattern[n].spin+")'";
-				html+='>'+tile[pattern[n].tile]+'</pattern>';
-				// console.log('pattern HTML: '+html);
-				id('defs').innerHTML+=html;
-				id('pattern'+index).firstChild.setAttribute('fill',g.fill);
-				id('pattern'+index).lastChild.setAttribute('fill',g.fill);
-				el.setAttribute('fill','url(#pattern'+index+')');
+			if(g.fillType.startsWith('p')) {
+				var n=Number(g.fillType.substr(1));
+				console.log('fillType is p'+n);
+				if(id('p'+el.id)==null) {
+					console.log(tile.length+' tiles');
+					console.log('pattern width is '+pattern[n].width);
+					var html="<pattern id='p"+el.id+"' width='"+pattern[n].width+"' height='"+pattern[n].height+"' patternUnits='userSpaceOnUse'";
+					if(pattern[n].spin>0) html+=" patternTransform='rotate("+pattern[n].spin+")'";
+					html+='>'+tile[pattern[n].tile]+'</pattern>';
+					console.log('pattern HTML: '+html);
+					id('defs').innerHTML+=html;
+					id('p'+el.id).firstChild.setAttribute('fill',g.fill);
+					id('p'+el.id).lastChild.setAttribute('fill',g.fill);
+				}
+				el.setAttribute('fill','url(#p'+el.id+')');
 			}
-			else el.setAttribute('fill',(g.fillType=='none')?'none':g.fill);
+			else {
+				if(id('p'+el.id)) {
+					console.log('delete pattern p'+el.id);
+					id('defs').removeChild(id('p'+el.id));
+				}
+				el.setAttribute('fill',(g.fillType=='none')?'none':g.fill);
+			}
 			if(g.opacity<1) {
 				el.setAttribute('stroke-opacity',g.opacity);
 				el.setAttribute('fill-opacity',g.opacity);
@@ -3360,7 +3349,7 @@ function draw() {
 			if(g.blur>0) el.setAttribute('filter','url(#blur'+g.blur+')');
     	}
 		id('dwg').appendChild(el);
-		if(graphs[n].type=='curve') console.log('first point on curve is '+graphs[n].points[0].x+','+graphs[n].points[0].y);
+		// if(graphs[n].type=='curve') console.log('first point on curve is '+graphs[n].points[0].x+','+graphs[n].points[0].y);
 	}
 	save();
 }
@@ -3437,6 +3426,38 @@ function editText() {
 	console.log('edit text');
 	showDialog('textDialog',true);
 }
+function finishLine() {
+	var points=blueline.points;
+	graph={};
+	graph.type='line';
+	graph.x=points[0].x;
+    graph.y=points[0].y;
+    console.log('line.x/y: '+points[0].x+','+points[0].y);
+    graph.points=[];
+    var pt={'x':graph.x,'y':graph.y};
+    graph.points.push(pt);
+    for(var i=1;i<points.length;i++) {
+    	if((points[i].x==points[i-1].x)&&(points[i].y==points[i-1].y)) continue;
+    	else graph.points.push({'x':points[i].x,'y':points[i].y});
+    }
+	var len=0;
+	for(var i=0;i<points.length-1;i++) {
+		console.log('point '+i+': '+points[i].x+','+points[i].y);
+		if(i>0) len+=Math.abs(points[i].x-points[i-1].x)+Math.abs(points[i].y-points[i-1].y);
+	}
+	console.log('linelength: '+len);
+	graph.dims=[];
+	graph.stroke=lineColor;
+	graph.lineW=(pen*scale);
+	graph.lineType=lineType;
+	graph.lineStyle=lineStyle;
+	graph.fillType='none';
+	graph.fill='none';
+	graph.layer=layer;
+	if(len>=scale) addGraph(graph); // avoid zero-size lines
+	blueline.setAttribute('points','0,0');
+	cancel();
+}
 function getAngle(x0,y0,x1,y1) {
     var dx=x1-x0;
     var dy=y1-y0;
@@ -3495,9 +3516,14 @@ function info(p) {
 	if(p[0]=='text') {
 		id('i6').innerText='@';
 		id('i6').style.display='block';
-		id('editButton').style.display='block'
+		id('actionButton').innerText='EDIT';
+		id('actionButton').style.display='block';
 	}
-	else id('editButton').style.display='none';
+	else if(mode=='line') {
+		id('actionButton').innerText='FINISH';
+		id('actionButton').style.display='block';
+	}
+	else id('actionButton').style.display='none';
 }
 function initialise() {
     console.log('set up size '+size+' '+aspect+' 1:'+scale+' scale '+aspect+' drawing');
@@ -4062,39 +4088,6 @@ function setPoints(g,spin) {
 	}
 	return points;
 }
-/*
-function setSizes(mode,spin,p1,p2,p3,p4) {
-    // console.log('setSizes - '+mode+','+p1+','+p2+','+p3+','+p4+' spin '+spin);
-    id('editButton').style.display='none';
-    if((mode=='box')||(mode=='oval')) {
-        id('i1').value=Math.round(p1);
-        id('i2').innerHTML='x';
-        id('i3').value=Math.round(p2);
-        id('i6').innerHTML='mm';
-    }
-    else if(mode=='polar') { // drawing line or arc
-        var h=p3-p1;
-        var v=p4-p2;
-        var d=Math.round(Math.sqrt(h*h+v*v));
-        var a=Math.atan(v/h); // radians
-        a=Math.round(a*180/Math.PI); // degrees
-        a+=90; // from North
-        if(p3<p1) a+=180;
-        id('i1').value=d;
-        id('i1').style.display='block'; 
-        id('i2').style.display='none';
-        id('i3').style.display='none';
-        id('i7').value=a;
-    }
-    else { // arc
-        id('i1').value=Math.round(p1); // radius
-        id('i3').style.display='none';
-        id('i7').value=Math.round(p2); // angle of arc
-    }
-    id('info').style.display='flex';
-    id('info').style.top='0';
-}
-*/
 function setStyle() {
 	// console.log('setStyle: '+selection.length+' items selected');
 	// default style settings
@@ -4146,7 +4139,7 @@ function setStyle() {
     id('patternOption').disabled=false;
     val=el.getAttribute('fillType');
     // console.log('fillType: '+val);
-    if(val.startsWith('pattern')) {
+    if(val.startsWith('p')) {
     	id('fillType').value='pattern';
     	id('fillColor').style.backgroundColor=id('pattern'+el.id).firstChild.getAttribute('fill');
     }
@@ -4317,6 +4310,7 @@ function updateGraph(n,parameters) {
 	    console.log('set '+attribute+' to '+val);
 		eval('graph.'+attribute+'='+val);
 	}
+	console.log('graph '+n+' filltype: '+graph.fillType);
 	graphs[n]=graph;
 	save();
 	draw();
