@@ -2,7 +2,7 @@ body {
 	margin: 0;
 	height: 100%;
 	overflow: hidden;
-	font-family: 'Courier New', monospace;
+	font-family: monospace;
 	background: silver;
 }
 input {
@@ -35,10 +35,12 @@ select {
     font-size: 1em;
 }
 button {
-    color: black;
+    color: color;
+    font-family: monospace;
     font-size: 1.2em;
     font-weight: bold;
-    background: none;
+    border-radius: 3px;
+    background: #EEE;
     border: none;
 }
 ul {
@@ -51,6 +53,7 @@ li {
 a{
 	color: black;
 	text-decoration: none;
+	font-family: monospace;
     font-size: 1.2em;
     font-weight: bold;
     padding-left: 5px;
@@ -64,15 +67,6 @@ a{
 .iconButton:disabled {
     opacity: 0.5;
 }
-/*
-.menuButton {
-	width: 32px;
-	height: 12px;
-	border: none;
-	color: white;
-	background: url(svg/more.svg) center center no-repeat;
-}
-*/
 .info {
 	margin-top: 8px;
 }
@@ -199,12 +193,10 @@ a{
     font-size: 1em;
     color: black;
     background-color: #FFFFFFEE;
-    /* box-shadow: 0 0 4px #88888888; */
     z-index: 13;
     display: flex;
     overflow: hidden;
 }
-
 #hint {
 	position: absolute;
 	top: 36px;

@@ -315,9 +315,10 @@
         </select></p>
     </div>
     <div id='moreDialog' class='dialogRight'>
-    	<p><button onclick='load()'>RESET</button></p>
-    	<p><button onclick='showHelp()'>HELP</button></p>
-    	<p><a href='mailto:elvin.ibbotson@gmail.com?subject=Draft feedback'>FEEDBACK</a></p>
+    	<p><button onclick='showHelp();showDialog("moreDialog",false)'>help</button></p>
+    	<p><button onclick='load();showDialog("moreDialog",false)'>reload</button></p>
+    	<p><button onclick='reset();showDialog("moreDialog",false)'>reset</button></p>
+    	<p><a href='mailto:elvin.ibbotson@gmail.com?subject=Draft feedback'>feedback</a></p>
     </div>
     <div id='stylesDialog' class='dialog'>
         <p>line 

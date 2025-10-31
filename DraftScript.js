@@ -1700,17 +1700,21 @@ id('graphic').addEventListener('pointerdown',function(e) {
                     break;
                 case 'arc':
                     mode='arcSize';
+                    x0=x; // where sizer starts
+                    y0=y;
+                    /* OLD CODE
                     x0=graph.cx;
                     y0=graph.cy;
+                    */
                     console.log('arc centre: '+graph.cx+','+graph.cy+'; radius: '+graph.r);
                     id('blueBox').setAttribute('width',0);
                     id('blueBox').setAttribute('height',0);
-                    id('blueOval').setAttribute('cx',x0); // circle for radius
-                    id('blueOval').setAttribute('cy',y0);
+                    id('blueOval').setAttribute('cx',graph.cx); // x0); // circle for radius
+                    id('blueOval').setAttribute('cy',graph.cy); // y0);
                     id('blueOval').setAttribute('rx',graph.r);
                     id('blueOval').setAttribute('ry',graph.r);
-                    id('blueLine').setAttribute('x1',x0); // prepare radius
-                    id('blueLine').setAttribute('y1',y0);
+                    id('blueLine').setAttribute('x1',graph.cx); // x0); // prepare radius
+                    id('blueLine').setAttribute('y1',graph.cy); // y0);
                     id('blueLine').setAttribute('x2',x0);
                     id('blueLine').setAttribute('y2',y0);
                     id('guides').style.display='block';
@@ -1929,8 +1933,8 @@ function drag(event) {
             info(['oval',Math.round(w),Math.round(h) ,null,null]); // WAS setSizes('oval',null,w,h);
             break;
         case 'arcSize':
-            dx=x-x0;
-            dy=y-y0;
+            dx=x-graph.cx; // x0;
+            dy=y-graph.cy; // y0;
             var r=Math.round(Math.sqrt((dx*dx)+(dy*dy)));
             if(Math.abs(r-graph.r)<snapD) { // change angle but not radius
                 id('blueLine').setAttribute('x2',x);
@@ -1945,8 +1949,8 @@ function drag(event) {
             else { // change radius but not angle
                 id('blueOval').setAttribute('rx',r);
                 id('blueOval').setAttribute('ry',r);
-                id('blueLine').setAttribute('x2',x0);
-                id('blueLine').setAttribute('y2',y0);
+                id('blueLine').setAttribute('x2',graph.cx); // x0);
+                id('blueLine').setAttribute('y2',graph.cy); // y0);
                 id('i5').value=r; // new radius
             }
             break;
@@ -2204,6 +2208,7 @@ id('graphic').addEventListener('pointerup',function(e) {
                 mode='edit';
                 return;
             }
+            /* OLD CODE
             dx=x-x0;
             dy=y-y0;
             graph=graphs[index];
@@ -2233,6 +2238,40 @@ id('graphic').addEventListener('pointerup',function(e) {
             	graph.points[2].y=r*Math.sin(theta);
                 graph.r=r;
             }
+            */
+            // INSTEAD...
+            graph=graphs[index];
+            dx=x-graph.cx;
+            dy=y-graph.cy;
+            console.log('moved by '+dx+','+dy+' from '+x0+','+y0);
+            var r=Math.sqrt((dx*dx)+(dy*dy)); // new radius
+            r/=graph.r; // ratio of new to old radii
+            console.log('new radius/old radius: '+r);
+            if((x0==graph.points[1].x)&&(y0==graph.points[1].y)) { // start point moved
+            	console.log('start point moved - adjust end point');
+            	graph.points[1].x=x;
+            	graph.points[1].y=y;
+            	dx=graph.points[2].x-graph.cx;
+            	dy=graph.points[2].y-graph.cy;
+            	dx*=r;
+            	dy*=r;
+            	console.log('move end point by '+dx+','+dy);
+            	graph.points[2].x=graph.cx+dx;
+            	graph.points[2].y=graph.cy+dy;
+            }
+            else { // arc end point moved
+            	console.log('end point moved - adjust start point');
+            	graph.points[2].x=x;
+            	graph.points[2].y=y;
+            	dx=graph.points[1].x-graph.cx;
+            	dy=graph.points[1].y-graph.cy;
+            	dx*=r;
+            	dy*=r;
+            	console.log('move start point by '+dx+','+dy);
+            	graph.points[1].x=graph.cx+dx;
+            	graph.points[1].y=graph.cy+dy;
+            }
+            graph.r*=r;
             draw();
             cancel();
             break;
@@ -2900,23 +2939,54 @@ id('i3').addEventListener('change',function() { // CHANGE OTHERS TO MATCH BOX
 });
 id('i5').addEventListener('change',function() {
 	var r=parseInt(id('i5').value);
-    console.log('set corner radius to '+r);
-    graph.radius=r;
-    // showDialog('filletDialog',false);
-    // info(null); // WAS showInfo(false);
+    console.log('set radius to '+r);
+    if(graph.type=='box') graph.radius=r;
+    else if(graph.type=='arc') { // change arc radius
+    	dx=graph.points[1].x-graph.cx;
+    	dy=graph.cy-graph.points[1].y;
+    	dx*=r/graph.r;
+    	dy*=r/graph.r;
+    	graph.points[1].x=graph.cx+dx;
+    	graph.points[1].y=graph.cy-dy;
+    	dx=graph.points[2].x-graph.cx;
+    	dy=graph.cy-graph.points[2].y;
+    	dx*=r/graph.r;
+    	dy*=r/graph.r;
+    	graph.points[2].x=graph.cx+dx;
+    	graph.points[2].y=graph.cy-dy;
+    	graph.r=r;
+    }
     draw();
-    // cancel();
+    cancel();
 });
 id('i7').addEventListener('change',function() {
     var val=parseInt(id('i7').value);
-    console.log('set spin to '+val+' degrees');
-    element=id(index);
-    graph.spin=val;
-    console.log('set points for spin '+graph.spin);
-    graph.points=setPoints(graph);
-    graphs[index]=graph;
-    id('bluePolygon').setAttribute('points','0,0');
+    if(graph.type=='arc') { // adjust arc angle...
+    	dx=graph.points[1].x-graph.cx;
+    	dy=graph.cy-graph.points[1].y;
+    	var a=Math.atan(dx/dy)*180/Math.PI; // degrees to start point
+    	console.log('angle to start: '+a);
+    	if(graph.sweep>0) a+=val; // degrees to end point - clockwise...
+    	else a-=val; // ... or anticlockwise
+    	console.log('angle to end: '+a);
+    	a*=Math.PI/180; // radians
+    	dx=graph.r*Math.sin(a);
+    	dy=graph.r*Math.cos(a);
+    	console.log('end point from centre: '+dx+','+dy);
+    	graph.points[2].x=graph.cx+dx;
+    	graph.points[2].y=graph.cy-dy;
+    }
+    else { // ...or adjust spin
+    	console.log('set spin to '+val+' degrees');
+    	element=id(index);
+    	graph.spin=val;
+    	console.log('set points for spin '+graph.spin);
+    	graph.points=setPoints(graph);
+    	graphs[index]=graph;
+    	id('bluePolygon').setAttribute('points','0,0');
+    }
     draw();
+    cancel();
 });
 // FUNCTIONS
 function action() {
@@ -3666,6 +3736,13 @@ function remove(n,keepNodes) {
     graphs.splice(n,1); // remove graph
     // draw();
 	// NO NEED... while(linkedDims.length>0) remove(linkedDims.pop()); // remove any linked dimensions
+}
+function reset() {
+	console.log('RESET!');
+	graphs=[];
+	sets=[];
+	save();
+	load();
 }
 function rezoom() {
 	w=Math.round(scr.w*scaleF/zoom);
