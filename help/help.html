@@ -13,6 +13,15 @@
 			font-weight: bold;
 			color: #000088;
 		}
+		h2 {
+			margin-top: 2em;
+		}
+		.border {
+			border: gray solid 1px;
+		}
+		.invert {
+			transform: rotate(180deg);
+		}
 	</style>
 </head>
 <body>
@@ -21,26 +30,31 @@
 PWAs can be run online like any web app but can also be installed on your device via the menu in your browser.</p>
 <p>The app uses SVG - scalable vector graphics - and is general-purpose but especially useful for technical drawings.</p>
 <p>You can select various drawing sizes up to A4 in portrait or landscape orientations and you can draw to scale, organising drawings on up to 10 layers. Accurate drawing is aided by 'snap' to drawing elements, to a grid or orthogonally.</p>
-<p>Keep reading and tap links to jump to particular sections.</p>
+<p>Tap links (in blue) to jump to particular topics.</p>
 <h2>screen layout</h2>
 <p>Toolboxes appear on the left of the screen with either <a href='#draw'>drawing tools</a> or <a href='#edit'>editing tools</a>.</p>
-<p>Whichever toolbox is visible there will be the <a href='#styles'>styles</a> box at the top with <a href='#layers'>layers</a> below it.</p>
-<p>While drawing or editing elements you will often have <a href='#info'>information</a> at the top of the screen, and sometimes you will interact with <a href='#dialogs'>dialog boxes which appear at the top left corner.</a></p>
+<p>Whichever toolbox is visible there will be the <a href='#styles'>styles</a> box at the top-left with <a href='#layers'>layers</a> below it.</p>
+<p>While drawing or editing elements you will often have <a href='#info'>information</a> at the top of the screen, and sometimes you will interact with 
+<a href='#dialogs'>dialog boxes</a> which appear at the top left corner.<br>
+At the top-right corner is the <i>more</i> button for other options. <img src='../svg/more.svg'></p>
 <p>The sequence is <a href='#draw'>draw</a>, <a href='#select'>select</a>, <a href='#edit'>edit</a> and <a href='#files'>save</a>.</p>
-<p><img src='screen.png'></p>
+<p><img src='screen.png' class='border'></p>
 <h2 id='draw'>Draw</h2>
-<p>Drawing is slightly different for the various drawing tools but usually involves tapping or dragging to position and size a drawing element. You use a mouse or a touch screen.</p>
+<p>Drawing is slightly different for the various drawing tools but usually involves tapping or dragging to position and size a drawing element. You use a mouse or a touch screen. 
+The draw toolbox also includes tools for loading and saving files and controlling your view of the drawing.</p>
 <p><img src='../svg/document.svg'><br>
 The document tool displays the <b>DRAWING</b> information - size, orientation and scale. You set these when you started a new drawing.</p>
 <p><img src='drawing.png'><br>
 You can choose a grid size and whether to 'snap' elements to the grid, and there are buttons for saving drawings, starting new drawings and loading saved ones - see the <a href='#files'>files</a> section.</p>
-</p>
 <p><img src='../svg/zoomin.svg'> <img src='../svg/zoomout.svg'> <img src='../svg/extents.svg'> <img src='../svg/pan.svg'><br>
 The view controls let you <i>zoom</i> in or out (doubling or halving the magnification) or quickly return to the initial magnification and drawing position after zooming or moving around the drawing with the <i>pan</i> tool. The zoom tools are single-tap but you drag the drawing after tapping pan.</p>
 <p><img src='../svg/curve.svg'><br>
 The <i>curve</i> tool lets you draw smoothed Bezier curves by dragging and the curve is drawn when you release the mouse button or lift your finger or stylus from a touchscreen.</p>
 <p><img src='../svg/line.svg'><br>
-Use the <i>line</i> tool to draw lines and shapes. Drag to draw a line segment. If you just want a single line, tap again at the end point. Otherwise, lifting the pointer ends the first segment and starts the next one. A tap at the end point finishes the line(s) and there is a limit of 10 segments. If you end a segment close to the start of the lines you will have a closed polygonal <i>shape</i>. While you are dragging a line segment you will see its length and direction at the top of the screen. Directions are shown as on a compass - degrees clockwise from 'north' at the top.</p>
+Use the <i>line</i> tool to draw lines and shapes. Drag to draw a line segment. If you just want a single line, tap again at the end point. Otherwise, lifting the pointer ends the first segment and starts the next one. 
+A tap at the end point finishes the line(s) and there is a limit of 10 segments. If you end a segment close to the start of the lines you will have a closed polygonal <i>shape</i>. 
+While you are dragging a line segment you will see its length and direction at the top of the screen. Directions are shown as on a compass - degrees clockwise from 'north' at the top. 
+Next to this information is a 'FINISH' button. Tapping this will end the line in the same way as a double-tap.</p>
 <p><img src='../svg/box.svg'><br>
 The <i>box</i> tool draws rectangles and squares. As you drag from a corner, the width and height will be shown and there is a degree of 'snap' making it easy to draw a square.</p>
 <p><img src='../svg/oval.svg'><br>
@@ -61,9 +75,9 @@ Tap the DIMENSION button to move on to positioning the dimension.
 Dimensions are associated with the elements they are attached to and move with elements if they are moved and are recalculated if elements are resized. You cannot, though, have dimensions attached to separate elements.<br>
 <img src='dimension.png'></p>
 <p><img src='../svg/set.svg'><br>
-Draft allows you to combine a number of drawing elements - boxes, lines, ovals, text, etc. - into <i>sets</i> A set can be any more complex item that yoou might want to repeat easily or which you might use in other drawings. 
-There is more about sets below, but this tool is how you add a set to your drawing: it brings up a list of the sets you have available and the one you choose is added - easy!.<br>
-<img src='set.png'></p>
+Draft allows you to combine a number of drawing elements - boxes, lines, ovals, text, etc. - into <i>sets</i> A set can be any more complex item that you might want to repeat easily or which you might use in other drawings. 
+There is more about <a href='#sets'>sets</a> below, but this tool is how you add a set to your drawing: it brings up a list of the sets you have available and the one you choose is added - easy!.<br>
+<img src='sets.png'></p>
 <h2>Select</h2>
 <p>Tapping any drawing element will select it allowing you to view its properties and move, edit or delete it if you wish. 
 Blue guides are shown: lines denoting the shape of the element, a circle <i>mover</i> handle, one or more <i>sizer</i> handles, and small dots at nodes. 
@@ -72,17 +86,150 @@ When you select elements the drawing tools are replaced by editing tools .
 In this example the selected box has <i>spin</i> (it has 30&deg; rotation) but the sizing box remains un-rotated to aid orthogonal snapping.</p>
 <p>The selected element's <i>style</i> is reflected in the style box at the top left and its size and spin are shown in the information panel. 
 When no elements are selected the style box shows the current default styling, used for new drawing elements.</p>
-<p><img src='select.png'></p>
+<p><img src='select.png' class='border'></p>
 <p>You can select more then one element at a time, by tapping on the ones you want or by dragging a selection box around them. 
 In this case styling and sizes differ from one element to another so no styling or sizes are shown, while blue rectangles indicate which elements are selected. 
 You can drag them all at once or perform other operations such as aligning them. 
 Tapping any blank part of the drawing cancels the selection and switches back to the drawing tools.</p>
-<h2>edit</h2>
+<h2 id='edit'>Edit</h2>
 <p>You can make changes to any selected drawing element, including the styling of the element or which layer it appears on, but styles and layers are described below.</p>
 <p><img src='../svg/add.svg'><br>
-The <i>add tool</i> is used to add segments to curves, lines or shapes. Tap add then tap a node. A new node will be inserted or appended after the node you choose and can then be dragged if you wish.</p>
+The <i>add tool</i> is used to add segments to curves, lines or shapes. Tap add then tap a node.<br>
+A new node will be inserted or appended after the node you choose and can then be dragged if you wish.</p>
 <p><img src='../svg/cross.svg'><br>
 The reverse is <i>remove</i>. This tool is used to remove nodes (and thus segments) from curves, lines and shapes or to delete whole elements or all selected elements.<br>
-<img src='remove.png'></p>
+<img src='delete.png'></p>
+<p><img src='../svg/up.svg'><img src='../svg/up.svg' class='invert'><br>
+Elements are drawn in order and elements early in the order my be oabscured by subsequent elements.<br>
+These tools bring a selected element <i>forward</i> or push it <i>back</i>, changing the order.</p>
+<p><img src='../svg/move.svg'><br>
+The <i>move</i> tool brings up an dialog where you can say how far you want the selected element(s) to move using either cartesian or polar coordinates.<br>
+Cartesian coordinates move elements to the right and/or down (or left and up if negative values are entered) 
+while polar coordinates move the selection a given distance in a particular direction (equivalent to compass bearings).<br>
+<img src='moveDialog.png'></p>
+<p><img src='../svg/spin.svg'><br>
+To rotate elements use the <i>spin</i> tool. This brings up the spin dialog for you to say how much you want to rotate an element or collection of elements.<br>
+Enter a number of degrees of (clockwise) roatation. To spin anticlockwise use a negative angle.<br>
+Each element is rotated about its <i>mover</i> handle and if more than one element is selected they are all rotated around the handle of the first element selected. 
+Spin here is relative - if and element has already been rotated, its spin is adjusted by the amount you enter.<br>
+You can also set the spin or rotation of a selected element by entering a number of degrees (typically in the range +/-180) in the last information box at the top of the screen.<br>
+<img src='spinDialog.png'></p>
+<p><img src='../svg/flip.svg'><br>
+The <i>flip</i> tool reverses the orientation of an element either left-to-right or top-to-bottom, flipping it about its <i>mover</i>.<br>
+You simply tap on one of the to flip directions in the dialog.<br>
+<img src='flipDialog.png'></p>
+<p><img src='../svg/align.svg'><br>
+If you have selected more than one element you can line them up using the <i>align</i> tool.<br>There are six options: align by left, right, top, bottom or centre horizontally or vertically.<br>
+<img src='alignDialog.png'></p>
+<img src='../svg/copy.svg'><br>
+The <i>copy</i> tool is the first and simplest of three ways of duplicating elements.<br>
+Tapping it creates a duplicate copy of the seected element in the same location.<br>
+There is no visible change but you can select the new copy and drag it to a new location or change its layer to duplicate elements on multiple layers.
+<p><img src='../svg/double.svg'><br>
+Another way to duplicate an element is to <i>double</i> it.<br>
+Enter an offset dimension in the dialog and a parallel copy will appear.<br>
+Double lines can be quickly formed, adding the new line to the right or left (negative offsets), or  you can double a box or oval bigger or smaller (negative offsets) than the original.<br>
+<img src='doubleDialog.png'></p>
+<p><img src='../svg/repeat.svg'><br>
+Use the <i>repeat</i> tool to create multiple copies of an element in one or two dimensions.<br>
+The copies are arranged in rows and/or columns.<br>
+Enter the total number you want in a row and/or the number of rows, along with the horizontal and/or vertical offset(s).<br>
+As in the move dialog, use negative offsets to copy to the left or upwards.<br>
+<img src='repeatDialog.png'></p>
+<p><img src='../svg/set.svg'><br>
+The <i>join</i> tool is used to combine selected elements to create a <i>set</i>.<br>
+Sets make it easy to add predefined figures to a drawing. They can also be saved for use in other drawings.<br>
+Draw your original figure using whatever elements you need then select these elements and tap <i>join</i>.<br>
+The <i>mover</i> handle of the first element you select will be the handle of the set.<br>
+<img src='joinDialog.png' class='border'></p>
+<h2 id='info'>Information</h2>
+<p>When you select a drawing element you will often see some information about it at the topof the screen.<br>
+The information displayed varies according to the context. In this example - for a box with round corners - you have...<br>
+<ul>
+	<li>the element type</li>
+	<li>its size - width x height</li>
+	<li>the corner radius</li>
+	<li>its spin or rotation</li>
+</ul>
+<img src='info.png' class='border'></p>
+<p>Also visible here are the blue guide lines which will appear during selection and editing operations.<br>
+They attach to a node when the cursor is close and help you align either horizontally or vertically with another element.</p>
+<p>Sometimes you will see an action button after the size fields...<br>
+<b>FINISH</b> is an alternative way of ending a line or series of lines.<br>
+<b>EDIT</b> allows you to amend or add to text.</p>
+<p>You will often see scrolling <i>hints</i> either below the information fields or on their own at the top of the screen.<br>
+These are intended to provide contextual help.</p>
+<h2 id='dialogs'>Dialogs</h2>
+<p>Dialogs can have several types of content. Some have a title button at the top which you tap to confirm settings, others just have a title.<br>
+Some have fields for you to enter numbers or text.<br>
+Some have a series of options.<br>
+Some have option icons or colours or patterns.<br>
+Dialogs disappear when you confirm a choice or, sometimes, as soon as you tap an option, and if you change your mind, just tapping somewhere outside the dialog will cancel it.<br>
+The <i>clear</i> button, which appears in several dialogs, is a quick way of resetting all fields. Otherwise, values will remain set which can help where you want to repeat operations for several elements.<br>
+<img src='../svg/clear.svg'></p>
+<h2 id='styles'>Styles</h2>
+<p>Styles dictate the appearance of drawing elements. To see the options, tap the <i>styles</i> box at the top-left.<br>
+<img src='stylesDialog.png'><br>
+If an element is selected, the <i>styles</i> dialog shows the styling of the element, otherwise it shows the current defaults.<br>
+Similarly, changing the style will either affect a selected element or change the default.<br>
+The top line is for <b>line</b> style: lines can be continuous (solid), dashed, dotted or invisible (none);<br>
+Line ends and corners can be square or rounded and there are four pen widths - from 0.25 to 2mm.<br>
+Next is <b>text</b> which can be one of four typefaces, normal (fine), bold or italic in 5 sizes<br>
+The colour box after the text styles is used to set the colour of both lines and text, choosing from 64 colours.<br>
+Closed shapes such as boxes can have <b>fill</b>: solid, pattern or none. The default white fill looks like no fill but makes elements easier to select.<br>
+Pattern fill uses the current fill colour (the same 64 colours) for one of 15 designs.<br>
+<img src='patternDialog.png'><br>
+Finally, <b>opacity</b> and <b>blur</b> apply to the whole element and each have four gradations.</p>
+<h2 id='layers'>Layers</h2>
+<p><img src='layersButton.png'><br>
+You can organise drawings on just one or up to 10 layers.<br>
+The <i>layers</i> button shows the current layer or that of a selected element and brings up a dialog.<br>
+You can select which layer you are working on and which layers are visible, and you can give layers names.<br>
+You can also choose whether to work on just the current layer or any visible layer.</p>
+<p>If you have an element selected the layers button shows which layer it is on. 
+If you want to move it to another layer, tap the button and choose a layer from the list.</p>
+<img src='layersDialog.png'><br>
+Here layers are used for different storeys in a building. With more than one layer visible, you can see how one level relates to another.<br>
+With just one layer visible you can see just one storey and save that floor plan for printing.<br>
+There are other ways to organise layers. One layer could be reserved for reference and guide lines,<br>
+different layers could represent phases of development or different utilities such as power, water and drainage.<br>
+It's up to you - fill your boots!</p>
+<h2 id='sets'>Sets</h2>
+<img src='../svg/set.svg'><br>
+<p>Suppose you are drawing an electronics circuit with several diodes.<br>
+You can draw one diode using a black triangle and a line, use <i>repeat</i> to draw a number of copies, then select each in turn, dragging them to new locations, or...<br>
+You can select both the triangle and the line (starting by tapping the centre of the apex of the triangle to use as a handle) and tap <i>join</i>.<br>
+Name the set 'diode' then you can place as many diodes as you like using the <i>set</i> tool.</p>
+The <i>set</i> tool in the draw toolbox and the <i>join</i> tool in the edit toolbox look the same and complement each other.<br>
+<p>If you create a few different sets while drafting a drawing or diagram you can easily save them for use another time.<br>
+Tap the <i>document</i> tool then choose <b>SAVE</b>. Choose the sets you want to include, enter a name ("electronics"?) and save your set (or set of sets)<br>
+Next time you want to produce a similar drawing or diagram, choose <b>LOAD</b> from the document menu and find the set file to import.</p>
+<p><img src='setSaveDialog.png'><img src='loadSetDialog.png'></p>
+<p>Electronics symbols is on idea for a set of sets but there are many, many more...<br>
+as an architect I would have kitchen or bathroom fittings, furniture, lighting and other electrical symbols, graphic elements like north points.<br>
+A civil engineer might have sets for drainage and utilities, street lighting, road signs,...<br>
+Whatever your discipline, if you are drafting there will be sets you can create.</p>
+<h2 id='documents'>Documents</h2>
+<img src='../svg/document.svg'><br>
+The <i>document</i> tool gives access to files of three types: data, drawings and sets.<br>
+We looked at creating <b>NEW</b> drawings earlier, but you will also <b>LOAD</b> and <b>SAVE</b> files.
+<p>You can LOAD drawings - the drawing data - or sets (or sets of sets).<br>
+Loading sets makes them available for use in your drawing, while loading a drawing replaces any current drawing, so remember to SAVE first!</p>
+<p>You can SAVE the drawing data - defining the whole drawing, the current view as a file you can print, or one or more sets as described above.</p>
+<p>Drawing data and sets are each saved in JSON format (JavaScript Object Notation) while drawings for viewing or printing are saved in SVG format.<br>
+View them on screen and choose the 'print' option.<br>
+Setting the print options to fit the  paper (no margins) at default or 100% scale will usually print a drawing accurately to scale.<br>
+You also have the option of 'printing' to PDF - possibly a more portable format.</p>
+<p>Files could for example be saved in a 'Draft' folder with sub-folders for drawings and sets, or in individual folders for different projects. It's up to you.</p>
+<h2>More</h2>
+<img src='../svg/more.svg'><br>
+<p>The <i>more</i> button gives access to four additional options...<br>
+<b>Help</b>: you're looking at it!<br>
+<b>Reload</b>: Simply reloads the current drawing - useful if something has gone a bit wrong (Draft is under constant development).<br>
+<b>Reset</b>: For when things go more than a bit wrong (the emergency button) - restarts the app. You should not lose anything.<br>
+<b>Feedback</b>: email me with suggestions, complaints, questions, ideas, and I will try to respond.<br>
+<img src='moreDialog.png'></p>
+<h2>Enjoy!</h2>
+Elvin Ibbotson 2025
 </body>
 </html>
