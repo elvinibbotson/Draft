@@ -152,12 +152,14 @@
         <!--button class='menuButton' onclick='showMore()'></button-->
     </div>
     <div id='info'>
+    	<div id='sizes'>
     	<span id='type' class='info'></span>&nbsp;
         <input id='i1' type='number'/><span id='i2' class='info'>x</span>
         <input id='i3' type='number'/><span id='i4' class='info'> r</span>
         <input id='i5' type='number'/><span id='i6' class='info'>mm @</span>
         <input id='i7' type='number'/><span id='i8' class='info'>&deg;</span>
         <button id='actionButton' onclick='action();'>FINISH</button>
+        </div>
         <div id='hint'></div>
     </div>
     <div id='layerChooser' class='dialog'>
@@ -291,7 +293,7 @@
     <div id='saveDialog' class='dialog'>
         <button id='confirmSave'>SAVE</button><br>
         <input type='radio' name='saveMethod' id='data' checked>
-        <label for='data'>drawing (json)</label><br>
+        <label for='data'>drawing data (json)</label><br>
         <input type='radio' name='saveMethod' id='print'>
         <label for='print'>drawing as SVG (to print)</label><br>
         <input type='radio' name='saveMethod' id='sets'>

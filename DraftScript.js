@@ -300,7 +300,7 @@ id('confirmSave').addEventListener('click',async function() {
     else if(id('print').checked) {
     	console.log('save drawing as SVG - size is '+dwg.w+'x'+dwg.h);
     	id('datumSet').style.display='none';
-    	var content='<svg xmlns="http://www.w3.org/2000/svg" width="'+dwg.w+'mm" height="'+dwg.h+'mm" viewBox="0 0 '+dwg.w+' '+dwg.h+'">';
+    	var content='<svg xmlns="http://www.w3.org/2000/svg" width="'+dwg.w+'mm" height="'+dwg.h+'mm" viewBox="0 0 '+(dwg.w*scale)+' '+(dwg.h*scale)+'">';
     	var elements=id('dwg').children;
     	for(var i=0;i<elements.length;i++) {
     		var el=elements[i];
@@ -318,28 +318,20 @@ id('confirmSave').addEventListener('click',async function() {
 		id('datumSet').style.display='block';
     }
     else { // save set(s)
+    	console.log('save selected sets');
     	var selectedSets=[];
-    	var request=db.transaction('sets','readonly').objectStore('sets').openCursor();
-    	request.onsuccess=function(event) {
-    		var cursor=event.target.result;
-        	if(cursor) {
-				var setName=cursor.value.name;
-				if(id('$'+setName).checked) selectedSets.push({name:setName, svg:cursor.value.svg});
-            	cursor.continue();
-        	}
-        	else {
-            	// console.log('all sets checked '+selectedSets.length+' selected');
-            	var json='{"sets":[';
-            	for(var i=0;i<selectedSets.length;i++) {
-            		json+='{"name":"'+selectedSets[i].name+'","svg":"'+selectedSets[i].svg+'"}';
-            		if(i<selectedSets.length-1) json+=','; // separate sets
-            	};
-            	json+=']}';
-            	// console.log('save sets JSON: '+json);
-            	write('',json,'json');
-        	}
+    	for(var i=0;i<sets.length;i++) {
+    		console.log('set '+i+': '+sets[i].name);
+    		if(id('$'+sets[i].name).checked) selectedSets.push({name:sets[i].name, svg:sets[i].svg});
     	}
-		request.onerror=function(e) { console.log('failed to check setst');}
+    	var json='{"sets":[';
+    	for(i=0;i<selectedSets.length;i++) {
+    		json+='{"name":"'+selectedSets[i].name+'","svg":"'+selectedSets[i].svg+'"}';
+            if(i<selectedSets.length-1) json+=','; // separate sets
+        };
+        json+=']}';
+        console.log('sets JSON: '+json);
+        write('',json,'json');
     }
     showDialog('saveDialog',false);
 });
@@ -452,10 +444,10 @@ id('setButton').addEventListener('click',function() {
     id('tools').style.display='none';
 });
 id('setList').addEventListener('change',function() {
-    // console.log('choose '+event.target.value);
+    console.log('choose '+event.target.value);
     setID=event.target.value;
-    // console.log('set '+setID+' picked');
-	// console.log('place set '+setID);
+    console.log('set '+setID+' picked');
+	console.log('place set '+setID);
     var graph={};
 	graph.type='set';
 	graph.name=setID;
@@ -583,13 +575,18 @@ id('confirmMove').addEventListener('click',function() {
     }
     if(selection.length<1) selection.push(index);
     if(selectedPoints.length>0) { // move all selected points in a line or shape...
-        var points=element.points;
+        // var points=graph.points;
         while(selectedPoints.length>0) {
             var n=selectedPoints.pop();
-            points[n].x+=moveX;
-            points[n].y+=moveY;
+            console.log('adjust point '+n+' from '+graph.points[n].x+','+graph.points[n].y);
+            graph.points[n].x+=moveX;
+            graph.points[n].y+=moveY;
+            console.log('to '+graph.points[n].x+','+graph.points[n].y);
         }
-        updateGraph(index,['points',element.getAttribute('points')]);
+        console.log('update graph '+index);
+        graphs[index]=graph;
+        draw();
+        // updateGraph(index,['points',points]);
     }
     else
     move(moveX,moveY);
@@ -826,7 +823,7 @@ id('alignOptions').addEventListener('click',function() {
     y=Math.floor((event.clientY-y0+5)/32); // 0 or 1
     // console.log('x: '+x+' y: '+y);
     var opt=y*3+x; // 0-5
-    // console.log('option '+opt);
+    console.log('option '+opt);
     var el=id(selection[0]);
     var box=getBounds(el);
     var minX=box.x;
@@ -844,14 +841,17 @@ id('alignOptions').addEventListener('click',function() {
     }
     var midX=(minX+maxX)/2;
     var midY=(minY+maxY)/2;
-    // console.log('overall box '+minX+'-'+maxX+'x'+minY+'-'+maxY);
-    for(i=0;i<selection.length;i++) {
-    	index=selecton[i];
-    	graph=graphs[index];
-    	element=id(index);
+    console.log('overall: '+minX+'-'+maxX+'x'+minY+'-'+maxY);
+    var fig=[]
+    for(i=0;i<selection.length;i++) fig[i]=selection[i];
+    selection=[];
+    for(i=0;i<fig.length;i++) {
+    	selection[0]=Number(fig[i]); // limit selection to each graph in turn (for move() function)
+    	graph=graphs[selection[0]];
+    	element=id(selection[0]);
         // el=id(selection[i]);
         box=getBounds(element);
-        // console.log('move '+el.id+'?');
+        console.log('move graph '+selection+' element '+element.id+'?');
         switch(opt) {
             case 0: // align left
                 if(box.x>minX) move((minX-box.x),0);
@@ -1201,10 +1201,13 @@ id('confirmJoin').addEventListener('click',function() {
     var ay=anchor.y;
     console.log('set anchor: '+ax+','+ay);
     var json='{"name":"'+name+'","svg":"';
-    for(var i in selection) {
+    for(var i=0;i<selection.length;i++) {
     	el=id(selection[i]);
     	graph=graphs[selection[i]];
-    	if((graph.type=='dim')||(graph.type=='set')) contrinue; // don't include dimensions or sets
+    	console.log('element '+i+': '+graph.type);
+    	if((graph.type=='dim')||(graph.type=='set')) continue; // don't include dimensions or sets
+    	var j=0;
+    	var pts='';
     	switch(graph.type) {
     		case 'curve':
     			var pts=graph.points;
@@ -1215,18 +1218,22 @@ id('confirmJoin').addEventListener('click',function() {
     			json+="<path d='"+curvePath(pts)+"'";
     			break;
     		case 'line':
-    			var pts='';
-    			for(var j in graph.points) {
-    				pts+=(graph.points[j].x-ax)+','+graph.points[j].y-ay+' ';
+    			pts='';
+    			for(j=0;j<graph.points.length;j++) {
+    				console.log('point '+j+': '+graph.points[j].x+','+graph.points[j].y);
+    				pts+=(graph.points[j].x-ax)+','+(graph.points[j].y-ay)+' ';
     			}
+    			console.log('line points: '+pts);
     			json+="<polyline points='"+pts+"'";
     			break;
     		case 'shape':
-    			var pts='';
+    			pts='';
     			for(var j in graph.points) {
     				pts+=(graph.points[j].x-ax)+','+graph.points[j].y-ay+' ';
     			}
-    			json+="<polygon points='"+pts+"'";
+    			json+="<polygon points='";
+    			for(j in pts) json+=pts[j].x+","+pts[j].y+" ";
+    			json+="'";
     			break;
     		case 'box':
     			json+="<rect x='"+(graph.x-ax)+"' y='"+(graph.y-ay)+"' width='"+graph.width+"' height='"+graph.height+"'";
@@ -1242,7 +1249,7 @@ id('confirmJoin').addEventListener('click',function() {
     			json+=" A "+graph.rx+","+graph.ry+" "+graph.spin+" 1,1 "+pts[1].x+","+pts[1].y+"' ";
     			break;
     		case 'arc':
-    			var d="M "+(graph.x1-ax)+","+(graph.y1-ay)+" A "+graph.rx+","+graph.ry+" "+graph.major+","+graph.sweep+" "+(graph.x2-ax)+","+(graph.y2-ay);
+    			var d="m "+(graph.points[1].x-ax)+","+(graph.points[1].y-ay)+" a "+graph.r+","+graph.r+" 0 "+graph.major+","+graph.sweep+" "+(graph.points[2].x-graph.points[1].x)+","+(graph.points[2].y-graph.points[1].y);
     			json+="<path d='"+d+"'";
     			break;
     		case 'text':
@@ -1254,7 +1261,7 @@ id('confirmJoin').addEventListener('click',function() {
                 json+=">"+el.getAttribute('text')+"</text>";
     	}
         if(graph.type!='text') { // set style and complete svg
-            json+="stroke=\'"+el.getAttribute('stroke')+"\' stroke-width=\'"+el.getAttribute('stroke-width')+"\' ";
+            json+=" stroke=\'"+el.getAttribute('stroke')+"\' stroke-width=\'"+el.getAttribute('stroke-width')+"\' ";
             var val=el.getAttribute('stroke-dasharray');
             if(val) json+="stroke-dasharray=\'"+val+"\' ";
             json+="fill=\'"+el.getAttribute('fill')+"\' ";
@@ -1266,8 +1273,9 @@ id('confirmJoin').addEventListener('click',function() {
     json+='"}';
     console.log('save set '+name+' - JSON: '+json);
     sets.push(json);
-    window.localStorage.setItem('sets',sets);
-    console.log(sets.length+' sets; first is '+sets[0]);
+    save();
+    // window.localStorage.setItem('sets',sets);
+    console.log(sets.length+' sets; first is '+sets[0].name);
     listSets();
     showDialog('joinDialog',false);
 });
@@ -2939,7 +2947,7 @@ id('i3').addEventListener('change',function() { // CHANGE OTHERS TO MATCH BOX
 });
 id('i5').addEventListener('change',function() {
 	var r=parseInt(id('i5').value);
-    console.log('set radius to '+r);
+    console.log('set length/radius to '+r);
     if(graph.type=='box') graph.radius=r;
     else if(graph.type=='arc') { // change arc radius
     	dx=graph.points[1].x-graph.cx;
@@ -2955,6 +2963,17 @@ id('i5').addEventListener('change',function() {
     	graph.points[2].x=graph.cx+dx;
     	graph.points[2].y=graph.cy-dy;
     	graph.r=r;
+    }
+    else if(graph.type=='line') {
+    	console.log('adjust line length');
+    	dx=graph.points[1].x-graph.points[0].x;
+    	dy=graph.points[1].y-graph.points[0].y;
+    	var d=Math.sqrt((dx*dx)+(dy*dy));
+    	console.log('from '+d+' to '+r);
+    	dx*=r/d;
+    	dy*=r/d;
+    	graph.points[1].x=graph.points[0].x+dx;
+    	graph.points[1].y=graph.points[0].y+dy;
     }
     draw();
     cancel();
@@ -2975,6 +2994,17 @@ id('i7').addEventListener('change',function() {
     	console.log('end point from centre: '+dx+','+dy);
     	graph.points[2].x=graph.cx+dx;
     	graph.points[2].y=graph.cy-dy;
+    }
+    else if(graph.type=='line') {
+    	console.log('adjust line angle to '+val);
+    	dx=graph.points[1].x-graph.points[0].x;
+    	dy=graph.points[1].y-graph.points[0].y;
+    	var d=Math.sqrt((dx*dx)+(dy*dy));
+    	var a=val*Math.PI/180; // radians
+    	dx=Math.round(d*Math.sin(a));
+    	dy=Math.round(d*Math.cos(a));
+    	graph.points[1].x=graph.points[0].x+dx;
+    	graph.points[1].y=graph.points[0].y-dy;
     }
     else { // ...or adjust spin
     	console.log('set spin to '+val+' degrees');
@@ -2999,7 +3029,7 @@ function action() {
 	}
 }
 function addGraph(graph) {
-    // console.log('add '+graph.type+' element - spin: '+graph.spin+' to layer '+graph.layer);
+    console.log('add '+graph.type+' element - spin: '+graph.spin+' to layer '+graph.layer);
 	graphs.push(graph);
     draw();
 }
@@ -3223,7 +3253,6 @@ function draw() {
             for(var i=0;i<points.length;i++) {
             	var point=points[i];
             	elPts+=point.x+','+point.y+' ';
-            	// var point=points.getItem(i);
                 nodes.push({'x':point.x,'y':point.y,'n':Number(n*10+i)});
                 console.log('add node '+i+' at '+point.x+','+point.y);
             } // NB node.n is id*10+[0-9]
@@ -3248,7 +3277,6 @@ function draw() {
             for(var i=0;i<points.length;i++) {
             	var point=points[i];
             	elPts+=point.x+','+point.y+' ';
-            	// var point=points.getItem(i);
                 nodes.push({'x':point.x,'y':point.y,'n':Number(n*10+i)});
                 console.log('add node '+i+' at '+point.x+','+point.y);
             } // NB node.n is id*10+[0-9]
@@ -3641,7 +3669,8 @@ function listSets() {
         id('sets').innerHTML+=html; // copy set svg into <defs>...
         html="<option value='"+name+"'>"+name+"</option>";
         id('setList').innerHTML+=html; //...and set name into setList...
-        html="<li style='float:right'>"+name+"&nbsp;<input type='checkbox' id='$"+name+"' class='setChoice'></li><br>";
+        html="<li><input type='checkbox' id='$"+name+"' class='setChoice'>"+name+"&nbsp;</li>";
+        // html="<li style='float:right'>"+name+"&nbsp;<input type='checkbox' id='$"+name+"' class='setChoice'></li>";
         id('setChooser').innerHTML+=html; // ...and setChooser
         console.log('set added');
     }
@@ -3653,12 +3682,14 @@ function load() {
 		graphs=json.graphs;
 		sets=json.sets;
 		console.log(graphs.length+' graphs and '+sets.length+' sets loaded');
+		for(var i in sets) console.log('set '+i+': '+sets[i].name);
 	}
 	draw();
     setLayers();
     listSets();
 }
-function move(dx,dy) { // CHANGE OTHER TO MATCH BOX, ETC
+function move(dx,dy) {
+	console.log('move '+selection.length+' graphs');
 	for(var i in selection) {
 		index=selection[i];
 		graph=graphs[index];
@@ -3756,7 +3787,7 @@ function rezoom() {
     id('clipBox').setAttribute('height',dwg.h*scale);
 }
 function save() {
-	console.log('save '+graphs.length+' graphs');
+	console.log('save '+graphs.length+' graphs & '+sets.length+' sets');
 	var data={};
 	data.graphs=graphs;
 	data.sets=sets;
@@ -4003,12 +4034,12 @@ function select(n,multiple,s) {
 function setButtons() {
     var n=selection.length;
     // console.log('set buttons for '+n+' selected elements');
-    var active=[5,11,13,15]; // remove,move,spin,flip buttons always active (buttons are odd-number children of edit)
+    var active=[1,5,11,13,15]; // remove,move,spin,flip buttons always active (buttons are odd-number children of edit)
     if(n>1) { // multiple selection
-        active.push(17,27); // align & join active for multiple selection
+        active.push(17,25); // align & join active for multiple selection
     }
     else { // single element selected
-    	active.push(1,7,9,19,21,23); // layer, forward, back,copy,double,repeat only for single selection
+    	active.push(7,9,19,21,23); // layer, forward, back,copy,double,repeat only for single selection
         var t=graphs[selection[0]].type; // type(id(selection[0]));
         if((t=='line')||(t=='shape')) active.push(3); // can add points to selected line/shape
         else if(t=='box') active.push(25); // fillet tool active for a selected box
@@ -4032,14 +4063,26 @@ function setButtons() {
     }
 }
 function setLayer() {
-	// console.log('set element layer(s)');
+	console.log('set layer for '+selection.length+' graphs');
 	var layer;
+	var g;
+	var i;
+	for(var n in selection) {
+		g=graphs[selection[n]];
+		for(var i=0;i<10;i++) {
+			if(id('choice'+i).checked) layer=i;
+		}
+		g.layer=layer;
+		graphs[n]=g;
+	}
+	/*
 	for(var i=0;i<10;i++) {
 		if(id('choice'+i).checked) layer=i;
 	}
+	*/
 	id('layer').innerText=layer;
-	graph.layer=layer;
-	graphs[index]=graph;
+	// graph.layer=layer;
+	// graphs[index]=graph;
 	draw();
 }
 function setLayers() {
