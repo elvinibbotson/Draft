@@ -1,15 +1,18 @@
 // GLOBAL VARIABLES
 var graphs=[]; // array holds graphs
 var graph; // current graph
+var sets=[];
+var layers=[]; // array of layer objects
+var layer=0;
+var thisLayerOnly=false; // limit select & edit to current layer?
 var index; // index/id of current graph/element
 var element; // current HTML/SVG element
 var nodes=[]; // array of nodes each with x,y coordinates and graph/element index+n
 var elNodes=[]; // array of nodes for selected graph/element
 var node=0; // node number (0-9) within selected graph/element
-var sets=[];
 var name=null;
 var size=0; // drawing size default to A4
-var aspect='landscape'; // default orientation
+var aspect=null;
 var scale=1; // default scale is 1:1
 var scaleF=3.78; // default scale factor for mm (1:1 scale)
 var gridSize=5; // default grid size is 5mm (at default scale of 1:1)
@@ -42,9 +45,6 @@ var selection=[]; // list of elements in selectionBox
 var selectedPoints=[]; // list of selected points in line or shape
 var anchor={}; // node used to anchor spin, flip, set,...
 var dims=[]; // array of links between elements and dimensions
-var layers=[]; // array of layer objects
-var layer=0;
-var thisLayerOnly=false; // limit select & edit to current layer?
 var blueline=null; // bluePolyline
 var path=''; // bluePath definition
 var set=null; // current set
@@ -105,20 +105,33 @@ scr.w=window.innerWidth; // scr.w=screen.width;
 scr.h=window.innerHeight; // scr.h=screen.height;
 dwg.x=dwg.y=0;
 // console.log("screen size "+scr.w+"x"+scr.h);
+// NEW FORMAT FOR DRAWING DATA
+var data=window.localStorage.getItem('drawingData');
+if(data) {
+	var json=JSON.parse(data);
+	name=json.name;
+	size=json.size;
+	aspect=json.aspect;
+	scale=json.scale;
+	gridSize=json.gridSize;
+	gridSnap=json.gridSnap;
+}
+/*
 name=window.localStorage.getItem('name');
 size=window.localStorage.getItem('size');
 aspect=window.localStorage.getItem('aspect');
 scale=window.localStorage.getItem('scale');
 // gridSize=window.localStorage.getItem('gridSize');
 gridSnap=window.localStorage.getItem('gridSnap');
-layerData=window.localStorage.getItem('layers');
-if(name===null) name='unnamed';
+*/
+// if(name===null) name='unnamed';
 if(size===null) size=0;
 if(scale===null) scale=1;
 if(!gridSize) gridSize=(scale<20)?(scale*5):100; // default grid size depends on scale
 if(!gridSnap) gridSnap=0;
 // console.log('grid checked: '+id('gridSnap').checked);
 // console.log('name: '+name+'; aspect: '+aspect+'; scale: '+scale+'; grid: '+gridSize+' '+gridSnap);
+layerData=window.localStorage.getItem('layers');
 if(!layerData) { // initialise layers first time
 	layers=[];
 	for(var i=0;i<10;i++) {
@@ -198,6 +211,7 @@ id('new').addEventListener('click',function() {
     showDialog('newDrawingDialog',true);
 });
 id('createNewDrawing').addEventListener('click',function() {
+	name=null;
 	size=id('sizeSelect').value;
 	aspect=id('aspectSelect').value;
     scale=id('scaleSelect').value;
@@ -207,11 +221,14 @@ id('createNewDrawing').addEventListener('click',function() {
     dwg.w=widths[index];
     dwg.h=heights[index];
     console.log('drawing size '+dwg.w+'x'+dwg.h+'(index: '+index+')');
+    saveDrawingData(); // SAVE IN NEW FORMAT
+    /*
     window.localStorage.setItem('size',size);
     window.localStorage.setItem('aspect',aspect);
     window.localStorage.setItem('scale',scale);
     name='';
     window.localStorage.setItem('name',name);
+    */
     index=0;
     // CLEAR DRAWING IN HTML & DATABASE
     layer=0; // reset layers
@@ -231,7 +248,7 @@ id('createNewDrawing').addEventListener('click',function() {
     id('dwg').innerHTML=''; // clear drawing
     console.log('drawing cleared');
     showDialog('newDrawingDialog',false);
-    window.localStorage.setItem('name',name);
+    // window.localStorage.setItem('name',name);
     initialise();
 });
 id('load').addEventListener('click',function() {
@@ -244,11 +261,12 @@ id('confirmLoad').addEventListener('click',async function(){
 	var [handle]=await window.showOpenFilePicker();
 	// console.log('file handle: '+handle);
 	var file=await handle.getFile();
-	// console.log('load file '+file+' name: '+file.name+' type '+file.type+' '+file.size+' bytes');
+	console.log('load file '+file+' name: '+file.name+' type '+file.type+' '+file.size+' bytes');
+	console.log('load method '+method);
     var loader=new FileReader();
     loader.addEventListener('load',function(evt) {
     	var data=evt.target.result;
-    	// console.log('data: '+data.length+' bytes');
+    	console.log('data: '+data.length+' bytes');
     	var json=JSON.parse(data);
     	layers=json.layers;
     	if(method=='set') sets=json.sets;
@@ -257,19 +275,25 @@ id('confirmLoad').addEventListener('click',async function(){
     		console.log('load drawing '+name);
 			var n=name.indexOf('.json');
 			name=name.substr(0,n);
-			window.localStorage.setItem('name',name);
+			// window.localStorage.setItem('name',name);
 			id('dwg').innerHTML=''; // clear drawing
     		id('handles').innerHTML=''; // clear any edit handles
     		size=json.size;
     		aspect=json.aspect;
     		scale=json.scale;
+    		gridSize=json.gridSize;
+    		gridSnap=json.gridSnap;
     		console.log('size: '+size+'; aspect: '+aspect+'; scale: '+scale);
+    		saveDrawingData(); // SAVE IN NEW FORMAT FOR DRAWING DATA
     		initialise();
+    		layers=json.layers; // NEW - LAYERS SAVED WITH DRAWING
       		graphs=json.graphs;
-      		console.log(graphs.length+' graphs loaded');
-      		save();
-    		load();
+      		sets=json.sets; // NEW - SAVE SETS WITH DRAWING
+      		console.log(graphs.length+' graphs and '+sets.length+' sets loaded');
+      		setLayers(); // NEW
     	}
+    	save();
+    	load();
     });
 	loader.addEventListener('error',function(event) {
     	console.log('load failed - '+event);
@@ -287,10 +311,12 @@ id('confirmSave').addEventListener('click',async function() {
     	// console.log('save data to json file');
     	var data={};
     	if(name) data.name=name;
-    	data.layers=layers;
     	data.size=size;
     	data.aspect=aspect;
     	data.scale=scale;
+    	data.gridSize=gridSize;
+    	data.gridSnap=gridSnap;
+    	data.layers=layers;
     	data.graphs=graphs;
     	data.sets=sets;
     	// console.log('ready to save drawing data to file');
@@ -305,20 +331,34 @@ id('confirmSave').addEventListener('click',async function() {
     	for(var i=0;i<elements.length;i++) {
     		var el=elements[i];
     		// console.log('element '+el+': '+el.outerHTML+'; style: '+el.getAttribute('style')+'; fillType: '+el.getAttribute('fillType'));
-    		if(el.getAttribute('style')===null) content+=el.outerHTML;
+			if(el.href!=null) { // use content of set
+    			var name=el.href.baseVal.substr(1);el.getAttribute('y')+''
+    			console.log('SET: '+name);
+    			content+='<g transform="translate('+el.getAttribute('x')+','+el.getAttribute('y')+')';
+    			if(el.getAttribute('spin')!=null) content+=' rotate('+el.getAttribute('spin')+',0,0)';
+    			// if(el.getAttribute('spin')!=null) content+=' rotate('+el.getAttribute('spin')+','+el.getAttribute('x')+','+el.getAttribute('y')+')';
+    			content+='">';
+    			// content+='<g x="'+el.getAttribute('x')+'" y="'+el.getAttribute('y')+'">';
+    			content+=id(name).innerHTML;
+    			content+='</g>';
+    		}
+			else if(el.getAttribute('style')===null) content+=el.outerHTML;
     		else if(el.getAttribute('style').indexOf('none')<0) content+=el.outerHTML;
-    		if(el.getAttribute('fillType').startsWith('pattern')) {
-    			// console.log('PATTERN FILL: pattern'+el.id);
-	    		content+=id('pattern'+el.id).outerHTML; // include pattern definition
+    		if(el.getAttribute('fillType')!=null) {
+    			if(el.getAttribute('fillType').startsWith('pattern')) {
+    				// console.log('PATTERN FILL: pattern'+el.id);
+	    			content+=id('pattern'+el.id).outerHTML; // include pattern definition
+    			}
     		}
     	}
     	content+='</svg>';
-    	// console.log('SVG: '+content);
+    	console.log('SVG: '+content);
     	write(name,content,'svg');
 		id('datumSet').style.display='block';
     }
     else { // save set(s)
     	console.log('save selected sets');
+    	for(var i in sets) console.log('set '+i+': '+sets[i].name);
     	var selectedSets=[];
     	for(var i=0;i<sets.length;i++) {
     		console.log('set '+i+': '+sets[i].name);
@@ -1197,6 +1237,7 @@ id('confirmJoin').addEventListener('click',function() {
         alert('Enter a name for the set');
         return;
     }
+    if(scale==1) name='@'+name; // '@' flags that sets defined at scale 1 are not scaled
     var ax=anchor.x;
     var ay=anchor.y;
     console.log('set anchor: '+ax+','+ay);
@@ -1272,9 +1313,8 @@ id('confirmJoin').addEventListener('click',function() {
     }
     json+='"}';
     console.log('save set '+name+' - JSON: '+json);
-    sets.push(json);
+    sets.push(JSON.parse(json)); // sets holds objects
     save();
-    // window.localStorage.setItem('sets',sets);
     console.log(sets.length+' sets; first is '+sets[0].name);
     listSets();
     showDialog('joinDialog',false);
@@ -3400,6 +3440,13 @@ function draw() {
         		t+='translate('+(hor*g.x*2)+','+(ver*g.y)+') ';
         		t+='scale('+((hor>0)? -1:1)+','+((ver>0)? -1:1)+')';
             }
+            console.log('set name is '+g.name);
+            if(g.name.startsWith('@')) {
+            	// el.setAttribute('x',0);
+            	// el.setAttribute('y',0);
+            	t+='translate(-'+g.x+',-'+g.y+') scale('+scale+','+scale+')';
+            }
+            console.log('set transform is '+t);
             if(t.length>0) el.setAttribute('transform',t);
     	}
     	el.setAttribute('layer',g.layer); // layers element appears on
@@ -3661,11 +3708,14 @@ function listSets() {
 	id('setList').innerHTML="<option onclick='hint(\'select a set\');' value=null>select a set</option>"; // rebuild setLists
     id('setChooser').innerHTML=''; // clear setChooser list
     for(var i in sets) {
+    	/*
     	var json=JSON.parse(sets[i]);
     	var name=json.name;
     	var svg=json.svg;
         console.log('add set '+name+'; svg: '+svg);
-        var html="<g id='"+name+"'>"+svg+"</g>";
+        */
+        var name=sets[i].name;
+        var html="<g id='"+name+"'>"+sets[i].svg+"</g>";
         id('sets').innerHTML+=html; // copy set svg into <defs>...
         html="<option value='"+name+"'>"+name+"</option>";
         id('setList').innerHTML+=html; //...and set name into setList...
@@ -3681,11 +3731,18 @@ function load() {
 		var json=JSON.parse(data);
 		graphs=json.graphs;
 		sets=json.sets;
+		// NEW - UPDATE <sets> in <defs>
+		id('sets').innerHTML=''; // clear existing sets
 		console.log(graphs.length+' graphs and '+sets.length+' sets loaded');
-		for(var i in sets) console.log('set '+i+': '+sets[i].name);
+		for(var i in sets) {
+			// sets[i]=JSON.parse(sets[i]);
+			console.log('set '+i+': '+sets[i].name);
+			id('sets').innerHTML+='<g id="'+sets[i].name+'">'+sets[i].svg+'</g>'; // add set definition
+			console.log('set '+sets[i].name+' definition added');
+		}
 	}
 	draw();
-    setLayers();
+    // setLayers();
     listSets();
 }
 function move(dx,dy) {
@@ -3795,6 +3852,18 @@ function save() {
 	// console.log('saving...'+json);
 	window.localStorage.setItem('DraftData',json);
 	console.log(graphs.length+' graphs and '+sets.length+' sets saved');
+}
+function saveDrawingData() {
+	var data={};
+    data.name=name;
+    data.size=size;
+    data.aspect=aspect;
+    data.scale=scale;
+    data.gridSize=gridSize;
+    data.gridSnap=false; // default at start of drawing
+    var json=JSON.stringify(data);
+    window.localStorage.setItem('drawingData',json);
+    console.log('drawing data saved');
 }
 function select(n,multiple,s) {
 	console.log('select');
@@ -4099,9 +4168,9 @@ function setLayers() {
 	setLayerVisibility();
 }
 function setLayerVisibility() {
-	// console.log('set layer visibilities');
+	console.log('set layer visibilities');
 	for(var i=0;i<10;i++) {
-		// console.log('layer '+i+' show? '+id('layerCheck'+i).checked);
+		console.log('layer '+i+' show? '+id('layerCheck'+i).checked);
 		layers[i].show=id('layerCheck'+i).checked;
 	}
 	var data={};
@@ -4446,7 +4515,8 @@ async function write(fileName,data,type) {
 	if(!name) { // save drawing name at first save
 		name=handle.name;
 		if(name.indexOf('.')>0) name=name.substring(0,name.indexOf('.'));
-		window.localStorage.setItem('name',name);
+		// window.localStorage.setItem('name',name);
+		saveDrawingData();
 	}
 	var writable=await handle.createWritable();
     await writable.write(data);
