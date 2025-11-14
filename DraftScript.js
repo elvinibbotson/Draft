@@ -1,4 +1,3 @@
-// GLOBAL VARIABLES
 var graphs=[]; // array holds graphs
 var graph; // current graph
 var sets=[];
@@ -62,7 +61,7 @@ var textFont='monospace'; // sans-serif font
 var textStyle='fine'; // normal text
 var currentDialog=null;
 var sizes=['A4','A5','21cm square','15x10cm','18x13cm','20x15cm','25x20cm'];
-var widths=[297,210,210,150,180,200,250.210,148,210,100,130,150,200];
+var widths=[297,210,210,150,180,200,250,210,148,210,100,130,150,200];
 var heights=[210,148,210,100,130,150,200,297,210,210,150,180,200,250];
 var pattern=[];
 var tile=[];
@@ -222,13 +221,6 @@ id('createNewDrawing').addEventListener('click',function() {
     dwg.h=heights[index];
     console.log('drawing size '+dwg.w+'x'+dwg.h+'(index: '+index+')');
     saveDrawingData(); // SAVE IN NEW FORMAT
-    /*
-    window.localStorage.setItem('size',size);
-    window.localStorage.setItem('aspect',aspect);
-    window.localStorage.setItem('scale',scale);
-    name='';
-    window.localStorage.setItem('name',name);
-    */
     index=0;
     // CLEAR DRAWING IN HTML & DATABASE
     layer=0; // reset layers
@@ -258,11 +250,16 @@ id('load').addEventListener('click',function() {
 id('confirmLoad').addEventListener('click',async function(){
 	var method='drawing';
     if(id('set').checked) method='set';
+    if(id('image').checked) method='image';
 	var [handle]=await window.showOpenFilePicker();
 	// console.log('file handle: '+handle);
 	var file=await handle.getFile();
 	console.log('load file '+file+' name: '+file.name+' type '+file.type+' '+file.size+' bytes');
 	console.log('load method '+method);
+	if(method=='image') {
+		addImage(file);
+		return;
+	}
     var loader=new FileReader();
     loader.addEventListener('load',function(evt) {
     	var data=evt.target.result;
@@ -275,7 +272,6 @@ id('confirmLoad').addEventListener('click',async function(){
     		console.log('load drawing '+name);
 			var n=name.indexOf('.json');
 			name=name.substr(0,n);
-			// window.localStorage.setItem('name',name);
 			id('dwg').innerHTML=''; // clear drawing
     		id('handles').innerHTML=''; // clear any edit handles
     		size=json.size;
@@ -2727,6 +2723,7 @@ id('graphic').addEventListener('pointerup',function(e) {
         case 'edit':
             var el=event.target;
             console.log('pointer up on element '+el.id+' parent: '+el.parentNode.id);
+            if(el.parentNode.id=='background') cancel();
             var hit=null;
             if(el.parentNode.id=='graphic') { // drawing background - check 10x10px zone
                 // console.log('nowt! - search locality');
@@ -3073,6 +3070,24 @@ function addGraph(graph) {
 	graphs.push(graph);
     draw();
 }
+function addImage(file) {
+	var loader=new FileReader();
+    loader.addEventListener('load',function(evt) {
+        var data=evt.target.result;
+        console.log('data: '+data.length+' bytes');
+        var ns=id('svg').namespaceURI;
+		var el=document.createElementNS(ns,'image');
+		el.setAttribute('href',data);
+		el.setAttribute('width',dwg.w);
+		el.setAttribute('height',dwg.h);
+		id('background').appendChild(el);
+    });
+    loader.addEventListener('error',function(event) {
+    	console.log('load failed - '+event);
+    });
+   	loader.readAsDataURL(file);
+    showDialog('loadDialog',false);
+}
 function cancel() { // cancel current operation and return to select mode
     mode='select';
     // show('editTools',false);
@@ -3249,7 +3264,8 @@ function draw() {
 	graphs.sort(function(a,b) {return a.layer-b.layer}); // sort by layer
 	for(var n in graphs) {
 		var g=graphs[n];
-		console.log('draw '+g.type+' - '+n+' layer: '+g.layer);
+		// console.log('draw '+g.type+' - '+n+' layer: '+g.layer);
+		// for(var i in layers) console.log('layer '+i+' visible: '+layers[i].show);
 		if(!layers[g.layer].show) continue;
 		var ns=id('svg').namespaceURI;
     	switch(g.type) {
@@ -3289,14 +3305,14 @@ function draw() {
             el.setAttribute('fill','none');
             var points=g.points;
             var elPts='';
-            console.log('line points: '+points.length);
+            // console.log('line points: '+points.length);
             for(var i=0;i<points.length;i++) {
             	var point=points[i];
             	elPts+=point.x+','+point.y+' ';
                 nodes.push({'x':point.x,'y':point.y,'n':Number(n*10+i)});
-                console.log('add node '+i+' at '+point.x+','+point.y);
+                // console.log('add node '+i+' at '+point.x+','+point.y);
             } // NB node.n is id*10+[0-9]
-            console.log('element points: '+elPts);
+            // console.log('element points: '+elPts);
             el.setAttribute('points',elPts);
             break;
         case 'shape':
@@ -3726,6 +3742,7 @@ function listSets() {
     }
 }
 function load() {
+	console.log('redraw - size is '+dwg.w+'x'+dwg.h);
 	var data=window.localStorage.getItem('DraftData');
 	if(data) {
 		var json=JSON.parse(data);
@@ -3880,7 +3897,7 @@ function select(n,multiple,s) {
     	console.log(elNodes.length+' nodes');
     	for(i=0;i<elNodes.length;i++) { // draw tiny disc at each node
     		var html="<use href='#node' x='"+elNodes[i].x+"' y='"+elNodes[i].y+"' r='"+scale/2+"'/>";
-    		console.log('node at '+elNodes[i].x+','+elNodes[i].y);
+    		// console.log('node at '+elNodes[i].x+','+elNodes[i].y);
     		id('handles').innerHTML+=html;
     	}
     	switch(graph.type) {

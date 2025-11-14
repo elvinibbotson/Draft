@@ -92,6 +92,7 @@
 		    	<pattern id='pattern20' width='4' height='4' patternUnits='userSpaceOnUse'><rect x="0" y="0" width="3" height="3" stroke="none" fill="#000"></rect></pattern>'
 	 		</defs>
 	 		<g id='nodes'></g>
+	 		<g id='background'></g>
 			<g id='dwg' clip-path="url(#clipper)" draggable='false'></g>
 	    	<g id='selection'></g>
 		    <g id='blue'>
@@ -282,12 +283,13 @@
         </select>
     </div>
     <div id='loadDialog' class='dialog'>
-        <button id='confirmLoad'>LOAD</button>
-        <p>
+        <button id='confirmLoad'>LOAD</button><br>
         <input type='radio' name='loadMethod' id='drawing' checked>
         <label for='drawing'>drawing</label><br>
         <input type='radio' name='loadMethod' id='set'>
         <label for='set'>set(s)</label><br>
+        <input type='radio' name='loadMethod' id='image'>
+        <label for='image'>image</label>
         </p>
     </div>
     <div id='saveDialog' class='dialog'>
