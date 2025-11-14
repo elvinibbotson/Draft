@@ -188,7 +188,7 @@ You can select which layer you are working on and which layers are visible, and 
 You can also choose whether to work on just the current layer or any visible layer.</p>
 <p>If you have an element selected the layers button shows which layer it is on. 
 If you want to move it to another layer, tap the button and choose a layer from the list.</p>
-<img src='layersDialog.png'><br>
+<p><img src='layersDialog.png'><br>
 Here layers are used for different storeys in a building. With more than one layer visible, you can see how one level relates to another.<br>
 With just one layer visible you can see just one storey and save that floor plan for printing.<br>
 There are other ways to organise layers. One layer could be reserved for reference and guide lines,<br>
@@ -204,17 +204,26 @@ The <i>set</i> tool in the draw toolbox and the <i>join</i> tool in the edit too
 <p>If you create a few different sets while drafting a drawing or diagram you can easily save them for use another time.<br>
 Tap the <i>document</i> tool then choose <b>SAVE</b>. Choose the sets you want to include, enter a name ("electronics"?) and save your set (or set of sets)<br>
 Next time you want to produce a similar drawing or diagram, choose <b>LOAD</b> from the document menu and find the set file to import.</p>
-<p><img src='setSaveDialog.png'><img src='loadSetDialog.png'></p>
+<p><img src='setSaveDialog.png'><img src='loadDialog.png'></p>
 <p>Electronics symbols is on idea for a set of sets but there are many, many more...<br>
 as an architect I would have kitchen or bathroom fittings, furniture, lighting and other electrical symbols, graphic elements like north points.<br>
 A civil engineer might have sets for drainage and utilities, street lighting, road signs,...<br>
 Whatever your discipline, if you are drafting there will be sets you can create.</p>
+<p>A scale drawing will often include elements which are not drawn to scale. A building plan, for example, will show all the building elements - 
+representing walls, doors and windows, stairs, etc - drawn to scale, but may also have a title panel where the drawing number, title and scale are shown 
+and a north point indicating the orientation of the plan.<br>
+These <i>graphic elements</i> should appear the same size on any drawing, regardless of scale, and Draft has an easy way to achieve this...<br>
+If you use the <i>join</i> tool to define a set in a drawing at 1:1 scale (full-size), the set will be classed as a graphic. 
+You might, for instance, use a 25mm diameter circle with an 'N' to make a north point. If you then add this to a 1:50 scale plan, 
+the circle will still be 25mm diameter on the drawing whereas if it were a normal set it would be drawn to scale as a 0.5mm dot! 
+It is useful to have a sets file defining a number of graphic sets.</p>
 <h2 id='documents'>Documents</h2>
 <img src='../svg/document.svg'><br>
 The <i>document</i> tool gives access to files of three types: data, drawings and sets.<br>
 We looked at creating <b>NEW</b> drawings earlier, but you will also <b>LOAD</b> and <b>SAVE</b> files.
 <p>You can LOAD drawings - the drawing data - or sets (or sets of sets).<br>
-Loading sets makes them available for use in your drawing, while loading a drawing replaces any current drawing, so remember to SAVE first!</p>
+Loading sets makes them available for use in your drawing, while loading a drawing replaces any current drawing, so remember to SAVE first!<br>
+You can also load a background <b>image</b> for use as a guide or reference when drawing. Background images are not part of a drawing and are not saved.</p>
 <p>You can SAVE the drawing data - defining the whole drawing, the current view as a file you can print, or one or more sets as described above.</p>
 <p>Drawing data and sets are each saved in JSON format (JavaScript Object Notation) while drawings for viewing or printing are saved in SVG format.<br>
 View them on screen and choose the 'print' option.<br>
