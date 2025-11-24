@@ -121,7 +121,6 @@ a{
 .setChoice {
 	width: 16px;
 	height: 16px;
-	/*float: right;*/
 }
 .spin90 {
     transform: rotate(90deg);
@@ -273,7 +272,7 @@ a{
 	background: url(svg/layers.svg) center center no-repeat;
 }
 #layerChoice {
-	width: 100px;
+	width: 150px;
 }
 #layerChoice li {
 	display: flex;

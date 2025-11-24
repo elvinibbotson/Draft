@@ -161,7 +161,8 @@ for(var i=0;i<10;i++) { // set layers dialog
 	if(layers[i].checked) layer=i;
 	id('layerName'+i).value=layers[i].name;
 	// if(!layers[i].name) id('layerName'+i).value='';
-	id('choiceName'+i).value=layers[i].name;
+	id('choiceName'+i).innerText=layers[i].name;
+	console.log('layer choice '+i+': '+layers[i].name);
 	// if(!layers[i].name) id('choiceName'+i).value='';
 	id('layerCheck'+i).checked=layers[i].show;
 	id('layer').innerText=layer;
@@ -285,8 +286,8 @@ id('confirmLoad').addEventListener('click',async function(){
     		layers=json.layers; // NEW - LAYERS SAVED WITH DRAWING
       		graphs=json.graphs;
       		sets=json.sets; // NEW - SAVE SETS WITH DRAWING
-      		console.log(graphs.length+' graphs and '+sets.length+' sets loaded');
-      		setLayers(); // NEW
+      		console.log(graphs.length+' graphs and '+sets.length+' sets loaded - set layers');
+      		setLayers(true); // set layers to suit loaded drawing
     	}
     	save();
     	load();
@@ -564,7 +565,7 @@ id('confirmRemove').addEventListener('click',function() { // complete deletion
     id('blueBox').setAttribute('height',0);
     showDialog('removeDialog',false);
     draw();
-    // cancel();
+    cancel();
 });
 id('backButton').addEventListener('click',function() {
 	console.log('push graph '+index+' back');
@@ -1321,12 +1322,15 @@ id('style').addEventListener('click',function(){
 })
 id('lineType').addEventListener('change',function() {
     var type=event.target.value;
+    console.log('set line type to '+type);
     if(selection.length>0) {
     	for (var i=0;i<selection.length;i++) {
     		// console.log('change line width for selected element '+i);
     		var n=selection[i];
     		console.log('set line type for graph '+n+' to '+type);
     		graphs[n].lineType=type;
+    		if(type=='none') graph.stroke='none';
+    		else if(graph.stroke=='none') stroke=lineColor;
     	}
     	draw();
     }
@@ -1470,38 +1474,24 @@ id('patternMenu').addEventListener('click',function(event) {
 	console.log('use pattern# '+n);
 	var fill=element.getAttribute('fill'); // fill colour/pattern
 	console.log('set element fill (currently '+fill+') to pattern'+n);
-	/*
-	if(fill.startsWith('url')) { // amend pattern choice
-		var p=id('pattern'+element.id);
-		var color=pattern.firstChild.getAttribute('fill');
-		p.setAttribute('index',n);
-		p.setAttribute('width',pattern[n].width);
-		p.setAttribute('height',pattern[n].height);
-		p.innerHTML=tile[pattern[n].tile];
-		p.firstChild.setAttribute('fill',color);
-		updateGraph(index,['fillType','"p'+n+'"']);
-	}
-	else { // set fill to pattern
-	*/
-		console.log('set pattern for element '+element.id);
-		console.log(' pattern '+n+' size: '+pattern[n].width+'x'+pattern[n].height);
-		var html="<pattern id='pattern"+element.id+"' index='"+n+"' width='"+pattern[n].width+"' height='"+pattern[n].height+"' patternUnits='userSpaceOnUse'";
-		if((scale>1)||(pattern[n].spin!=0)) { // set transform
+	console.log('set pattern for element '+element.id);
+	console.log(' pattern '+n+' size: '+pattern[n].width+'x'+pattern[n].height);
+	var html="<pattern id='pattern"+element.id+"' index='"+n+"' width='"+pattern[n].width+"' height='"+pattern[n].height+"' patternUnits='userSpaceOnUse'";
+	if((scale>1)||(pattern[n].spin!=0)) { // set transform
 			html+=" patternTransform='";
 			if(scale>1) html+="scale("+scale+")";
 			if(pattern[n].spin!=0) html+=" rotate("+pattern[n].spin+")";
 			html+="'";
 		}
-		html+="'>"+tile[pattern[n].tile]+'</pattern>';
-		console.log('pattern HTML: '+html);
-		id('defs').innerHTML+=html;
-		var el=id('pattern'+element.id);
-		id('pattern'+element.id).firstChild.setAttribute('fill',fill);
-		id('pattern'+element.id).lastChild.setAttribute('fill',fill);
-		element.setAttribute('fillType','pattern');
-		element.setAttribute('fill','url(#pattern'+element.id+')');
-		updateGraph(index,['fillType','"p'+n+'"']);
-	// }
+	html+="'>"+tile[pattern[n].tile]+'</pattern>';
+	console.log('pattern HTML: '+html);
+	id('defs').innerHTML+=html;
+	var el=id('pattern'+element.id);
+	id('pattern'+element.id).firstChild.setAttribute('fill',fill);
+	id('pattern'+element.id).lastChild.setAttribute('fill',fill);
+	element.setAttribute('fillType','pattern');
+	element.setAttribute('fill','url(#pattern'+element.id+')');
+	updateGraph(index,['fillType','"p'+n+'"']);
 });
 id('colorPicker').addEventListener('click',function(e) {
 	var val=e.target.id;
@@ -3724,12 +3714,6 @@ function listSets() {
 	id('setList').innerHTML="<option onclick='hint(\'select a set\');' value=null>select a set</option>"; // rebuild setLists
     id('setChooser').innerHTML=''; // clear setChooser list
     for(var i in sets) {
-    	/*
-    	var json=JSON.parse(sets[i]);
-    	var name=json.name;
-    	var svg=json.svg;
-        console.log('add set '+name+'; svg: '+svg);
-        */
         var name=sets[i].name;
         var html="<g id='"+name+"'>"+sets[i].svg+"</g>";
         id('sets').innerHTML+=html; // copy set svg into <defs>...
@@ -3759,7 +3743,6 @@ function load() {
 		}
 	}
 	draw();
-    // setLayers();
     listSets();
 }
 function move(dx,dy) {
@@ -3888,7 +3871,7 @@ function select(n,multiple,s) {
 		console.log('select graph '+n+' of '+graphs.length+' multiple is '+multiple+' s is '+s);
 		graph=graphs[n];
 		if(s) console.log('place mover on node '+s.n+' at '+s.x+','+s.y);
-		console.log('graph type: '+graph.type+'; layer: '+graph.layer);
+		console.log('graph type: '+graph.type+'; stroke: '+graph.layer);
 		id('choice'+graph.layer).checked=true;
     	id('handles').innerHTML=''; // clear any handles then add handles for selected element 
     	elNodes=nodes.filter(function(node) { // get nodes for selected element
@@ -3940,10 +3923,16 @@ function select(n,multiple,s) {
             	// setSizes('box',el.getAttribute('spin'),w,h); // size of bounding box
             	// draw handles
             	var html='';
-            	for(var i=1;i<n;i++) {
+            	if(!s) var s=0; // default to mover at start
+            	for(var i=0;i<n;i++) {
+            		if(i==s) continue;
                 	html="<use id='sizer"+i+"' href='#sizer' x='"+points[i].x+"' y='"+points[i].y+"'/>";
                 	id('handles').innerHTML+=html; // disc handles move remaining nodes
             	}
+            	html="<use id='mover"+s.n%10+"' href='#mover' x='"+s.x+"' y='"+s.y+"'/>"; // mover at node
+            	anchor.x=s.x;
+            	anchor.y=s.y;
+            	/*
             	if(s) {
             		html="<use id='mover"+s.n%10+"' href='#mover' x='"+s.x+"' y='"+s.y+"'/>"; // mover at node
             		anchor.x=s.x;
@@ -3954,6 +3943,7 @@ function select(n,multiple,s) {
             		anchor.x=points[0].x;
             		anchor.y=points[0].y;
             	}
+            	*/
             	id('handles').innerHTML+=html; // circle handle moves whole element
             	id('bluePolyline').setAttribute('points',el.getAttribute('points'));
             	id('guides').style.display='block';
@@ -4161,23 +4151,23 @@ function setLayer() {
 		g.layer=layer;
 		graphs[n]=g;
 	}
-	/*
-	for(var i=0;i<10;i++) {
-		if(id('choice'+i).checked) layer=i;
-	}
-	*/
 	id('layer').innerText=layer;
-	// graph.layer=layer;
-	// graphs[index]=graph;
 	draw();
 }
-function setLayers() {
-	// console.log('set layers');
+function setLayers(reverse) {
+	console.log('set layers - reverse: '+reverse);
 	for(var i=0;i<10;i++) {
-		// console.log('layer '+i+' name: '+layers[i].name+' chosen: '+layers[i].checked+' show: '+layers[i].show);
-		if(id('layer'+i).checked) layer=i;
-		layers[i].name=id('layerName'+i).value;
-		layers[i].show=id('layerCheck'+i).checked;
+		if(reverse) {
+			console.log('layer '+i+' name: '+layers[i].name+' chosen: '+layers[i].checked+' show: '+layers[i].show);
+			id('layerName'+i).value=layers[i].name;
+			id('layerCheck'+i).checked=layers[i].show;
+			if(layers[i].checked) layer=i;
+		}
+		else {
+			layers[i].name=id('layerName'+i).value;
+			layers[i].show=id('layerCheck'+i).checked;
+			if(id('layer'+i).checked) layer=i;
+		}
 		id('choiceName'+i).innerText=layers[i].name;
 		id('layer').innerText=layer;
 	}
