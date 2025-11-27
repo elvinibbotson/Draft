@@ -371,6 +371,7 @@ id('confirmSave').addEventListener('click',async function() {
         write('',json,'json');
     }
     showDialog('saveDialog',false);
+    cancel();
 });
 id('zoomInButton').addEventListener('click',function() {
     zoom*=2;
@@ -394,6 +395,7 @@ id('extentsButton').addEventListener('click',function() {
 });
 id('panButton').addEventListener('click',function() {
     mode='pan';
+    hint('pan: drag drawing then tap to end');
 });
 // DRAWING TOOLS
 id('curveButton').addEventListener('click',function() {
@@ -2313,7 +2315,10 @@ id('graphic').addEventListener('pointerup',function(e) {
             // console.log('pan ends at '+x+','+y);
             dwg.x-=(x-x0);
             dwg.y-=(y-y0);
-            if((Math.abs(x-x0)<snapD)&&(Math.abs(y-y0)<snapD)) mode='select'; // tap to exit pan mode
+            if((Math.abs(x-x0)<snapD)&&(Math.abs(y-y0)<snapD)) {
+            	mode='select'; // tap to exit pan mode
+            	cancel();
+            }
             break;
         case 'curve':
             // console.log('end curve');
@@ -3919,31 +3924,19 @@ function select(n,multiple,s) {
             	h=bounds.height;
             	var points=el.points;
             	var n=points.length;
-            	// console.log('bounds: '+w+'x'+h+'mm; '+n+' points');
-            	// setSizes('box',el.getAttribute('spin'),w,h); // size of bounding box
             	// draw handles
             	var html='';
-            	if(!s) var s=0; // default to mover at start
+            	if(!s) var s={'n':0,'x':points[0].x,'y':points[0].y}; // default to mover at start
+            	console.log('add sizers and mover at node '+s);
             	for(var i=0;i<n;i++) {
             		if(i==s) continue;
                 	html="<use id='sizer"+i+"' href='#sizer' x='"+points[i].x+"' y='"+points[i].y+"'/>";
                 	id('handles').innerHTML+=html; // disc handles move remaining nodes
             	}
             	html="<use id='mover"+s.n%10+"' href='#mover' x='"+s.x+"' y='"+s.y+"'/>"; // mover at node
+            	console.log('mover code: '+html);
             	anchor.x=s.x;
             	anchor.y=s.y;
-            	/*
-            	if(s) {
-            		html="<use id='mover"+s.n%10+"' href='#mover' x='"+s.x+"' y='"+s.y+"'/>"; // mover at node
-            		anchor.x=s.x;
-            		anchor.y=s.y;
-            	}
-            	else {
-            		html="<use id='mover0' href='#mover' x='"+points[0].x+"' y='"+points[0].y+"'/>"; // mover at start
-            		anchor.x=points[0].x;
-            		anchor.y=points[0].y;
-            	}
-            	*/
             	id('handles').innerHTML+=html; // circle handle moves whole element
             	id('bluePolyline').setAttribute('points',el.getAttribute('points'));
             	id('guides').style.display='block';
