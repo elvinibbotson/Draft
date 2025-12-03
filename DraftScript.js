@@ -297,6 +297,7 @@ id('confirmLoad').addEventListener('click',async function(){
 	});
     loader.readAsText(file);
     showDialog('loadDialog',false);
+    cancel();
 });
 id('save').addEventListener('click',function() {
     name=window.localStorage.getItem('name');
@@ -4147,14 +4148,14 @@ function setLayer() {
 	id('layer').innerText=layer;
 	draw();
 }
-function setLayers(reverse) {
+function setLayers(event,reverse) {
 	console.log('set layers - reverse: '+reverse);
 	for(var i=0;i<10;i++) {
+		console.log('layer '+i+' name: '+layers[i].name+' chosen: '+id('layer'+i).checked+' show: '+layers[i].show);
 		if(reverse) {
-			console.log('layer '+i+' name: '+layers[i].name+' chosen: '+layers[i].checked+' show: '+layers[i].show);
 			id('layerName'+i).value=layers[i].name;
 			id('layerCheck'+i).checked=layers[i].show;
-			if(layers[i].checked) layer=i;
+			id('layer'+i).checked=(layer==i);
 		}
 		else {
 			layers[i].name=id('layerName'+i).value;
@@ -4162,9 +4163,11 @@ function setLayers(reverse) {
 			if(id('layer'+i).checked) layer=i;
 		}
 		id('choiceName'+i).innerText=layers[i].name;
-		id('layer').innerText=layer;
+		// id('layer').innerText=layer;
 	}
 	// console.log('layers:'+layers);
+	console.log('set layer '+layer);
+	id('layer').innerText=layer;
 	setLayerVisibility();
 }
 function setLayerVisibility() {
