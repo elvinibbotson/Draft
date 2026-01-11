@@ -6,12 +6,11 @@
 	{
 		"src": "Draft.png",
 		"sizes": "512x512",
-		"type": "image/png",
-		"purpose": "any maskable"
+		"type": "image/png"
 	}
   ],
   "start_url": "/Draft/",
-  "display": "standalone",
+  "display": "fullscreen",
   "orientation": "any",
   "background_color": "white",
   "theme_color": "white"
