@@ -4220,7 +4220,7 @@ function setPoints(g,spin) {
 				dy=g.points[i].y-y0;
 				x=dx*c-dy*s;
 				y=dy*c+dx*s;
-				points.push({'x':x0+x,'y':y0+y});
+				points.push({'x':Math.round(x0+x),'y':Math.round(y0+y)});
 			}
 			// for(i in points) console.log('point '+i+': '+points[i].x+','+points[i].y);
 			break;
@@ -4235,9 +4235,9 @@ function setPoints(g,spin) {
 			s=Math.sin(s);
 			points=[];
 			points.push({'x':x,'y':y}); // top left
-			points.push({'x':x+w*c,'y':y+w*s}); // top right
-			points.push({'x':x+w*c-h*s,'y':y+w*s+h*c}); // bottom right
-			points.push({'x':x-h*s,'y':y+h*c}); // bottom left
+			points.push({'x':Math.round(x+w*c),'y':Math.round(y+w*s)}); // top right
+			points.push({'x':Math.round(x+w*c-h*s),'y':Math.round(y+w*s+h*c)}); // bottom right
+			points.push({'x':Math.round(x-h*s),'y':Math.round(y+h*c)}); // bottom left
 			break;
 		case 'oval':
 			x=g.cx;
@@ -4248,10 +4248,10 @@ function setPoints(g,spin) {
 			s=Math.sin(s);
 			points=[];
 			points.push({'x':x,'y':y}); // centre
-			points.push({'x':x+g.ry*s,'y':y-g.ry*c}); // top centre
-			points.push({'x':x+g.rx*c,'y':y+g.rx*s}); // right centre
-			points.push({'x':x-g.ry*s,'y':y+g.ry*c}); // bottom centre
-			points.push({'x':x-g.rx*c,'y':y-g.rx*s}); // left centre
+			points.push({'x':Math.round(x+g.ry*s),'y':Math.round(y-g.ry*c)}); // top centre
+			points.push({'x':Math.round(x+g.rx*c),'y':Math.round(y+g.rx*s)}); // right centre
+			points.push({'x':Math.round(x-g.ry*s),'y':Math.round(y+g.ry*c)}); // bottom centre
+			points.push({'x':Math.round(x-g.rx*c),'y':Math.round(y-g.rx*s)}); // left centre
 			break;
 		case 'arc':
 			x0=g.cx;
@@ -4267,7 +4267,7 @@ function setPoints(g,spin) {
 			dy=g.points[1].y-y0;
 			x=dx*c-dy*s;
 			y=dy*c+dx*s;
-			points.push({'x':x0+x,'y':y0+y});
+			points.push({'x':Math.round(x0+x),'y':Math.round(y0+y)});
 			console.log('...to '+g.points[1].x+','+g.points[1].y);
 			dx=g.points[2].x-x0; // end point
 			dy=g.points[2].y-y0;
