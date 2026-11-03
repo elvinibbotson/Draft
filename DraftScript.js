@@ -1762,7 +1762,7 @@ id('graphic').addEventListener('pointerdown',function(e) {
         }
     }
     snap=snapCheck(); //  JUST DO if(snapCheck())?
-    console.log('SNAP: '+snap+' x/y: '+x+','+y);
+    console.log('SNAP: '+snap+' x,y: '+x+','+y);
     // if(snap) { // snap start/centre to snap target
         x0=x;
         y0=y;
@@ -3353,13 +3353,13 @@ function draw() {
             if(g.opacity<1) el.setAttribute('fill-opacity',g.opacity);
             console.log('add nodes for '+g.points.length+' points');
             nodes.push({'x':g.points[0].x,'y':g.points[0].y,'n':(n*10)}); // top/left - node 0
-            nodes.push({'x':(g.points[0].x+g.points[1].x)/2,'y':(g.points[0].y+g.points[1].y)/2,'n':(n*10+1)}); // top/centre - node 1
+            nodes.push({'x':Math.round((g.points[0].x+g.points[1].x)/2),'y':(g.points[0].y+g.points[1].y)/2,'n':(n*10+1)}); // top/centre - node 1
             nodes.push({'x':g.points[1].x,'y':g.points[1].y,'n':(n*10+2)}); // top/right - node 2
-            nodes.push({'x':(g.points[0].x+g.points[3].x)/2,'y':(g.points[0].y+g.points[3].y)/2,'n':(n*10+3)}); // centre/left - node 3
-            nodes.push({'x':(g.points[0].x+g.points[2].x)/2,'y':(g.points[0].y+g.points[2].y)/2,'n':(n*10+4)}); // centre - node 4
-            nodes.push({'x':(g.points[1].x+g.points[2].x)/2,'y':(g.points[1].y+g.points[2].y)/2,'n':(n*10+5)}); // centre/right - node 5
+            nodes.push({'x':Math.round((g.points[0].x+g.points[3].x)/2),'y':Math.round((g.points[0].y+g.points[3].y)/2),'n':(n*10+3)}); // centre/left - node 3
+            nodes.push({'x':Math.round((g.points[0].x+g.points[2].x)/2),'y':Math.round((g.points[0].y+g.points[2].y)/2),'n':(n*10+4)}); // centre - node 4
+            nodes.push({'x':Math.round((g.points[1].x+g.points[2].x)/2),'y':Math.round((g.points[1].y+g.points[2].y)/2),'n':(n*10+5)}); // centre/right - node 5
             nodes.push({'x':g.points[3].x,'y':g.points[3].y,'n':(n*10+6)}); // bottom/left - node 6
-            nodes.push({'x':(g.points[2].x+g.points[3].x)/2,'y':(g.points[2].y+g.points[3].y)/2,'n':(n*10+7)}); // bottom/centre - node 7
+            nodes.push({'x':Math.round((g.points[2].x+g.points[3].x)/2),'y':Math.round((g.points[2].y+g.points[3].y)/2),'n':(n*10+7)}); // bottom/centre - node 7
             nodes.push({'x':g.points[2].x,'y':g.points[2].y,'n':(n*10+8)}); // bottom/right - node 8
             if(g.spin!=0) el.setAttribute('transform','rotate('+g.spin+','+g.x+','+g.y+')');
             for(var d in g.dims) drawDim(n,g.dims[d]);
