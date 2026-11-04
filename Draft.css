@@ -1,0 +1,386 @@
+body {
+	margin: 0;
+	height: 100%;
+	overflow: hidden;
+	font-family: monospace;
+	background: silver;
+}
+input {
+    width: 75px;
+	height: 22px;
+	color: black;
+	background-color: white;
+	opacity: 0.5;
+	border: 1px solid gray;
+	padding: 0;
+	margin: 4px;
+	font-size: 1.0em;
+}
+textarea {
+	padding: 5px;
+	max-width: 100%;
+	line-height: 1.5;
+	font-size: 0.8rem;
+	letter-spacing: 1px;
+}
+img {
+    vertical-align: bottom;
+    border: 1px solid gray;
+}
+select {
+    color: black;
+    background-color: white;
+    height: 32px;
+    border: 1px solid gray;
+    font-size: 1em;
+}
+button {
+    color: color;
+    font-family: monospace;
+    font-size: 1.2em;
+    font-weight: bold;
+    border: solid black 2px;
+    border-width: 2px;
+    border-radius: 3px;
+    background: white;
+}
+ul {
+	padding: 0;
+}
+li {
+	list-style-type: none;
+	margins: 5px 5px 0 5px;
+}
+a{
+	color: black;
+	text-decoration: none;
+	font-family: monospace;
+    font-size: 1.2em;
+    font-weight: bold;
+    padding-left: 5px;
+}
+.iconButton {
+    width: 32px;
+    height: 32px;
+    border: none;
+    color: white;
+}
+.iconButton:disabled {
+    opacity: 0.5;
+}
+.info {
+	margin-top: 8px;
+}
+.dialog {
+	position: fixed;
+	left: 5px;
+	top: 5px;
+	padding: 5px;
+	border: solid gray 2px;
+	border-radius: 5px;
+	display: none;
+	color: black;
+	background-color: #FFFFFFEE;
+    /* box-shadow: 0 0 4px #88888888; */
+	z-index: 15;
+}
+.dialogRight {
+	position: fixed;
+	right: 5px;
+	top: 5px;
+	padding: 5px;
+	border: solid gray 2px;
+	border-radius: 5px;
+	display: none;
+	color: black;
+	background-color: #FFFFFFEE;
+	z-index: 15;
+}
+.clearButton {
+	margin: 2px;
+	border: none;
+	width: 24px;
+	height: 24px;
+	float: right;
+	background-color: white;
+	background-image: url('svg/clear.svg');
+}
+.layerCheck {
+	width: 16px;
+	height: 16px;
+	float: right;
+}
+.layerName {
+	width: 120px;
+	height: 16px;
+}
+.nameField {
+    width: 240px;
+    border: none;
+}
+.setChoice {
+	width: 16px;
+	height: 16px;
+}
+.spin90 {
+    transform: rotate(90deg);
+}
+.spin180 {
+    transform: rotate(180deg);
+}
+.spin270 {
+    transform: rotate(270deg);
+}
+#graphic {
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	border: solid 5px red;
+	background-color: silver;
+	pointer-events: auto;
+	touch-action: none;
+	-webkit-touch-action: none;
+	mouse-events: none;
+	-webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+#paper {
+    position: fixed;
+	left: 0;
+	top: 0;
+	background-color: #CCC;
+    z-index: 0;
+}
+#svg {
+    position: fixed;
+	left: 0;
+	top: 0;
+    z-index: 2;
+}
+#tools {
+    position: fixed;
+    left: 0;
+    top: 32px;
+    width: 32px;
+    border: none;
+    background-color: #FFFFFFEE;
+    /* box-shadow: 0 0 4px #88888888; */
+    display: block;
+    z-index: 10;
+}
+#editTools {
+    position: fixed;
+    left: 0;
+    top: 32px;
+    width: 32px;
+    border: none;
+    background-color: #FFFFFFEE;
+    /* box-shadow: 0 0 4px #88888888; */
+    display: none;
+    z-index: 11;
+}
+#info {
+    position: fixed;
+    top: -32px;
+    left: 32px;
+    height: 30px;
+	width: 100%;
+    padding: 4px;
+    font-size: 1em;
+    color: black;
+    background-color: #FFFFFFEE;
+    z-index: 13;
+    display: block;
+    overflow: hidden;
+}
+#sizes {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 30px;
+	display: flex;
+}
+#hint {
+	position: absolute;
+	top: 36px;
+	left: 4px;
+	display: inline-block;
+	white-space: nowrap;
+	padding-left: 25%;
+	animation: marquee 10s linear 2s infinite;
+}
+@keyframes marquee {
+	from {transform: translateX(0);}
+	to {transform: translateX(-100%);}
+}
+#style {
+	position: fixed;
+	top:0;
+	left: 0;
+	width: 32px;
+	height: 32px;
+	border: none;
+	background-color: #FFFFFFC0;
+    /* box-shadow: 0 0 4px #88888888; */
+    z-index: 12;
+}
+#styleBox {
+	position: absolute;
+	top: 4px;
+	left: 4px;
+	right:4px;
+	bottom: 4px;
+	border-style: solid;
+	border-width: 0.25mm;
+	border-color: black;
+	background: none;
+}
+#moreButton {
+	position: fixed;
+	top: 4px;
+	right: 4px;
+	width: 32px;
+	height: 32px;
+	border: none;
+	background-color: #FFFFFFC0;
+	background: url(svg/more.svg) center center no-repeat;
+}
+#moreDialog button {
+	border: none;
+}
+#guides {
+    display: none;
+}
+#datumSet {
+    display: none;
+}
+#layer {
+	position: absolute;
+	top: 0;
+	left: 8px;
+	color: white;
+	font-size: 20pt;
+	font-weight: bold;
+	z-index: 5;
+}
+#layersButton {
+	background: url(svg/layers.svg) center center no-repeat;
+}
+#layerChoice {
+	width: 150px;
+}
+#layerChoice li {
+	display: flex;
+}
+#docButton {
+    background: url(svg/document.svg) center center no-repeat;
+}
+#zoomInButton {
+    background: url(svg/zoomin.svg) center center no-repeat;
+}
+#zoomOutButton {
+    background: url(svg/zoomout.svg) center center no-repeat;
+}
+#extentsButton {
+    background: url(svg/extents.svg) center center no-repeat;
+}
+#panButton {
+    background: url(svg/pan.svg) center center no-repeat;
+}
+#curveButton {
+    background: url(svg/curve.svg) center center no-repeat;
+}
+#lineButton {
+    background: url(svg/line.svg) center center no-repeat;
+}
+#boxButton {
+    background: url(svg/box.svg) center center no-repeat;
+}
+#ovalButton {
+    background: url(svg/oval.svg) center center no-repeat;
+}
+#arcButton {
+    background: url(svg/arc.svg) center center no-repeat;
+}
+#textButton {
+    background: url(svg/text.svg) center center no-repeat;
+}
+#dimButton {
+    background: url(svg/dimension.svg) center center no-repeat;
+}
+#setButton {
+    background: url(svg/set.svg) center center no-repeat;
+}
+#layerButton {
+	background: url(svg/layers.svg) center center no-repeat;
+}
+#addButton {
+    background: url(svg/add.svg) center center no-repeat;
+}
+#deleteButton {
+    background: url(svg/cross.svg) center center no-repeat;
+}
+#forwardButton {
+    background: url(svg/up.svg) center center no-repeat;
+}
+#backButton {
+    background: url(svg/up.svg) center center no-repeat;
+    transform: rotate(180deg);
+}
+#moveButton {
+    background: url(svg/move.svg) center center no-repeat;
+}
+#spinButton {
+    background: url(svg/spin.svg) center center no-repeat;
+}
+#flipButton {
+    background: url(svg/flip.svg) center center no-repeat;
+}
+#alignButton {
+    background: url(svg/align.svg) center center no-repeat;
+}
+#copyButton {
+    background: url(svg/copy.svg) center center no-repeat;
+}
+#doubleButton {
+    background: url(svg/double.svg) center center no-repeat;
+}
+#repeatButton {
+    background: url(svg/repeat.svg) center center no-repeat;
+}
+#joinButton {
+    background: url(svg/set.svg) center center no-repeat;
+}
+#lineColor {
+    width: 24px;
+    height: 24px;
+    border: 1px solid #CCCCCC;
+    vertical-align: bottom;
+    background-color: black;
+}
+#fillColor {
+    width: 24px;
+    height: 24px;
+    border: 1px solid #CCCCCC;
+    vertical-align: bottom;
+    background: white;
+}
+#colorMenu {
+	position: fixed;
+    top: 100px;
+    left: 100px;
+    display: none;
+}
+#patternMenu {
+	width: 155px;
+	height: 94px;
+	background: white url('patterns.png') no-repeat center;
+}
+#text {
+    width: 200px;
+}
