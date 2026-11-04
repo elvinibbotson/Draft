@@ -1630,13 +1630,13 @@ id('graphic').addEventListener('pointerdown',function(e) {
                 case 'box':
                  	x0=handle.getAttribute('x');
                     y0=handle.getAttribute('y');
-                    path='m '+(elNodes[0].x-x)+' '+(elNodes[0].y-y)+' l '+(elNodes[2].x-elNodes[0].x)+' '+(elNodes[2].y-elNodes[0].y);
-                    path+=' l '+(elNodes[8].x-elNodes[2].x)+' '+(elNodes[8].y-elNodes[2].y);
-                    path+=' l '+(elNodes[6].x-elNodes[8].x)+' '+(elNodes[6].y-elNodes[8].y);
-                    path+=' l '+(elNodes[0].x-elNodes[6].x)+' '+(elNodes[0].y-elNodes[6].y);
+                    path='m '+(elNodes[0].x-x)+' '+(elNodes[0].y-y);
+                    path+=' l '+(elNodes[1].x-elNodes[0].x)+' '+(elNodes[1].y-elNodes[0].y);
+                    path+=' l '+(elNodes[2].x-elNodes[1].x)+' '+(elNodes[2].y-elNodes[1].y);
+                    path+=' l '+(elNodes[3].x-elNodes[2].x)+' '+(elNodes[3].y-elNodes[2].y)+' z';
                     console.log('CANCEL TRANSFORM');
                     id('blue').setAttribute('transform','rotate(0)');
-                    // console.log('box path: '+path);
+                    console.log('box path: '+path);
                     break;
                 case 'oval':handle.getAttribute('x');
                 	x0=handle.getAttribute('x');
@@ -2245,38 +2245,6 @@ id('graphic').addEventListener('pointerup',function(e) {
                 mode='edit';
                 return;
             }
-            /* OLD CODE
-            dx=x-x0;
-            dy=y-y0;
-            graph=graphs[index];
-            var r=graph.r;
-            r+=Math.sqrt((dx*dx)+(dy*dy));
-            console.log('pointer up - radius: '+r);
-            graph=graphs[index];
-            if(Math.abs(r-graph.r)<snapD) { // radius unchanged - set angle
-            	console.log('radius unchanged');
-                var a=Math.atan(dy/dx);
-                if(node<2) {
-                    graph.x1=x0+graph.r*Math.cos(a);
-                    graph.y1=y0+graph.r*Math.sin(a);
-                }
-                else {
-                    graph.x2=x0+graph.r*Math.cos(a);
-                    graph.y2=y0+graph.r*Math.sin(a);
-                }
-            }
-            else { // radius changed - adjust arc start...
-            	console.log('radius changed');
-            	var theta=Math.atan((graph.points[1].y-graph.cy)/(graph.points[1].x-graph.cx)); // angle to start point
-            	graph.points[1].x=r*Math.cos(theta);
-            	graph.points[1].y=r*Math.sin(theta);
-            	theta=Math.atan((graph.points[2].y-graph.cy)/(graph.points[2].x-graph.cx)); // angle to end point
-            	graph.points[2].x=r*Math.cos(theta);
-            	graph.points[2].y=r*Math.sin(theta);
-                graph.r=r;
-            }
-            */
-            // INSTEAD...
             graph=graphs[index];
             dx=x-graph.cx;
             dy=y-graph.cy;
@@ -2455,8 +2423,13 @@ id('graphic').addEventListener('pointerup',function(e) {
             console.log('finish box');
             graph={};
 	        graph.type='box';
+	        // NEW CODE...
+	        x=graph.x=id('blueBox').getAttribute('x');
+	        y=graph.y=id('blueBox').getAttribute('y');
+	        /* WAS
 	        x=graph.x=parseInt(id('blueBox').getAttribute('x'));
 	        y=graph.y=parseInt(id('blueBox').getAttribute('y'));
+	        */
 	        graph.width=w;
 	        graph.height=h;
 	        graph.radius=rad;
@@ -3353,14 +3326,9 @@ function draw() {
             if(g.opacity<1) el.setAttribute('fill-opacity',g.opacity);
             console.log('add nodes for '+g.points.length+' points');
             nodes.push({'x':g.points[0].x,'y':g.points[0].y,'n':(n*10)}); // top/left - node 0
-            nodes.push({'x':Math.round((g.points[0].x+g.points[1].x)/2),'y':(g.points[0].y+g.points[1].y)/2,'n':(n*10+1)}); // top/centre - node 1
-            nodes.push({'x':g.points[1].x,'y':g.points[1].y,'n':(n*10+2)}); // top/right - node 2
-            nodes.push({'x':Math.round((g.points[0].x+g.points[3].x)/2),'y':Math.round((g.points[0].y+g.points[3].y)/2),'n':(n*10+3)}); // centre/left - node 3
-            nodes.push({'x':Math.round((g.points[0].x+g.points[2].x)/2),'y':Math.round((g.points[0].y+g.points[2].y)/2),'n':(n*10+4)}); // centre - node 4
-            nodes.push({'x':Math.round((g.points[1].x+g.points[2].x)/2),'y':Math.round((g.points[1].y+g.points[2].y)/2),'n':(n*10+5)}); // centre/right - node 5
-            nodes.push({'x':g.points[3].x,'y':g.points[3].y,'n':(n*10+6)}); // bottom/left - node 6
-            nodes.push({'x':Math.round((g.points[2].x+g.points[3].x)/2),'y':Math.round((g.points[2].y+g.points[3].y)/2),'n':(n*10+7)}); // bottom/centre - node 7
-            nodes.push({'x':g.points[2].x,'y':g.points[2].y,'n':(n*10+8)}); // bottom/right - node 8
+            nodes.push({'x':g.points[1].x,'y':g.points[1].y,'n':(n*10+1)}); // top/right - node 1
+            nodes.push({'x':g.points[2].x,'y':g.points[2].y,'n':(n*10+8)}); // bottom/right - node 2
+            nodes.push({'x':g.points[3].x,'y':g.points[3].y,'n':(n*10+2)}); // bottom/left - node 3
             if(g.spin!=0) el.setAttribute('transform','rotate('+g.spin+','+g.x+','+g.y+')');
             for(var d in g.dims) drawDim(n,g.dims[d]);
             break;
@@ -3661,9 +3629,9 @@ function info(p) {
 	id('info').style.top='0px'; // show sizes
 	id('type').innerText=p[0];
 	id('i1').style.display=id('i6').style.display=(p[1]!=null)? 'block':'none';
-	id('i1').value=p[1]; // length/width
+	id('i1').value=decimal(p[1]); // length/width
 	id('i2').style.display=id('i3').style.display=(p[2]!=null)? 'block':'none';
-	id('i3').value=p[2]; // height?
+	id('i3').value=decimal(p[2]); // height?
 	id('i4').style.display=id('i5').style.display=(p[3]!=null)? 'block':'none';
 	id('i5').value=p[3]; // radius
 	if((p[4]!=null)||(p[0!='arc'])) id('i6').innerText='mm @';
@@ -3954,10 +3922,10 @@ function select(n,multiple,s) {
             	}
             	break;
         	case 'box':
-        		x=graph.x;
-        		y=graph.y;
-        		w=graph.width;
-        		h=graph.height;
+        		x=Number(graph.x);
+        		y=Number(graph.y);
+        		w=Number(graph.width);
+        		h=Number(graph.height);
             	var pts='';
             	for(var i in graph.points) {
             		pts+=graph.points[i].x+','+graph.points[i].y+' ';
@@ -4225,33 +4193,35 @@ function setPoints(g,spin) {
 			// for(i in points) console.log('point '+i+': '+points[i].x+','+points[i].y);
 			break;
 		case 'box':
-			x=g.x;
-			y=g.y;
+			x=Number(g.x);
+			y=Number(g.y);
 			// spin around top left corner
-			w=g.width;
-			h=g.height;
+			w=Number(g.width);
+			h=Number(g.height);
 			s=g.spin*Math.PI/180; // radians
 			c=Math.cos(s);
 			s=Math.sin(s);
+			console.log('set points for box at '+x+','+y+' s: '+s+' c: '+c+' point 2: '+(x+w)+','+(y+h));
 			points=[];
-			points.push({'x':x,'y':y}); // top left
-			points.push({'x':Math.round(x+w*c),'y':Math.round(y+w*s)}); // top right
-			points.push({'x':Math.round(x+w*c-h*s),'y':Math.round(y+w*s+h*c)}); // bottom right
-			points.push({'x':Math.round(x-h*s),'y':Math.round(y+h*c)}); // bottom left
+			points.push({'x':x,'y':y}); // top left - point[0]
+			points.push({'x':x+w*c,'y':y+w*s}); // top right - point[1]
+			points.push({'x':x+w*c-h*s,'y':y+w*s+h*c}); // bottom right - point[2]
+			points.push({'x':x-h*s,'y':y+h*c}); // bottom left - point[3]
+			console.log('point 2 x: '+(x+w*c)+'-'+(h*s)+' = '+(x+w*c-h*s));
 			break;
 		case 'oval':
-			x=g.cx;
-			y=g.cy;
+			x=Number(g.cx);
+			y=Number(g.cy);
 			// spin around centre
 			s=g.spin*Math.PI/180; // radians
 			c=Math.cos(s);
 			s=Math.sin(s);
 			points=[];
 			points.push({'x':x,'y':y}); // centre
-			points.push({'x':Math.round(x+g.ry*s),'y':Math.round(y-g.ry*c)}); // top centre
-			points.push({'x':Math.round(x+g.rx*c),'y':Math.round(y+g.rx*s)}); // right centre
-			points.push({'x':Math.round(x-g.ry*s),'y':Math.round(y+g.ry*c)}); // bottom centre
-			points.push({'x':Math.round(x-g.rx*c),'y':Math.round(y-g.rx*s)}); // left centre
+			points.push({'x':x+g.ry*s,'y':y-g.ry*c}); // top centre
+			points.push({'x':x+g.rx*c,'y':y+g.rx*s}); // right centre
+			points.push({'x':x-g.ry*s,'y':y+g.ry*c}); // bottom centre
+			points.push({'x':x-g.rx*c,'y':y-g.rx*s}); // left centre
 			break;
 		case 'arc':
 			x0=g.cx;
@@ -4465,7 +4435,7 @@ function snapCheck() {
         	y=Math.round(y/gridSize)*gridSize;
         	console.log('SNAP TO GRID');
         }
-        console.log('snap to '+x+','+y);
+        // console.log('snap to '+x+','+y);
         return false;
     }
 }
