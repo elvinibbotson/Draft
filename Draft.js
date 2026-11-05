@@ -1763,11 +1763,8 @@ id('graphic').addEventListener('pointerdown',function(e) {
     }
     snap=snapCheck(); //  JUST DO if(snapCheck())?
     console.log('SNAP: '+snap+' x,y: '+x+','+y);
-    // if(snap) { // snap start/centre to snap target
-        x0=x;
-        y0=y;
-    // }
-    // console.log('mode: '+mode);
+    if(snap.x) x0=snap.x;
+    if(snap.y) y0=snap.y;
     switch(mode) {
     	case 'curve':
             blueline=id('bluePolyline');
@@ -1851,16 +1848,24 @@ id('graphic').addEventListener('pointerdown',function(e) {
             selectionBox.w=selectionBox.h=0;
     }
     event.stopPropagation();
-    if(mode!='set') id('graphic').addEventListener('pointermove',drag);
+    if(mode!='set') {
+    	id('graphic').addEventListener('pointermove',drag);
+    	datum1.x=datum1.y=datum2.x=datum2.y=0;
+    	datum1.n=datum2.n=null;
+    	id('datum1').setAttribute('x',0);
+        id('datum1').setAttribute('y',0);
+        id('datum2').setAttribute('x',0);
+        id('datum2').setAttribute('y',0);
+    }
     console.log('exit pointer down code - graphs: '+graphs.length);
 });
 function drag(event) {
-	console.log('dragging - mode: '+mode);
+	// console.log('dragging - mode: '+mode);
     event.preventDefault();
     id('datumSet').style.display='block'; // show datum lines while dragging
     scr.x=Math.round(event.clientX);
     scr.y=Math.round(event.clientY);
-    x=Math.round(scr.x*scaleF/zoom+dwg.x);
+    x=Math.round(scr.x*scaleF/zoom+dwg.x); // nearest mm
     y=Math.round(scr.y*scaleF/zoom+dwg.y);
     if((Math.abs(x-x0)<snapD)&&(Math.abs(y-y0)<snapD)) return; // ignore tiny drag
     // ADJUST FOR RESOLUTION AT SCALE - 1mm up to 1:10, 5mm at 1:20, 10mm at 1:50 and 25mm at 1:100
@@ -1871,9 +1876,12 @@ function drag(event) {
     	y=res*Math.round(y/res);
     	// console.log('x,y resolved to '+x+','+y);
     }
-    if(mode!='arcEnd') {
+    if(mode!='arcEnd') { // normally check for snap
         snap=snapCheck(); // snap to nearby nodes, datum,...
+        if(snap.x) x=snap.x;
+        if(snap.y) y=snap.y;
         if(!snap) {
+        	console.log('no snap');
             if(Math.abs(x-x0)<snapD) x=x0; // ...vertical...
             if(Math.abs(y-y0)<snapD) y=y0; // ...or horizontal
         }
@@ -2011,6 +2019,10 @@ function drag(event) {
         case 'box':
             w=Math.abs(x-x0);
             h=Math.abs(y-y0);
+            if(!snap) { // if not snapping, size box to nearest mm
+            	w=Math.round(w);
+            	h=Math.round(h);
+            }
             if(Math.abs(w-h)<snapD*2) w=h; // snap to square
             var left=(x<x0)?(x0-w):x0;
             var top=(y<y0)?(y0-h):y0;
@@ -2423,13 +2435,8 @@ id('graphic').addEventListener('pointerup',function(e) {
             console.log('finish box');
             graph={};
 	        graph.type='box';
-	        // NEW CODE...
 	        x=graph.x=id('blueBox').getAttribute('x');
 	        y=graph.y=id('blueBox').getAttribute('y');
-	        /* WAS
-	        x=graph.x=parseInt(id('blueBox').getAttribute('x'));
-	        y=graph.y=parseInt(id('blueBox').getAttribute('y'));
-	        */
 	        graph.width=w;
 	        graph.height=h;
 	        graph.radius=rad;
@@ -2675,20 +2682,22 @@ id('graphic').addEventListener('pointerup',function(e) {
                     	id('selection').innerHTML+=html;
                     }
                 }
+                
+                console.log(selection.length+' items selected');
+                
                 if(selection.length>0) { // highlight selected elements
                     mode='edit';
                     showTools('edit');
                     // console.log(selection.length+' elements selected');
                     if(selection.length<2) {
-                        // console.log('only one selection');
+                        console.log('only one selection');
                         id('selection').innerHTML=''; // no blue box
-                        element=id(selection[0]);
-                        select(element); // add handles etc
+                        select(selection[0],false);
                     }
                     return;
                 }
             }
-            info(null); // WAS showInfo(false);
+            info(null);
         case 'edit':
             var el=event.target;
             console.log('pointer up on element '+el.id+' parent: '+el.parentNode.id);
@@ -2742,7 +2751,7 @@ id('graphic').addEventListener('pointerup',function(e) {
                         	graph=graphs[hit];
                         	element=id(hit);
                         	console.log('select single element - index '+index+' type: '+graph.type);
-                        	select(hit,false,snap);
+                        	select(hit,false,(graph.type==set));
                     	}
                     	else { // multiple selection
                         	// console.log('add '+type(el)+' '+el.id+' to multiple selection');
@@ -3233,7 +3242,7 @@ function draw() {
 	graphs.sort(function(a,b) {return a.layer-b.layer}); // sort by layer
 	for(var n in graphs) {
 		var g=graphs[n];
-		// console.log('draw '+g.type+' - '+n+' layer: '+g.layer);
+		console.log('draw '+g.type+' - '+n+' layer: '+g.layer);
 		// for(var i in layers) console.log('layer '+i+' visible: '+layers[i].show);
 		if(!layers[g.layer].show) continue;
 		var ns=id('svg').namespaceURI;
@@ -3474,7 +3483,6 @@ function draw() {
 			if(g.blur>0) el.setAttribute('filter','url(#blur'+g.blur+')');
     	}
 		id('dwg').appendChild(el);
-		// if(graphs[n].type=='curve') console.log('first point on curve is '+graphs[n].points[0].x+','+graphs[n].points[0].y);
 	}
 	save();
 }
@@ -3621,7 +3629,7 @@ function id(el) {
 	return document.getElementById(el);
 }
 function info(p) {
-	console.log('info: '+p);
+	// console.log('info: '+p);
 	if(p===null) {
 		id('info').style.top='-32px'; // hide sizes
 		return;
@@ -3840,7 +3848,7 @@ function saveDrawingData() {
     console.log('drawing data saved');
 }
 function select(n,multiple,s) {
-	console.log('select');
+	console.log('select n: '+n+' '+multiple+' s: '+s);
 	if(!multiple) { // single element selected
 		console.log('select graph '+n+' of '+graphs.length+' multiple is '+multiple+' s is '+s);
 		graph=graphs[n];
@@ -3933,6 +3941,7 @@ function select(n,multiple,s) {
             	id('bluePolygon').setAttribute('points',pts);
             	id('guides').style.display='block';
             	if(s) {
+            		console.log('s is true; '+s.n);
             		var html="<use id='mover"+s.n%10+"' href='#mover' x='"+s.x+"' y='"+s.y+"'/>"; // mover at a node
             		anchor.x=s.x;
             		anchor.y=s.y;
@@ -3943,6 +3952,7 @@ function select(n,multiple,s) {
             		anchor.y=y;
             	}
             	html+="<use id='sizer' href='#sizer' x='"+(x+w)+"' y='"+(y+h)+"'/>"; // sizer at bottom-right of blueBox
+            	console.log('html: '+html);
             	id('handles').innerHTML+=html;
             	id('blueBox').setAttribute('x',x);
         		id('blueBox').setAttribute('y',y);
@@ -4379,6 +4389,7 @@ function showTools(which) {
 	id('style').style.display=((which=='tools')||(which=='edit'))?'block':'none';
 }
 function snapCheck() {
+	snap={'x':null,'y':null,'n':null};
     var near=nodes.filter(function(node) {
         return (Math.abs(node.x-x)<snapD)&&(Math.abs(node.y-y)<snapD);
     });
@@ -4391,8 +4402,22 @@ function snapCheck() {
                 snap={'x':near[i].x,'y':near[i].y,'n':near[i].n};
             }
         }
-        console.log('SNAP TO NODE x: '+snap.x+' y: '+snap.y+' n: '+snap.n);
-        if(snap.n!=datum2.n) {
+        console.log('snap to node '+snap.n+': '+snap.x+','+snap.y);
+        if(datum1.n==null) {
+        	datum1.x=snap.x;
+        	datum1.y=snap.y;
+        	datum1.n=snap.n;
+        	id('datum1').setAttribute('x',datum1.x);
+            id('datum1').setAttribute('y',datum1.y);
+        }
+        else if(datum2.n==null) {
+        	datum2.x=snap.x;
+        	datum2.y=snap.y;
+        	datum2.n=snap.n;
+        	id('datum2').setAttribute('x',datum2.x);
+            id('datum2').setAttribute('y',datum2.y);
+        }
+        else if(snap.n!=datum2.n) { // update datums
             datum1.x=datum2.x;
             datum1.y=datum2.y;
             datum1.n=datum2.n;
@@ -4406,38 +4431,34 @@ function snapCheck() {
             id('datum2').setAttribute('y',datum2.y);
             // console.log('DATUM2: '+datum2.n+' at '+datum2.x+','+datum2.y);
         }
-        x=snap.x;
-        y=snap.y;
-        return snap;
     }
     else { // if no nearby nodes...
-        if(Math.abs(x-datum.x1)<snapD) { // near datum X?
-        	x=datum.x1;
-        	console.log('SNAP X TO DATUM');
+        if(Math.abs(x-datum1.x)<snapD) { // near datum X?
+        	snap.x=datum1.x;
+        	console.log('snap x to datum 1');
         }
-        else if(Math.abs(x-datum.x2)<snapD) {
-        	x=datum.x2;
-        	console.log('SNAP X TO DATUM');
-        }
-        else if(gridSnap>0) {
-        	x=Math.round(x/gridSize)*gridSize;
-        	console.log('SNAP TO GRID');
-        }
-        if(Math.abs(y-datum.y1)<snapD) {
-        	y=datum.y1;
-        	console.log('SNAP Y TO DATUM');
-        }
-        else if(Math.abs(y-datum.y2)<snapD) {
-        	y=datum.y2;
-        	console.log('SNAP Y TO DATUM');
+        else if(Math.abs(x-datum2.x)<snapD) {
+        	snap.x=datum2.x;
+        	console.log('snap x to datum 2');
         }
         else if(gridSnap>0) {
-        	y=Math.round(y/gridSize)*gridSize;
-        	console.log('SNAP TO GRID');
+        	snap.x=Math.round(x/gridSize)*gridSize;
+        	console.log('snap to grid');
         }
-        // console.log('snap to '+x+','+y);
-        return false;
+        if(Math.abs(y-datum1.y)<snapD) {
+        	snap.y=datum1.y;
+        	console.log('snap y to datum 1');
+        }
+        else if(Math.abs(y-datum2.y)<snapD) {
+        	snap.y=datum2.y;
+        	console.log('snap y to datum 2');
+        }
+        else if(gridSnap>0) {
+        	snap.y=Math.round(y/gridSize)*gridSize;
+        	console.log('snap to grid');
+        }
     }
+    return snap;
 }
 function textFormat(text,across) {
 	var chars=text.length;
