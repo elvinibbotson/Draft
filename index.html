@@ -69,8 +69,15 @@
                    	<stop offset='100%' stop-color='blue' stop-opacity="0"/>
                	</radialGradient>
 		    	<g id='sets'></g>
-		    	<!--pattern id='pattern0' width='4' height='2' patternUnits='userSpaceOnUse'><rect x="0" y="1" width="4" height="0.5" stroke="none" fill="#000"></rect></pattern>'
-		    	<pattern id='pattern1' width='4' height='2' patternUnits='userSpaceOnUse'><rect x="0" y="1" width="4" height="1" stroke="none" fill="#000"></rect></pattern>'
+		    	<pattern id='pattern0' width='5' height='5' patternUnits='userSpaceOnUse'><rect x="0" y="2" width="5" height="1" stroke="none" fill="#000"></rect></pattern>'
+		    	<pattern id='pattern1' width='5' height='5' patternUnits='userSpaceOnUse'><rect x="2" y="0" width="1" height="5" stroke="none" fill="#000"></rect></pattern>'
+		    	<pattern id='pattern2' width='5' height='5' patternUnits='userSpaceOnUse'><rect x="0" y="2" width="5" height="2" stroke="none" fill="#000"></rect></pattern>'
+		    	<pattern id='pattern3' width='5' height='5' patternUnits='userSpaceOnUse'><rect x="2" y="0" width="2" height="5" stroke="none" fill="#000"></rect></pattern>'
+		    	<pattern id='pattern4' width='5' height='5' patternUnits='userSpaceOnUse' patternTransform='rotate(-45)'><rect x="0" y="2" width="5" height="1" stroke="none" fill="#000"></rect></pattern>'
+		    	<pattern id='pattern5' width='5' height='5' patternUnits='userSpaceOnUse' patternTransform='rotate(45)'><rect x="0" y="2" width="5" height="1" stroke="none" fill="#000"></rect></pattern>'
+				<pattern id='pattern6' width='5' height='5' patternUnits='userSpaceOnUse'><rect x="0" y="2" width="5" height="1" stroke="none" fill="#000"></rect><rect x="2" y="0" width="1" height="5" stroke="none" fill="#000"></rect></pattern>'</pattern>'
+				<pattern id='pattern7' width='5' height='5' patternUnits='userSpaceOnUse' patternTransform='rotate(45)'><rect x="0" y="2" width="5" height="1" stroke="none" fill="#000"></rect><rect x="2" y="0" width="1" height="5" stroke="none" fill="#000"></rect></pattern>'</pattern>'
+
 		    	<pattern id='pattern2' width='4' height='4' patternUnits='userSpaceOnUse'><rect x="0" y="2" width="4" height="2" stroke="none" fill="#000"></rect></pattern>'
 		    	<pattern id='pattern3' width='4' height='2' patternUnits='userSpaceOnUse' patternTransform='rotate(90)'><rect x="0" y="1" width="4" height="0.5" stroke="none" fill="#000"></rect></pattern>'
 		    	<pattern id='pattern4' width='4' height='2' patternUnits='userSpaceOnUse' patternTransform='rotate(90)'><rect x="0" y="1" width="4" height="1" stroke="none" fill="#000"></rect></pattern>'
@@ -78,7 +85,6 @@
 		    	<pattern id='pattern6' width='4' height='2' patternUnits='userSpaceOnUse' patternTransform='rotate(-45)'><rect x="0" y="1" width="4" height="0.5" stroke="none" fill="#000"></rect></pattern>'
 		    	<pattern id='pattern7' width='4' height='2' patternUnits='userSpaceOnUse' patternTransform='rotate(-45)'><rect x="0" y="1" width="4" height="1" stroke="none" fill="#000"></rect></pattern>'
 		    	<pattern id='pattern8' width='4' height='4' patternUnits='userSpaceOnUse' patternTransform='rotate(-45)'><rect x="0" y="2" width="4" height="2" stroke="none" fill="#000"></rect></pattern>'
-		    	<pattern id='pattern9' width='4' height='2' patternUnits='userSpaceOnUse' patternTransform='rotate(45)'><rect x="0" y="1" width="4" height="0.5" stroke="none" fill="#000"></rect></pattern>'
 		    	<pattern id='pattern10' width='4' height='2' patternUnits='userSpaceOnUse' patternTransform='rotate(45)'><rect x="0" y="1" width="4" height="1" stroke="none" fill="#000"></rect></pattern>'
 		    	<pattern id='pattern11' width='4' height='4' patternUnits='userSpaceOnUse' patternTransform='rotate(45)'><rect x="0" y="2" width="4" height="2" stroke="none" fill="#000"></rect></pattern>'
 		    	<pattern id='pattern12' width='2' height='2' patternUnits='userSpaceOnUse'><rect x="0" y="1" width="2" height="0.5" stroke="none" fill="#000"></rect></pattern>'
@@ -365,14 +371,8 @@
         <img id='lineColor'/>
         </p>
         <p>fill 
-        <!--select id='fillType'>
-            <option value='none'>none</option>
-            <option value='solid' selected>solid</option>
-            <option id='patternOption' value='pattern'>pattern</option>
-        </select-->
         <img id='fillColor'/>
-        <!--/p>
-        <p--> opacity 
+         opacity 
         <select id='opacity'>
             <option value='1' selected>100% solid</option>
             <option value='0.75'>75% high</option>
@@ -394,7 +394,6 @@
         <button id='textOKbutton'>TEXT</button><br>
         <textarea id='text' rows='5' cols='100'></textarea>
     </div>
-    <!--div id='patternMenu' class='dialog'></div-->
     <div id='removeDialog' class='dialog'>
         <button id='confirmRemove'>DELETE</button>
         <p>selected element(s)?</p>
@@ -506,6 +505,20 @@
 			<rect id='#5FF' x='25' y='375' width='25' height='25' stroke='none' fill='#5FF'/>
 			<rect id='#AFF' x='50' y='375' width='25' height='25' stroke='none' fill='#AFF'/>
 			<rect id='#FFF' x='75' y='375' width='25' height='25' stroke='#AAA' fill='#FFF'/>
+    	</svg>
+    </div>
+    <div id='patternPicker' class='dialog'>
+    	<svg width='100' height='125'>
+    		<!--rect x='0' y='0' width='100' height='125' stroke='none' fill='#FFF'/-->
+    		<rect id='p0' x='0' y='0' width='25' height='25' stroke='none' fill='url(#pattern0)'/>
+    		<rect id='p1' x='25' y='0' width='25' height='25' stroke='none' fill='url(#pattern1)'/>
+    		<rect id='p2' x='50' y='0' width='25' height='25' stroke='none' fill='url(#pattern2)'/>
+    		<rect id='p3' x='75' y='0' width='25' height='25' stroke='none' fill='url(#pattern3)'/>
+    		<rect id='p4' x='0' y='25' width='25' height='25' stroke='none' fill='url(#pattern4)'/>
+    		<rect id='p5' x='25' y='25' width='25' height='25' stroke='none' fill='url(#pattern5)'/>
+    		<rect id='p6' x='50' y='25' width='25' height='25' stroke='none' fill='url(#pattern6)'/>
+    		<rect id='p6' x='75' y='25' width='25' height='25' stroke='none' fill='url(#pattern7)'/>
+    		<rect id='p24' x='75' y='100' width='25' height='25' stroke='#AAA' fill='#FFF'/>
     	</svg>
     </div>
 	<script src="Draft.js" async></script>

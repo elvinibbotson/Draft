@@ -1441,10 +1441,10 @@ id('fillType').addEventListener('change',function() {
 });
 */
 id('fillColor').addEventListener('click',function() {
-	// console.log('show colour menu');
 	id('colorPicker').style.display='block';
 	id('colorPicker').mode='fill';
-	var color=showColorPicker(true,event.clientX-16,event.clientY-16);
+	showPicker('colorPicker',true,event.clientX-16,event.clientY-16);
+	showPicker('patternPicker',true,event.clientX+100,event.clientY-16);
 });
 id('opacity').addEventListener('change',function() {
     var val=event.target.value;
@@ -1504,7 +1504,8 @@ id('patternMenu').addEventListener('click',function(event) {
 */
 id('colorPicker').addEventListener('click',function(e) {
 	var val=e.target.id;
-	showColorPicker(false);
+	showPicker('colorPicker',false);
+	showPicker('patternPicker',false);
 	if(id('colorPicker').mode=='line') { // line colour
         if(selection.length>0) { // change line shade of selected elements
         	for(var i=0;i<selection.length;i++) {
@@ -1518,7 +1519,7 @@ id('colorPicker').addEventListener('click',function(e) {
         }
         else { // change default line colour
             // console.log('line colour: '+val);
-            if(val=='white') val='black'; // cannot have white lines
+            if(val=='#FFF') val='#000'; // cannot have white lines
             lineColor=val;
         }
         id('styleBox').style.borderColor=val;
@@ -1531,14 +1532,6 @@ id('colorPicker').addEventListener('click',function(e) {
     			var n=selection[i];
     			console.log('change fill color for graph/element '+n);
     			if(graphs[n].type=='text') continue; // text fill colour uses line colour
-    			/*
-    			var fill=id('fillType').value;
-        		if(fill=='pattern') { // change colour of one or two elements in pattern tile
-        			id('pattern'+n).firstChild.setAttribute('fill',val);
-        			id('pattern'+n).lastChild.setAttribute('fill',val);
-        		}
-        		else if(fill=='none') graph.fillType='solid';
-        		*/
         		else graphs[n].fill=val;
     		}
     		draw();
@@ -1547,6 +1540,27 @@ id('colorPicker').addEventListener('click',function(e) {
         id('styleBox').style.background=val;
         id('fillColor').style.backgroundColor=val;
     }
+});
+id('patternPicker').addEventListener('click',function(e) {
+	// SIMILAR CODE FOR PATTERNS - OLD CODE...
+	x=Math.floor((event.clientX-7)/30); // column 0-4
+	y=Math.floor((event.clientY-7)/30); // row 0-2
+	var n=y*5+x; // 5 per row - n is 0-14
+	console.log('use pattern# '+n);
+	var fill=element.getAttribute('fill'); // fill colour/pattern
+	console.log('set element fill (currently '+fill+') to pattern'+n);
+	console.log('set pattern for element '+element.id);
+	console.log(' pattern '+n+' size: '+pattern[n].width+'x'+pattern[n].height);
+	var html="<pattern id='pattern"+element.id+"' index='"+n+"' width='"+pattern[n].width+"' height='"+pattern[n].height+"' patternUnits='userSpaceOnUse'";
+	html+="'>"+tile[pattern[n].tile]+'</pattern>';
+	console.log('pattern HTML: '+html);
+	id('defs').innerHTML+=html;
+	var el=id('pattern'+element.id);
+	id('pattern'+element.id).firstChild.setAttribute('fill',fill);
+	id('pattern'+element.id).lastChild.setAttribute('fill',fill);
+	// element.setAttribute('fillType','pattern');
+	element.setAttribute('fill','url(#pattern'+element.id+')');
+	updateGraph(index,['fillType','"p'+n+'"']);
 });
 // POINTER ACTIONS
 id('graphic').addEventListener('pointerdown',function(e) { 
@@ -3448,6 +3462,7 @@ function draw() {
 			};
 			var dash=setLineType(g);
 			if(dash) el.setAttribute('stroke-dasharray',dash);
+			/*
 			if(g.fillType.startsWith('p')) {
 				var n=Number(g.fillType.substr(1));
 				console.log('fillType is p'+n);
@@ -3471,7 +3486,6 @@ function draw() {
 				}
 				el.setAttribute('fill',(g.fillType=='none')?'none':g.fill);
 			}
-			/*
 			if(g.opacity<1) {
 				el.setAttribute('stroke-opacity',g.opacity);
 				el.setAttribute('fill-opacity',g.opacity);
@@ -4356,13 +4370,13 @@ function showDialog(dialog,visible) {
     currentDialog=(visible)?dialog:null; // update currentDialog
     showTools((visible)?'none':'edit');
 }
-function showColorPicker(visible,x,y) {
-    // console.log('show colorPicker');
+function showPicker(picker,visible,x,y) {
+	picker=id(picker);
     if(x) {
-        id('colorPicker').style.left=x+'px';
-        id('colorPicker').style.top=y+'px';
+        picker.style.left=x+'px';
+        picker.style.top=y+'px';
     }
-    id('colorPicker').style.display=(visible)?'block':'none';
+    picker.style.display=(visible)?'block':'none';
 }
 function showHelp() {
 	console.log('show help');
