@@ -69,7 +69,7 @@
                    	<stop offset='100%' stop-color='blue' stop-opacity="0"/>
                	</radialGradient>
 		    	<g id='sets'></g>
-		    	<pattern id='pattern0' width='4' height='2' patternUnits='userSpaceOnUse'><rect x="0" y="1" width="4" height="0.5" stroke="none" fill="#000"></rect></pattern>'
+		    	<!--pattern id='pattern0' width='4' height='2' patternUnits='userSpaceOnUse'><rect x="0" y="1" width="4" height="0.5" stroke="none" fill="#000"></rect></pattern>'
 		    	<pattern id='pattern1' width='4' height='2' patternUnits='userSpaceOnUse'><rect x="0" y="1" width="4" height="1" stroke="none" fill="#000"></rect></pattern>'
 		    	<pattern id='pattern2' width='4' height='4' patternUnits='userSpaceOnUse'><rect x="0" y="2" width="4" height="2" stroke="none" fill="#000"></rect></pattern>'
 		    	<pattern id='pattern3' width='4' height='2' patternUnits='userSpaceOnUse' patternTransform='rotate(90)'><rect x="0" y="1" width="4" height="0.5" stroke="none" fill="#000"></rect></pattern>'
@@ -89,7 +89,7 @@
 		    	<pattern id='pattern17' width='4' height='4' patternUnits='userSpaceOnUse' patternTransform='rotate(45)'><rect x="0" y="2" width="4" height="2" stroke="none" fill="#000"></rect></pattern>'
 		    	<pattern id='pattern18' width='1' height='1' patternUnits='userSpaceOnUse'><rect x="0.25" y="0.25" width="0.5" height="0.5" stroke="none" fill="#000"></rect></pattern>'
 		    	<pattern id='pattern19' width='2' height='2' patternUnits='userSpaceOnUse'><rect x="0.5" y="0.5" width="1" height="1" stroke="none" fill="#000"></rect></pattern>'
-		    	<pattern id='pattern20' width='4' height='4' patternUnits='userSpaceOnUse'><rect x="0" y="0" width="3" height="3" stroke="none" fill="#000"></rect></pattern>'
+		    	<pattern id='pattern20' width='4' height='4' patternUnits='userSpaceOnUse'><rect x="0" y="0" width="3" height="3" stroke="none" fill="#000"></rect></pattern-->'
 	 		</defs>
 	 		<g id='nodes'></g>
 	 		<g id='background'></g>
@@ -365,21 +365,23 @@
         <img id='lineColor'/>
         </p>
         <p>fill 
-        <select id='fillType'>
+        <!--select id='fillType'>
             <option value='none'>none</option>
             <option value='solid' selected>solid</option>
             <option id='patternOption' value='pattern'>pattern</option>
-        </select>
+        </select-->
         <img id='fillColor'/>
-        </p>
-        <p>opacity 
+        <!--/p>
+        <p--> opacity 
         <select id='opacity'>
-            <option value=1 selected>100%</option>
-            <option value=0.75>75%</option>
-            <option value=0.5>50%</option>
-            <option value=0.25>25%</option>
+            <option value='1' selected>100% solid</option>
+            <option value='0.75'>75% high</option>
+            <option value='0.5'>50% medium</option>
+            <option value='0.25'>25% low</option>
+            <option value='0'>0% clear</option>
         </select>
-         blur 
+        </p>
+        <p> blur 
         <select id='blur'>
         	<option value=0 selected>none</option>
         	<option value=1>25%</option>
@@ -392,7 +394,7 @@
         <button id='textOKbutton'>TEXT</button><br>
         <textarea id='text' rows='5' cols='100'></textarea>
     </div>
-    <div id='patternMenu' class='dialog'></div>
+    <!--div id='patternMenu' class='dialog'></div-->
     <div id='removeDialog' class='dialog'>
         <button id='confirmRemove'>DELETE</button>
         <p>selected element(s)?</p>

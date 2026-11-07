@@ -53,7 +53,7 @@ var lineStyle='square';
 var lineColor='black';
 var pen=0.25; // 0.25mm at 1:1 scale - increase for smaller scales (eg.12.5 at 1:50 scale)
 var fillType='solid';
-var fillColor='white';
+var fillColor='#FFF';
 var opacity='1';
 var blur=0;
 var textSize=5; // default text size
@@ -63,6 +63,7 @@ var currentDialog=null;
 var sizes=['A4','A5','21cm square','15x10cm','18x13cm','20x15cm','25x20cm'];
 var widths=[297,210,210,150,180,200,250,210,148,210,100,130,150,200];
 var heights=[210,148,210,100,130,150,200,297,210,210,150,180,200,250];
+/*
 var pattern=[];
 var tile=[];
 pattern[0]={'width':4, 'height':2, 'spin':0, 'tile':0};
@@ -78,8 +79,8 @@ pattern[9]={'width':2, 'height':2, 'spin':45, 'tile':2};
 pattern[10]={'width':1, 'height':1, 'spin':0, 'tile':3};
 pattern[11]={'width':4, 'height':4, 'spin':0, 'tile':4};
 pattern[12]={'width':1, 'height':1, 'spin':0, 'tile':5};
-pattern[13]={'width':2, 'height':2, 'spin':0, 'tile':6};
-pattern[14]={'width':1, 'height':1, 'spin':45, 'tile':6};
+pattern[13]={'width':1, 'height':1, 'spin':45, 'tile':5};
+pattern[14]={'width':2, 'height':2, 'spin':0, 'tile':6};
 tile[0]='<rect x="0" y="1" width="4" height="0.5" stroke="none"/>';
 tile[1]='<rect x="0" y="1" width="4" height="1" stroke="none"/>';
 tile[2]='<rect x="0" y="1" width="2" height="0.5" stroke="none"/><rect x="1" y="0" width="0.5" height="2" stroke="none"/>';
@@ -87,6 +88,7 @@ tile[3]='<rect x="0" y="0" width="0.5" height="0.5" stroke="none"/><rect x="0.5"
 tile[4]='<rect x="0" y="0" width="2" height="2" stroke="none"/><rect x="2" y="2" width="2" height="2" stroke="none"/>';
 tile[5]='<circle cx="0.5" cy="0.5" r="0.25" stroke="none"/>';
 tile[6]='<circle cx="1" cy="1" r="0.5" stroke="none"/>';
+*/
 class Point {
     constructor(x,y) {
         this.x=x;
@@ -1414,6 +1416,7 @@ id('lineColor').addEventListener('click',function() {
     id('colorPicker').mode='line';
     showColorPicker(true,event.clientX-16,event.clientY-16);
 });
+/*
 id('fillType').addEventListener('change',function() {
     var filltype=event.target.value;
     // console.log('fill type: '+filltype);
@@ -1436,6 +1439,7 @@ id('fillType').addEventListener('change',function() {
     }
     id('styleBox').style.background=(type=='none')?'none':fillColor;
 });
+*/
 id('fillColor').addEventListener('click',function() {
 	// console.log('show colour menu');
 	id('colorPicker').style.display='block';
@@ -1447,11 +1451,17 @@ id('opacity').addEventListener('change',function() {
     if(selection.length>0) {
     	for(var i=0;i<selection.length;i++) {
     		var n=selection[i];
+    		
     		graphs[n].opacity=val;
+    		/*
+    		var fill=graphs[n].fill.substring(0,4); // strip off any alpha
+    		if(fill.length<5) fill+=val; // add alpha
+    		graphs[n].fill=fill;
+    		*/
     	}
     	draw();
     }
-    else opacity=val; // change default opacity
+    opacity=val; // change default opacity
     id('styleBox').style.opacity=val;
 });
 id('blur').addEventListener('change',function() {
@@ -1466,6 +1476,7 @@ id('blur').addEventListener('change',function() {
     }
     else blur=val; // change default blur
 });
+/*
 id('patternOption').addEventListener('click',function() {
 	// console.log('click "pattern" - fill is '+element.getAttribute('fill'));
 	if(element && element.getAttribute('fill').startsWith('url')) showDialog('patternMenu',true);
@@ -1480,12 +1491,6 @@ id('patternMenu').addEventListener('click',function(event) {
 	console.log('set pattern for element '+element.id);
 	console.log(' pattern '+n+' size: '+pattern[n].width+'x'+pattern[n].height);
 	var html="<pattern id='pattern"+element.id+"' index='"+n+"' width='"+pattern[n].width+"' height='"+pattern[n].height+"' patternUnits='userSpaceOnUse'";
-	if((scale>1)||(pattern[n].spin!=0)) { // set transform
-			html+=" patternTransform='";
-			if(scale>1) html+="scale("+scale+")";
-			if(pattern[n].spin!=0) html+=" rotate("+pattern[n].spin+")";
-			html+="'";
-		}
 	html+="'>"+tile[pattern[n].tile]+'</pattern>';
 	console.log('pattern HTML: '+html);
 	id('defs').innerHTML+=html;
@@ -1496,6 +1501,7 @@ id('patternMenu').addEventListener('click',function(event) {
 	element.setAttribute('fill','url(#pattern'+element.id+')');
 	updateGraph(index,['fillType','"p'+n+'"']);
 });
+*/
 id('colorPicker').addEventListener('click',function(e) {
 	var val=e.target.id;
 	showColorPicker(false);
@@ -1519,19 +1525,21 @@ id('colorPicker').addEventListener('click',function(e) {
         id('lineColor').style.backgroundColor=val;
     }
     else { // fill colour
-    	if(selection.length>0) { // change line shade of selected elements
+    	if(selection.length>0) { // change fill colour of selected elements
     		for (var i=0;i<selection.length;i++) {
     			// console.log('change fill colour for selected element '+i);
     			var n=selection[i];
     			console.log('change fill color for graph/element '+n);
     			if(graphs[n].type=='text') continue; // text fill colour uses line colour
+    			/*
     			var fill=id('fillType').value;
         		if(fill=='pattern') { // change colour of one or two elements in pattern tile
         			id('pattern'+n).firstChild.setAttribute('fill',val);
         			id('pattern'+n).lastChild.setAttribute('fill',val);
         		}
         		else if(fill=='none') graph.fillType='solid';
-        		graphs[n].fill=val;
+        		*/
+        		else graphs[n].fill=val;
     		}
     		draw();
     	}
@@ -2200,7 +2208,7 @@ id('graphic').addEventListener('pointerup',function(e) {
             }
             else selection.push(index); // move single element
             // console.log('move '+selection.length+' elements by '+dx+','+dy);
-            console.log('move '+selection.length+' items');
+            console.log('move '+selection.length+' items by '+dx+','+dy);
             move(dx,dy);
             draw();
             cancel();
@@ -2435,8 +2443,8 @@ id('graphic').addEventListener('pointerup',function(e) {
             console.log('finish box');
             graph={};
 	        graph.type='box';
-	        x=graph.x=id('blueBox').getAttribute('x');
-	        y=graph.y=id('blueBox').getAttribute('y');
+	        x=graph.x=Number(id('blueBox').getAttribute('x'));
+	        y=graph.y=Number(id('blueBox').getAttribute('y'));
 	        graph.width=w;
 	        graph.height=h;
 	        graph.radius=rad;
@@ -2682,9 +2690,7 @@ id('graphic').addEventListener('pointerup',function(e) {
                     	id('selection').innerHTML+=html;
                     }
                 }
-                
                 console.log(selection.length+' items selected');
-                
                 if(selection.length>0) { // highlight selected elements
                     mode='edit';
                     showTools('edit');
@@ -2747,11 +2753,12 @@ id('graphic').addEventListener('pointerup',function(e) {
                     	if(selection.length<2) { // only item selected
                     		// SINGLE ELEMENT SELECTED - IS IT A NODE?
                         	var snap=snapCheck();
+                        	console.log('snap to node '+snap.n+': '+snap.x+','+snap.y)
                         	index=parseInt(hit);
                         	graph=graphs[hit];
                         	element=id(hit);
                         	console.log('select single element - index '+index+' type: '+graph.type);
-                        	select(hit,false,(graph.type==set));
+                        	select(hit,false,snap);
                     	}
                     	else { // multiple selection
                         	// console.log('add '+type(el)+' '+el.id+' to multiple selection');
@@ -3235,7 +3242,6 @@ function decimal(n) {
 	return (n/10);
 }
 function draw() {
-	// cancel();
 	var el;
 	id('dwg').innerHTML='';
 	nodes=[];
@@ -3277,34 +3283,27 @@ function draw() {
             el.setAttribute('stroke-width',g.lineW);
             var dash=setLineType(g);
             if(dash) el.setAttribute('stroke-dasharray',dash);
-            el.setAttribute('fillType',g.fillType);
-            el.setAttribute('fill',g.fill);
-            if(g.opacity<1) el.setAttribute('fill-opacity',g.opacity);
+            // el.setAttribute('fill',g.fill);
+            // el.setAttribute('fill-opacity',g.opacity);
             el.setAttribute('fill','none');
             var points=g.points;
             var elPts='';
-            // console.log('line points: '+points.length);
             for(var i=0;i<points.length;i++) {
             	var point=points[i];
             	elPts+=point.x+','+point.y+' ';
                 nodes.push({'x':point.x,'y':point.y,'n':Number(n*10+i)});
-                // console.log('add node '+i+' at '+point.x+','+point.y);
-            } // NB node.n is id*10+[0-9]
-            // console.log('element points: '+elPts);
+            }
             el.setAttribute('points',elPts);
             break;
         case 'shape':
             var el=document.createElementNS(ns,'polygon');
             el.setAttribute('id',n);
-            // el.setAttribute('spin',g.spin);
             el.setAttribute('stroke',g.stroke);
             el.setAttribute('stroke-width',g.lineW);
             var dash=setLineType(g);
             if(dash) el.setAttribute('stroke-dasharray',dash);
-            el.setAttribute('fillType',g.fillType);
             el.setAttribute('fill',g.fill);
-            if(g.opacity<1) el.setAttribute('fill-opacity',g.opacity);
-            if(g.opacity<1) el.setAttribute('fill-opacity',g.opacity);
+            el.setAttribute('fill-opacity',g.opacity);
             var points=g.points;
             var elPts='';
             console.log('line points: '+points.length);
@@ -3313,7 +3312,7 @@ function draw() {
             	elPts+=point.x+','+point.y+' ';
                 nodes.push({'x':point.x,'y':point.y,'n':Number(n*10+i)});
                 console.log('add node '+i+' at '+point.x+','+point.y);
-            } // NB node.n is id*10+[0-9]
+            }
             console.log('element points: '+elPts);
             el.setAttribute('points',elPts);
             break;
@@ -3330,9 +3329,8 @@ function draw() {
             el.setAttribute('stroke-width',g.lineW);
             var dash=setLineType(g);
             if(dash) el.setAttribute('stroke-dasharray',dash);
-            el.setAttribute('fillType',g.fillType);
             el.setAttribute('fill',g.fill);
-            if(g.opacity<1) el.setAttribute('fill-opacity',g.opacity);
+            el.setAttribute('fill-opacity',g.opacity);
             console.log('add nodes for '+g.points.length+' points');
             nodes.push({'x':g.points[0].x,'y':g.points[0].y,'n':(n*10)}); // top/left - node 0
             nodes.push({'x':g.points[1].x,'y':g.points[1].y,'n':(n*10+1)}); // top/right - node 1
@@ -3352,9 +3350,8 @@ function draw() {
             el.setAttribute('stroke-width',g.lineW);
             var dash=setLineType(g);
             if(dash) el.setAttribute('stroke-dasharray',dash);
-            el.setAttribute('fillType',g.fillType);
             el.setAttribute('fill',g.fill);
-            if(g.opacity<1) el.setAttribute('fill-opacity',g.opacity);
+            el.setAttribute('fill-opacity',g.opacity);
             for(var p=0;p<g.points.length;p++) {
             	nodes.push({'x':g.points[p].x,'y':g.points[p].y,'n':n*10+p});
             }
@@ -3373,9 +3370,8 @@ function draw() {
             el.setAttribute('stroke-width',g.lineW);
             var dash=setLineType(g);
             if(dash) el.setAttribute('stroke-dasharray',dash);
-            el.setAttribute('fillType',g.fillType);
             el.setAttribute('fill',g.fill);
-            if(g.opacity<1) el.setAttribute('fill-opacity',g.opacity);
+            el.setAttribute('fill-opacity',g.opacity);
             // create nodes for arc start, centre & end points
             console.log('add nodes for graph '+n+' in range '+n*10);
             for(var p=0;p<g.points.length;p++) {
@@ -3395,7 +3391,6 @@ function draw() {
             if(g.textStyle=='bold') el.setAttribute('font-weight','bold');
             else if(g.textStyle=='italic') el.setAttribute('font-style','italic');
             el.setAttribute('stroke','none');
-            el.setAttribute('fillType',g.fillType);
             el.setAttribute('fill',g.fill);
             el.setAttribute('text',g.text);
             var t=document.createTextNode(g.text);
@@ -3476,10 +3471,12 @@ function draw() {
 				}
 				el.setAttribute('fill',(g.fillType=='none')?'none':g.fill);
 			}
+			/*
 			if(g.opacity<1) {
 				el.setAttribute('stroke-opacity',g.opacity);
 				el.setAttribute('fill-opacity',g.opacity);
 			}
+			*/
 			if(g.blur>0) el.setAttribute('filter','url(#blur'+g.blur+')');
     	}
 		id('dwg').appendChild(el);
@@ -3728,12 +3725,12 @@ function load() {
     listSets();
 }
 function move(dx,dy) {
-	console.log('move '+selection.length+' graphs');
+	// console.log('move '+selection.length+' graphs by '+dx+','+dy);
 	for(var i in selection) {
 		index=selection[i];
 		graph=graphs[index];
 		element=id(index);
-		console.log('move graph '+index+' ('+graph.type+') by '+dx+','+dy);
+		// console.log('move graph '+index+' ('+graph.type+') by '+dx+','+dy);
 		switch(graph.type) {
     		case 'curve':
         	case 'line':
@@ -3753,7 +3750,7 @@ function move(dx,dy) {
         		graphs[index]=graph;
         		break
         	case 'oval':
-            	console.log('move oval by '+dx+','+dy);
+            	// console.log('move oval by '+dx+','+dy);
             	graph.cx+=dx;
             	graph.cy+=dy;
             	graph.points=setPoints(graph);
@@ -3850,9 +3847,9 @@ function saveDrawingData() {
 function select(n,multiple,s) {
 	console.log('select n: '+n+' '+multiple+' s: '+s);
 	if(!multiple) { // single element selected
-		console.log('select graph '+n+' of '+graphs.length+' multiple is '+multiple+' s is '+s);
+		console.log('select graph '+n+' of '+graphs.length+' multiple is '+multiple+' snap node is '+s.n);
 		graph=graphs[n];
-		if(s) console.log('place mover on node '+s.n+' at '+s.x+','+s.y);
+		if(s.n) console.log('place mover on node '+s.n+' at '+s.x+','+s.y);
 		console.log('graph type: '+graph.type+'; stroke: '+graph.layer);
 		id('choice'+graph.layer).checked=true;
     	id('handles').innerHTML=''; // clear any handles then add handles for selected element 
@@ -3940,7 +3937,7 @@ function select(n,multiple,s) {
             	}
             	id('bluePolygon').setAttribute('points',pts);
             	id('guides').style.display='block';
-            	if(s) {
+            	if(s.n) {
             		console.log('s is true; '+s.n);
             		var html="<use id='mover"+s.n%10+"' href='#mover' x='"+s.x+"' y='"+s.y+"'/>"; // mover at a node
             		anchor.x=s.x;
@@ -4205,6 +4202,7 @@ function setPoints(g,spin) {
 		case 'box':
 			x=Number(g.x);
 			y=Number(g.y);
+			console.log('box at '+g.x+','+g.y);
 			// spin around top left corner
 			w=Number(g.width);
 			h=Number(g.height);
@@ -4261,8 +4259,6 @@ function setPoints(g,spin) {
 	return points;
 }
 function setStyle() {
-	// console.log('setStyle: '+selection.length+' items selected');
-	// default style settings
     id('lineType').value=lineType;
     id('styleBox').style.borderStyle=lineType;
     id('styleBox').style.borderWidth=pen+'mm';
@@ -4270,37 +4266,32 @@ function setStyle() {
     id('penSelect').value=pen;
     id('lineColor').style.backgroundColor=lineColor;
     id('styleBox').style.borderColor=lineColor;
-    // console.log('default text: '+textFont+','+textStyle+','+textSize+','+lineColor);
     id('textFont').value=textFont;
     id('textStyle').value=textStyle;
     id('textSize').value=textSize;
-    id('fillType').value=fillType;
+    // id('fillType').value=fillType;
     id('fillColor').style.backgroundColor=fillColor;
-    if(fillType=='solid') id('styleBox').style.background=fillColor;
-    id('styleBox').style.opacity=opacity;
-    id('patternOption').disabled=true;
+    // if(fillType=='solid') id('styleBox').style.background=fillColor;
+    // id('styleBox').style.opacity=opacity;
+    // id('patternOption').disabled=true;
     id('opacity').value=opacity;
     // set styles to suit selected element?
     var el=(selection.length==1)?id(selection[0]):null;
     if(!el) return; // no selection or multiple selection
     if(graph.type=='set') return;
-    // console.log('set style for element '+el.id);
     val=getLineType(el);
     id('lineType').value=val;
     id('styleBox').style.borderStyle=val;
     val=el.getAttribute('stroke-linecap');
-    // console.log('element lineStyle '+val+'; current lineStyle: '+id('lineStyle').value);
     if(val) {
     	if(val=='butt') id('lineStyle').value='square';
     	else id('lineStyle').value='round';
     }
     val=el.getAttribute('stroke-width');
-    // console.log('pen: '+val);
     if(val) {
         id('styleBox').style.borderWidth=(val/scaleF)+'px';
         val=Math.floor(val/10);
         if(val>3) val=3;
-        // console.log('select option '+val);
         id('penSelect').options[val].selected=true;
     }
     val=el.getAttribute('stroke');
@@ -4308,6 +4299,7 @@ function setStyle() {
         id('lineColor').style.backgroundColor=val;
         id('styleBox').style.borderColor=val;
     }
+    /*
     id('patternOption').disabled=false;
     val=el.getAttribute('fillType');
     // console.log('fillType: '+val);
@@ -4320,16 +4312,16 @@ function setStyle() {
     	id('fillType').value='none';
     }
     else {
-    	id('fillType').value='solid';
-    	val=el.getAttribute('fill');
-    	console.log('fill color: '+val);
-        if(graph.type=='text') {
-            id('lineColor').style.backgroundColor=val;
-        }
-        else {
-            id('fillColor').style.backgroundColor=val;
-            id('styleBox').style.background=val;
-        }
+    */
+    // id('fillType').value='solid';
+	val=el.getAttribute('fill'); // includes alpha
+    console.log('element fill: '+val);
+    if(graph.type=='text') {
+        id('lineColor').style.backgroundColor=val;
+    }
+    else {
+    	id('fillColor').style.backgroundColor=val;
+        id('styleBox').style.background=val;
     }
     val=el.getAttribute('fill-opacity');
     if(val) {
