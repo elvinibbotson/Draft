@@ -226,7 +226,6 @@ a{
 	height: 32px;
 	border: none;
 	background-color: #FFFFFFC0;
-    /* box-shadow: 0 0 4px #88888888; */
     z-index: 12;
 }
 #styleBox {
@@ -357,29 +356,18 @@ a{
     background: url(svg/set.svg) center center no-repeat;
 }
 #lineColor {
-    width: 24px;
-    height: 24px;
-    border: 1px solid #CCCCCC;
+    width: 25px;
+    height: 25px;
+    border: 1px solid #CCC;
     vertical-align: bottom;
     background-color: black;
 }
-#fillColor {
-    width: 24px;
-    height: 24px;
-    border: 1px solid #CCCCCC;
+#fill {
+    width: 25px;
+    height: 25px;
+    border: 1px solid #CCC;
     vertical-align: bottom;
-    background: white;
-}
-#colorMenu {
-	position: fixed;
-    top: 100px;
-    left: 100px;
-    display: none;
-}
-#patternMenu {
-	width: 155px;
-	height: 94px;
-	background: white url('patterns.png') no-repeat center;
+    background: #FFF;
 }
 #text {
     width: 200px;

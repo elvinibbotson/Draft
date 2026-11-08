@@ -52,8 +52,7 @@ var lineType='solid'; // default styles
 var lineStyle='square';
 var lineColor='black';
 var pen=0.25; // 0.25mm at 1:1 scale - increase for smaller scales (eg.12.5 at 1:50 scale)
-var fillType='solid';
-var fillColor='#FFF';
+var fill='#FFF';
 var opacity='1';
 var blur=0;
 var textSize=5; // default text size
@@ -117,15 +116,6 @@ if(data) {
 	gridSize=json.gridSize;
 	gridSnap=json.gridSnap;
 }
-/*
-name=window.localStorage.getItem('name');
-size=window.localStorage.getItem('size');
-aspect=window.localStorage.getItem('aspect');
-scale=window.localStorage.getItem('scale');
-// gridSize=window.localStorage.getItem('gridSize');
-gridSnap=window.localStorage.getItem('gridSnap');
-*/
-// if(name===null) name='unnamed';
 if(size===null) size=0;
 if(scale===null) scale=1;
 if(!gridSize) gridSize=(scale<20)?(scale*5):100; // default grid size depends on scale
@@ -223,9 +213,8 @@ id('createNewDrawing').addEventListener('click',function() {
     dwg.w=widths[index];
     dwg.h=heights[index];
     console.log('drawing size '+dwg.w+'x'+dwg.h+'(index: '+index+')');
-    saveDrawingData(); // SAVE IN NEW FORMAT
+    saveDrawingData();
     index=0;
-    // CLEAR DRAWING IN HTML & DATABASE
     layer=0; // reset layers
 	for(var i=0;i<10;i++) {
 		id('layer'+i).checked=layers[i].checked=(i==0); // select current layer 0
@@ -243,7 +232,6 @@ id('createNewDrawing').addEventListener('click',function() {
     id('dwg').innerHTML=''; // clear drawing
     console.log('drawing cleared');
     showDialog('newDrawingDialog',false);
-    // window.localStorage.setItem('name',name);
     initialise();
 });
 id('load').addEventListener('click',function() {
@@ -1416,32 +1404,8 @@ id('lineColor').addEventListener('click',function() {
     id('colorPicker').mode='line';
     showColorPicker(true,event.clientX-16,event.clientY-16);
 });
-/*
-id('fillType').addEventListener('change',function() {
-    var filltype=event.target.value;
-    // console.log('fill type: '+filltype);
-    if(selection.length>0) {
-    	var col=id('fillColor').value;
-    	for (var i=0;i<selection.length;i++) {
-    		// console.log('change fill type for selected element '+i);
-    		var n=selection[i];
-    		console.log('graph '+n+' fillType: '+graphs[n].fillType);
-    		if(filltype=='pattern') {
-    			showDialog('patternMenu',true);
-    			return;
-    		}
-    		else graphs[n].fillType=filltype;
-    	}
-    	draw();
-    }
-    else { // change default fillType type
-        fillType=type;
-    }
-    id('styleBox').style.background=(type=='none')?'none':fillColor;
-});
-*/
-id('fillColor').addEventListener('click',function() {
-	id('colorPicker').style.display='block';
+id('fill').addEventListener('click',function() {
+	// id('colorPicker').style.display='block';
 	id('colorPicker').mode='fill';
 	showPicker('colorPicker',true,event.clientX-16,event.clientY-16);
 	showPicker('patternPicker',true,event.clientX+100,event.clientY-16);
@@ -1476,32 +1440,6 @@ id('blur').addEventListener('change',function() {
     }
     else blur=val; // change default blur
 });
-/*
-id('patternOption').addEventListener('click',function() {
-	// console.log('click "pattern" - fill is '+element.getAttribute('fill'));
-	if(element && element.getAttribute('fill').startsWith('url')) showDialog('patternMenu',true);
-});
-id('patternMenu').addEventListener('click',function(event) {
-	x=Math.floor((event.clientX-7)/30); // column 0-4
-	y=Math.floor((event.clientY-7)/30); // row 0-2
-	var n=y*5+x; // 5 per row - n is 0-14
-	console.log('use pattern# '+n);
-	var fill=element.getAttribute('fill'); // fill colour/pattern
-	console.log('set element fill (currently '+fill+') to pattern'+n);
-	console.log('set pattern for element '+element.id);
-	console.log(' pattern '+n+' size: '+pattern[n].width+'x'+pattern[n].height);
-	var html="<pattern id='pattern"+element.id+"' index='"+n+"' width='"+pattern[n].width+"' height='"+pattern[n].height+"' patternUnits='userSpaceOnUse'";
-	html+="'>"+tile[pattern[n].tile]+'</pattern>';
-	console.log('pattern HTML: '+html);
-	id('defs').innerHTML+=html;
-	var el=id('pattern'+element.id);
-	id('pattern'+element.id).firstChild.setAttribute('fill',fill);
-	id('pattern'+element.id).lastChild.setAttribute('fill',fill);
-	element.setAttribute('fillType','pattern');
-	element.setAttribute('fill','url(#pattern'+element.id+')');
-	updateGraph(index,['fillType','"p'+n+'"']);
-});
-*/
 id('colorPicker').addEventListener('click',function(e) {
 	var val=e.target.id;
 	showPicker('colorPicker',false);
@@ -1538,35 +1476,36 @@ id('colorPicker').addEventListener('click',function(e) {
     	}
         else {fillColor=val;} // change default fill shade
         id('styleBox').style.background=val;
-        id('fillColor').style.backgroundColor=val;
+        id('fill').style.background=val;
     }
 });
 id('patternPicker').addEventListener('click',function(e) {
-	// SIMILAR CODE FOR PATTERNS - OLD CODE...
-	x=Math.floor((event.clientX-7)/30); // column 0-4
-	y=Math.floor((event.clientY-7)/30); // row 0-2
-	var n=y*5+x; // 5 per row - n is 0-14
-	console.log('use pattern# '+n);
-	var fill=element.getAttribute('fill'); // fill colour/pattern
-	console.log('set element fill (currently '+fill+') to pattern'+n);
-	console.log('set pattern for element '+element.id);
-	console.log(' pattern '+n+' size: '+pattern[n].width+'x'+pattern[n].height);
-	var html="<pattern id='pattern"+element.id+"' index='"+n+"' width='"+pattern[n].width+"' height='"+pattern[n].height+"' patternUnits='userSpaceOnUse'";
-	html+="'>"+tile[pattern[n].tile]+'</pattern>';
-	console.log('pattern HTML: '+html);
-	id('defs').innerHTML+=html;
-	var el=id('pattern'+element.id);
-	id('pattern'+element.id).firstChild.setAttribute('fill',fill);
-	id('pattern'+element.id).lastChild.setAttribute('fill',fill);
-	// element.setAttribute('fillType','pattern');
-	element.setAttribute('fill','url(#pattern'+element.id+')');
-	updateGraph(index,['fillType','"p'+n+'"']);
+	var val=e.target.id;
+	showPicker('colorPicker',false);
+	showPicker('patternPicker',false);
+	val='url(#sp'+val.substring(1)+')'; // pattern number
+	if(selection.length>0) { // change fill colour of selected elements
+    		for (var i=0;i<selection.length;i++) {
+    			var n=selection[i];
+    			console.log('set fill pattern for graph/element '+n+' to '+val);
+    			if(graphs[n].type=='text') continue; // text fill colour uses line colour
+        		else graphs[n].fill=val;
+    		}
+    		draw();
+    	}
+        else {fill=val;} // change default fill
+        id('styleBox').style.background='url(svg/pattern.svg) center center repeat';
+        id('fill').style.background='url(svg/pattern.svg)';
 });
 // POINTER ACTIONS
 id('graphic').addEventListener('pointerdown',function(e) { 
     console.log('pointer down - mode is '+mode);
     event.preventDefault();
-    if(currentDialog) showDialog(currentDialog,false); // clicking drawing removes any dialogs/menus
+    if(currentDialog) {
+    	showDialog(currentDialog,false); // clicking drawing removes any dialogs/menus
+    	showPicker('colorPicker',false);
+    	showPicker('patternPicker',false);
+    }
     id('colorPicker').style.display='none';
     scr.x=Math.round(event.clientX);
     scr.y=Math.round(event.clientY);
@@ -2342,7 +2281,7 @@ id('graphic').addEventListener('pointerup',function(e) {
 	        graph.lineStyle=lineStyle;
 	        if(lineType=='none') graph.lineStyle='solid'; // cannot have empty stroke
 	        graph.fillType='none';
-	        graph.fill=fillColor;
+	        graph.fill=fill;
 	        graph.opacity=opacity;
 	        graph.blur=blur;
 	        graph.layer=layer;
@@ -2405,7 +2344,7 @@ id('graphic').addEventListener('pointerup',function(e) {
 	                graph.lineType=lineType;
 	        		graph.lineStyle=lineStyle;
 	                graph.fillType=fillType;
-	                graph.fill=fillColor;
+	                graph.fill=fill;
 	                graph.layer=layer;
 	                if(len>=scale) addGraph(graph); // avoid zero-size shapes
 	                blueline.setAttribute('points','0,0');
@@ -2447,7 +2386,7 @@ id('graphic').addEventListener('pointerup',function(e) {
 	        graph.lineType=lineType;
 	        graph.lineStyle=lineStyle;
 	        graph.fillType=fillType;
-	        graph.fill=fillColor;
+	        graph.fill=fill;
 	        graph.layer=layer;
 	        if(len>=scale) addGraph(graph); // avoid zero-size shapes
 	        id('bluePolyline').setAttribute('points','0,0');
@@ -2468,8 +2407,7 @@ id('graphic').addEventListener('pointerup',function(e) {
 	        graph.lineW=pen*scale;
 	        graph.lineType=lineType;
 	        graph.lineStyle=lineStyle;
-	        graph.fillType=fillType;
-	        graph.fill=fillColor;
+	        graph.fill=fill;
 	        graph.opacity=opacity;
 	        graph.blur=blur;
 	        graph.layer=layer;
@@ -2495,8 +2433,7 @@ id('graphic').addEventListener('pointerup',function(e) {
 	        graph.lineType=lineType;
 	        graph.lineStyle=lineStyle;
 	        graph.lineW=pen*scale;
-	        graph.fillType=fillType;
-	        graph.fill=fillColor;
+	        graph.fill=fill;
 	        graph.opacity=opacity;
 	        graph.layer=layer;
 	        if((graph.rx>=scale)&&(graph.ry>=scale)) addGraph(graph); // avoid zero-size ovals
@@ -2552,7 +2489,6 @@ id('graphic').addEventListener('pointerup',function(e) {
 	        graph.lineType=lineType;
 	        graph.lineStyle=lineStyle;
 	        graph.lineW=pen*scale;
-	        graph.fillType='none'; // arcs default to no fill
 	        graph.opacity=1;
 	        graph.layer=layer;
 	        if((graph.r>=scale)&&(a!=0)) addGraph(graph); // avoid zero-size arcs
@@ -3158,8 +3094,6 @@ function copy(x,y) {
         g.lineType=graph.lineType; // getLineType(el);
         g.lineStyle=graph.lineStyle;
 		g.fill=graph.fill;
-        g.fillType=graph.fillType;
-        // console.log('copy fillType: '+g.fillType+'; fill: '+g.fill);
         graph.opacity=graph.opacity;
     }
     g.spin=graph.spin; // el.getAttribute('spin');
@@ -3275,7 +3209,6 @@ function draw() {
             el.setAttribute('stroke-width',g.lineW);
             var dash=setLineType(g);
             if(dash) el.setAttribute('stroke-dasharray',dash);
-            el.setAttribute('fillType',g.fillType);
             el.setAttribute('fill',g.fill);
             if(g.opacity<1) el.setAttribute('fill-opacity',g.opacity);
             el.setAttribute('spin',g.spin);
@@ -3449,7 +3382,6 @@ function draw() {
     	}
     	el.setAttribute('layer',g.layer); // layers element appears on
     	if((g.type!='text')&&(g.type!='dim')&&(g.type!='set')) { // set style
-    		// console.log('set style - fillType is '+g.fillType+'; fill is '+g.fill);
     		el.setAttribute('stroke',g.stroke);
 			el.setAttribute('stroke-width',g.lineW);
 			if(g.lineStyle=='round') {
@@ -3462,35 +3394,6 @@ function draw() {
 			};
 			var dash=setLineType(g);
 			if(dash) el.setAttribute('stroke-dasharray',dash);
-			/*
-			if(g.fillType.startsWith('p')) {
-				var n=Number(g.fillType.substr(1));
-				console.log('fillType is p'+n);
-				if(id('p'+el.id)==null) {
-					console.log(tile.length+' tiles');
-					console.log('pattern width is '+pattern[n].width);
-					var html="<pattern id='p"+el.id+"' width='"+pattern[n].width+"' height='"+pattern[n].height+"' patternUnits='userSpaceOnUse'";
-					if(pattern[n].spin>0) html+=" patternTransform='rotate("+pattern[n].spin+")'";
-					html+='>'+tile[pattern[n].tile]+'</pattern>';
-					console.log('pattern HTML: '+html);
-					id('defs').innerHTML+=html;
-					id('p'+el.id).firstChild.setAttribute('fill',g.fill);
-					id('p'+el.id).lastChild.setAttribute('fill',g.fill);
-				}
-				el.setAttribute('fill','url(#p'+el.id+')');
-			}
-			else {
-				if(id('p'+el.id)) {
-					console.log('delete pattern p'+el.id);
-					id('defs').removeChild(id('p'+el.id));
-				}
-				el.setAttribute('fill',(g.fillType=='none')?'none':g.fill);
-			}
-			if(g.opacity<1) {
-				el.setAttribute('stroke-opacity',g.opacity);
-				el.setAttribute('fill-opacity',g.opacity);
-			}
-			*/
 			if(g.blur>0) el.setAttribute('filter','url(#blur'+g.blur+')');
     	}
 		id('dwg').appendChild(el);
@@ -3595,7 +3498,6 @@ function finishLine() {
 	graph.lineW=(pen*scale);
 	graph.lineType=lineType;
 	graph.lineStyle=lineStyle;
-	graph.fillType='none';
 	graph.fill='none';
 	graph.layer=layer;
 	if(len>=scale) addGraph(graph); // avoid zero-size lines
@@ -3674,6 +3576,7 @@ function initialise() {
     scaleF=25.4*scale/96; // 96px/inch
     handleR=2*scale;
     snapD=2*scale;
+    console.log('SCALE: '+scale);
     // console.log('scaleF: '+scaleF+' handleR=snapD='+snapD);
     var index=parseInt(size);
     if(aspect=='portrait') index+=7;
@@ -3700,6 +3603,12 @@ function initialise() {
     id('datum').setAttribute('transform','scale('+scale+')');
     for(var i=0;i<10;i++) nodes.push({'x':0,'y':0,'n':i}); // 10 nodes for blueline
     id('countH').value=id('countV').value=1;
+    for(var i=0;i<16;i++) { // set up scaled patterns
+    	var t=id('pattern'+i).getAttribute('patternTransform');
+    	if(t) t+=', scale('+scale/3+')';
+    	else t='scale('+scale/3+')';
+    	id('sp'+i).setAttribute('patternTransform',t);
+    }
     cancel(); // set select mode
 }
 function listSets() {
@@ -3725,7 +3634,6 @@ function load() {
 		var json=JSON.parse(data);
 		graphs=json.graphs;
 		sets=json.sets;
-		// NEW - UPDATE <sets> in <defs>
 		id('sets').innerHTML=''; // clear existing sets
 		console.log(graphs.length+' graphs and '+sets.length+' sets loaded');
 		for(var i in sets) {
@@ -3735,6 +3643,7 @@ function load() {
 			console.log('set '+sets[i].name+' definition added');
 		}
 	}
+	initialise();
 	draw();
     listSets();
 }
@@ -4283,11 +4192,7 @@ function setStyle() {
     id('textFont').value=textFont;
     id('textStyle').value=textStyle;
     id('textSize').value=textSize;
-    // id('fillType').value=fillType;
-    id('fillColor').style.backgroundColor=fillColor;
-    // if(fillType=='solid') id('styleBox').style.background=fillColor;
-    // id('styleBox').style.opacity=opacity;
-    // id('patternOption').disabled=true;
+    id('fill').style.backgroundColor=fill;
     id('opacity').value=opacity;
     // set styles to suit selected element?
     var el=(selection.length==1)?id(selection[0]):null;
@@ -4313,29 +4218,20 @@ function setStyle() {
         id('lineColor').style.backgroundColor=val;
         id('styleBox').style.borderColor=val;
     }
-    /*
-    id('patternOption').disabled=false;
-    val=el.getAttribute('fillType');
-    // console.log('fillType: '+val);
-    if(val.startsWith('p')) {
-    	id('fillType').value='pattern';
-    	id('fillColor').style.backgroundColor=id('pattern'+el.id).firstChild.getAttribute('fill');
-    }
-    else if(val=='none') {
-    	id('styleBox').style.background='#00000000';
-    	id('fillType').value='none';
-    }
-    else {
-    */
-    // id('fillType').value='solid';
-	val=el.getAttribute('fill'); // includes alpha
+	val=el.getAttribute('fill');
     console.log('element fill: '+val);
     if(graph.type=='text') {
         id('lineColor').style.backgroundColor=val;
     }
     else {
-    	id('fillColor').style.backgroundColor=val;
-        id('styleBox').style.background=val;
+    	if(val.startsWith('#')) {
+    		id('fill').style.background=val;
+        	id('styleBox').style.background=val;
+        }
+        else {
+        	id('styleBox').style.background='url(svg/pattern.svg) center center repeat';
+        	id('fill').style.background='url(svg/pattern.svg)';
+        }
     }
     val=el.getAttribute('fill-opacity');
     if(val) {
@@ -4499,7 +4395,6 @@ function updateGraph(n,parameters) {
 	    console.log('set '+attribute+' to '+val);
 		eval('graph.'+attribute+'='+val);
 	}
-	console.log('graph '+n+' filltype: '+graph.fillType);
 	graphs[n]=graph;
 	save();
 	draw();
