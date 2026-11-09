@@ -105,7 +105,6 @@ scr.w=window.innerWidth; // scr.w=screen.width;
 scr.h=window.innerHeight; // scr.h=screen.height;
 dwg.x=dwg.y=0;
 // console.log("screen size "+scr.w+"x"+scr.h);
-// NEW FORMAT FOR DRAWING DATA
 var data=window.localStorage.getItem('drawingData');
 if(data) {
 	var json=JSON.parse(data);
@@ -1402,7 +1401,7 @@ id('textStyle').addEventListener('change',function() {
 });
 id('lineColor').addEventListener('click',function() {
     id('colorPicker').mode='line';
-    showColorPicker(true,event.clientX-16,event.clientY-16);
+    showPicker('colorPicker',true,event.clientX-16,event.clientY-16);
 });
 id('fill').addEventListener('click',function() {
 	// id('colorPicker').style.display='block';
@@ -1457,7 +1456,7 @@ id('colorPicker').addEventListener('click',function(e) {
         }
         else { // change default line colour
             // console.log('line colour: '+val);
-            if(val=='#FFF') val='#000'; // cannot have white lines
+            if(val=='#FFF') val='#000'; // cannot default to white lines
             lineColor=val;
         }
         id('styleBox').style.borderColor=val;
@@ -2644,11 +2643,11 @@ id('graphic').addEventListener('pointerup',function(e) {
                 if(selection.length>0) { // highlight selected elements
                     mode='edit';
                     showTools('edit');
-                    // console.log(selection.length+' elements selected');
+                    console.log(selection.length+' elements selected - snap: '+snap.n+' '+snap.x+','+snap.y);
                     if(selection.length<2) {
                         console.log('only one selection');
                         id('selection').innerHTML=''; // no blue box
-                        select(selection[0],false);
+                        select(selection[0],false,snap);
                     }
                     return;
                 }
@@ -3795,7 +3794,7 @@ function select(n,multiple,s) {
 				var html='';
 				for(var i=1;i<graph.points.length;i++) html+="<use id='sizer"+i+"' href='#sizer' x='"+graph.points[i].x+"' y='"+graph.points[i].y+"'/>";
 				// id('handles').innerHTML+=html; // disc handles move nodes
-				if(s) {
+				if(s.n) {
 					html+="<use id='mover"+s.n%10+"' href='#mover' x='"+s.x+"' y='"+s.y+"'/>"; // mover at node
 					anchor.x=s.x;
 					anchor.y=s.y;
@@ -3821,12 +3820,14 @@ function select(n,multiple,s) {
             	h=bounds.height;
             	var points=el.points;
             	var n=points.length;
+            	console.log(n+' points');
             	// draw handles
             	var html='';
-            	if(!s) var s={'n':0,'x':points[0].x,'y':points[0].y}; // default to mover at start
-            	console.log('add sizers and mover at node '+s);
+            	if(!s.n) var s={'n':0,'x':points[0].x,'y':points[0].y}; // default to mover at start
+            	console.log('s is '+s.n+' at '+s.x+','+s.y);
+            	console.log('add sizers and mover at node '+s.n);
             	for(var i=0;i<n;i++) {
-            		if(i==s) continue;
+            		if((points[i].x==s.x)&&(points[i].y==s.y)) continue;
                 	html="<use id='sizer"+i+"' href='#sizer' x='"+points[i].x+"' y='"+points[i].y+"'/>";
                 	id('handles').innerHTML+=html; // disc handles move remaining nodes
             	}
@@ -3895,7 +3896,7 @@ function select(n,multiple,s) {
             	id('blueBox').setAttribute('transform','rotate(0)');
             	id('guides').style.display='block';
             	var html='';
-            	if(s) {
+            	if(s.n) {
             		html="<use id='mover"+s.n%10+"' href='#mover' x='"+s.x+"' y='"+s.y+"'/>"; // mover at a node
             		anchor.x=s.x;
             		anchor.y=s.y;
@@ -3914,7 +3915,7 @@ function select(n,multiple,s) {
         	case 'arc':
             	html="<use id='sizer1' href='#sizer' x='"+graph.points[1].x+"' y='"+graph.points[1].y+"'/>"; // sizers at start...
             	html+="<use id='sizer2' href='#sizer' x='"+graph.points[2].x+"' y='"+graph.points[2].y+"'/>"; // ...and end or arc
-            	if(s) {
+            	if(s.n) {
             		html+="<use id='mover"+s.n%10+"' href='#mover' x='"+s.x+"' y='"+s.y+"'/>"; // mover at a node
             		anchor.x=s.x;
             		anchor.y=s.y;

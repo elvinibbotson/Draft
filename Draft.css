@@ -9,12 +9,13 @@ input {
     width: 75px;
 	height: 22px;
 	color: black;
-	background-color: white;
+	background-color: #FFF;
 	opacity: 0.5;
-	border: 1px solid gray;
 	padding: 0;
 	margin: 4px;
 	font-size: 1.0em;
+	border: 1px solid gray;;
+	border-radius: 5px;
 }
 textarea {
 	padding: 5px;
@@ -25,24 +26,26 @@ textarea {
 }
 img {
     vertical-align: bottom;
-    border: 1px solid gray;
+    border: solid 1px gray;
+    border-radius: 5px;
 }
 select {
     color: black;
-    background-color: white;
+    background-color: #FFF;
     height: 32px;
-    border: 1px solid gray;
-    font-size: 1em;
+    font-size: 1em;    
+    border: none;
+    border-radius: 5px;
 }
 button {
     color: color;
     font-family: monospace;
     font-size: 1.2em;
     font-weight: bold;
-    border: solid black 2px;
-    border-width: 2px;
-    border-radius: 3px;
-    background: white;
+    background: #FFF;
+    border: solid 1px gray;
+    border-radius: 5px;
+    /* box-shadow: 3px 3px 3px 0 #0004; */
 }
 ul {
 	padding: 0;
@@ -64,6 +67,8 @@ a{
     height: 32px;
     border: none;
     color: white;
+    
+    box-shadow: none;
 }
 .iconButton:disabled {
     opacity: 0.5;
@@ -76,33 +81,34 @@ a{
 	left: 5px;
 	top: 5px;
 	padding: 5px;
-	border: solid gray 2px;
-	border-radius: 5px;
 	display: none;
-	color: black;
-	background-color: #FFFFFFEE;
-    /* box-shadow: 0 0 4px #88888888; */
+	color: #000;
+	background-color: #EEE;
 	z-index: 15;
+	border: none;
+	border-radius: 10px;
+	box-shadow: 0 5px 10px 0 #0004;
 }
 .dialogRight {
 	position: fixed;
 	right: 5px;
 	top: 5px;
 	padding: 5px;
-	border: solid gray 2px;
-	border-radius: 5px;
 	display: none;
-	color: black;
-	background-color: #FFFFFFEE;
+	color: #000;
+	background-color: #EEE;
 	z-index: 15;
+	border: none;
+	border-radius: 10px;
+	box-shadow: 0 5px 10px 0 #0004;
 }
 .clearButton {
 	margin: 2px;
-	border: none;
+	border: solid 1px gray;
 	width: 24px;
 	height: 24px;
 	float: right;
-	background-color: white;
+	background-color: #FFF;
 	background-image: url('svg/clear.svg');
 }
 .layerCheck {
@@ -167,8 +173,7 @@ a{
     top: 32px;
     width: 32px;
     border: none;
-    background-color: #FFFFFFEE;
-    /* box-shadow: 0 0 4px #88888888; */
+    background-color: #FFF;
     display: block;
     z-index: 10;
 }
@@ -179,7 +184,6 @@ a{
     width: 32px;
     border: none;
     background-color: #FFFFFFEE;
-    /* box-shadow: 0 0 4px #88888888; */
     display: none;
     z-index: 11;
 }
@@ -192,7 +196,7 @@ a{
     padding: 4px;
     font-size: 1em;
     color: black;
-    background-color: #FFFFFFEE;
+    background-color: #FFFE;
     z-index: 13;
     display: block;
     overflow: hidden;
@@ -225,14 +229,14 @@ a{
 	width: 32px;
 	height: 32px;
 	border: none;
-	background-color: #FFFFFFC0;
+	background-color: #FFFC;
     z-index: 12;
 }
 #styleBox {
 	position: absolute;
 	top: 4px;
 	left: 4px;
-	right:4px;
+	right: 4px;
 	bottom: 4px;
 	border-style: solid;
 	border-width: 0.25mm;
@@ -246,7 +250,7 @@ a{
 	width: 32px;
 	height: 32px;
 	border: none;
-	background-color: #FFFFFFC0;
+	background-color: #FFFC;
 	background: url(svg/more.svg) center center no-repeat;
 }
 #moreDialog button {
