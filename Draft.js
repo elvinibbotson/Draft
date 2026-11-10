@@ -617,10 +617,10 @@ id('confirmMove').addEventListener('click',function() {
         draw();
         // updateGraph(index,['points',points]);
     }
-    else
-    move(moveX,moveY);
+    else move(moveX,moveY);
     showDialog('moveDialog',false);
     cancel();
+    
 });
 id('spinButton').addEventListener('click',function() {
     showDialog('spinDialog',true);
@@ -2488,6 +2488,7 @@ id('graphic').addEventListener('pointerup',function(e) {
 	        graph.lineType=lineType;
 	        graph.lineStyle=lineStyle;
 	        graph.lineW=pen*scale;
+	        graph.fill='none';
 	        graph.opacity=1;
 	        graph.layer=layer;
 	        if((graph.r>=scale)&&(a!=0)) addGraph(graph); // avoid zero-size arcs
@@ -3647,7 +3648,7 @@ function load() {
     listSets();
 }
 function move(dx,dy) {
-	// console.log('move '+selection.length+' graphs by '+dx+','+dy);
+	console.log('move '+selection.length+' graphs by '+dx+','+dy);
 	for(var i in selection) {
 		index=selection[i];
 		graph=graphs[index];
@@ -4255,8 +4256,6 @@ function setStyle() {
         if(val=='italic') id('textStyle').value='italic';
         val=el.getAttribute('font-weight');
         if(val=='bold') id('textStyle').value='bold';
-        id('patternOption').disabled=true;
-        id('patternOption').disabled=true;
     } 
 }
 function showDialog(dialog,visible) {
@@ -4266,6 +4265,7 @@ function showDialog(dialog,visible) {
     id(dialog).style.display=(visible)?'block':'none'; // show/hide dialog
     currentDialog=(visible)?dialog:null; // update currentDialog
     showTools((visible)?'none':'edit');
+    id('guides').style.display='none';
 }
 function showPicker(picker,visible,x,y) {
 	picker=id(picker);
@@ -4278,11 +4278,6 @@ function showPicker(picker,visible,x,y) {
 function showHelp() {
 	console.log('show help');
 	window.open('help/help.html');
-}
-function showMore() {
-	console.log('show more options dialog');
-	cancel();
-	showDialog('moreDialog',true);
 }
 function showTools(which) {
 	console.log('show tools: '+which);
