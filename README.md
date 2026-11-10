@@ -36,6 +36,6 @@ Elements may also be resized or reshaped by dragging or by editing the <i>info</
 <ul>
   <li>line type, width and colour</li>
   <li>text font, size, style and colour</li>
-  <li>fill type, colour and pattern</li>
-  <li>opacity and blur</li>
+  <li>fill colour or pattern and opacity</li>
+  <li>object blur</li>
 </ul>
